@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Soroban Canvas Quiz</title>
   <style>
     html, body {
@@ -12,10 +13,10 @@
     }
     #abacusRoot {
       position: absolute;
-      top: 0; left: 0;
+      top: 0; right: 0;
       width: 100vw; height: 100vh;
       display: flex;
-      justify-content: flex-start;
+      justify-content: flex-end;
       align-items: center;
       background: #4d79ff;
       overflow: hidden;
@@ -68,6 +69,7 @@
     }
     .bead.heaven.active { transform: translateY(100%); }
     .bead.earth.active { transform: translateY(-150%); }
+
     #quizPanel {
       position: absolute;
       top: 0; left: 0;
@@ -131,7 +133,11 @@
       cursor: pointer;
       font-size: 1rem;
     }
-    #numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+    #numpad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
     #numpad button {
       background: #668cff;
       border: none;
@@ -141,7 +147,11 @@
       font-size: 1.2rem;
       cursor: pointer;
     }
-    #quizTimer { text-align: center; font-weight: bold; margin-top: auto; }
+    #quizTimer {
+      text-align: center;
+      font-weight: bold;
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
@@ -169,142 +179,168 @@
   <script>
     (() => {
       const DEAD_ZONE = 10, SHAKE_G = 16, HAPTIC_MS = 12;
-      const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
-      const board = $('#sorobanBoard');for (let i = 0; i < 7; i++) board.appendChild(createRod());
+      const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+      const board = $('#sorobanBoard');
 
-  function createRod() {
-    const rod = document.createElement('div'); rod.className = 'rod';
-    rod.innerHTML = `
-      <div class="rod-line"></div>
-      <div class="heaven"><div class="bead heaven"></div></div>
-      <div class="gap-space"></div>
-      <div class="earth">
-        <div class="bead earth"></div>
-        <div class="bead earth"></div>
-        <div class="bead earth"></div>
-        <div class="bead earth"></div>
-      </div>
-      <div class="bar"></div>
-    `;
-    return rod;
-  }
+      for (let i = 0; i < 7; i++) board.appendChild(createRod());
 
-  function setBead(bead, makeActive) {
-    const heaven = bead.classList.contains("heaven");
-    if (heaven) bead.classList.toggle("active", makeActive);
-    else {
-      const earths = [...bead.parentElement.children];
-      const idx = earths.indexOf(bead);
-      if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
-      else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
-    }
-    if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
-  }
-
-  $$('.bead').forEach((bead) => {
-    bead.addEventListener("pointerdown", e => {
-      const region = bead.classList.contains("heaven") ? "heaven" : "earth";
-      const startY = e.clientY;
-      bead.setPointerCapture(e.pointerId);
-
-      bead.onpointermove = ev => {
-        const dy = ev.clientY - startY;
-        if ((region === 'heaven' && Math.abs(dy) > DEAD_ZONE) ||
-            (region === 'earth' && Math.abs(dy) > DEAD_ZONE)) {
-          setBead(bead, (region === 'heaven') ? dy > 0 : dy < 0);
-          bead.onpointermove = null;
-        }
-      };
-
-      bead.onpointerup = bead.onpointercancel = () => {
-        bead.onpointermove = null;
-        bead.releasePointerCapture(e.pointerId);
-      };
-    });
-  });
-
-  function clearBoard() {
-    $$('.bead.active').forEach(b => b.classList.remove('active'));
-  }
-
-  if (window.DeviceMotionEvent) {
-    let last = 0;
-    window.addEventListener("devicemotion", ev => {
-      const { x, y, z } = ev.accelerationIncludingGravity;
-      const mag = Math.hypot(x, y, z);
-      const now = performance.now();
-      if (mag > SHAKE_G && now - last > 750) {
-        clearBoard(); last = now;
+      function createRod() {
+        const rod = document.createElement('div');
+        rod.className = 'rod';
+        rod.innerHTML = `
+          <div class="rod-line"></div>
+          <div class="heaven"><div class="bead heaven"></div></div>
+          <div class="gap-space"></div>
+          <div class="earth">
+            <div class="bead earth"></div>
+            <div class="bead earth"></div>
+            <div class="bead earth"></div>
+            <div class="bead earth"></div>
+          </div>
+          <div class="bar"></div>
+        `;
+        return rod;
       }
-    });
-  }
 
-  // QUIZ LOGIC
-  const QUESTIONS = shuffle([
-    { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
-    { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
-    { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
-    { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
-    { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
-  ]);
-  let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
-  const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
-  const timerEl = $('#quizTimer'), padContainer = $('#numpad');
+      function setBead(bead, makeActive) {
+        const heaven = bead.classList.contains("heaven");
+        if (heaven) bead.classList.toggle("active", makeActive);
+        else {
+          const earths = [...bead.parentElement.children];
+          const idx = earths.indexOf(bead);
+          if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
+          else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
+        }
+        if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+      }
 
-  function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
+      $$('.bead').forEach(bead => {
+        bead.addEventListener("pointerdown", e => {
+          const region = bead.classList.contains("heaven") ? "heaven" : "earth";
+          const startY = e.clientY;
+          bead.setPointerCapture(e.pointerId);
 
-  function loadQuestion() {
-    const q = QUESTIONS[currentIndex];
-    qNumEl.textContent = `Q${currentIndex+1}`;
-    qTextEl.textContent = `${q.q} =`;
-    currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
-  }
-  function updateTimer() {
-    const m = String(Math.floor(timeLeft/60)).padStart(2,'0'), s = String(timeLeft%60).padStart(2,'0');
-    timerEl.textContent = `Time Left: ${m}:${s}`;
-  }
-  function appendDigit(d) {
-    if (inputLocked) return;
-    if (d==='C') currentInput=''; else if(d==='BACK') currentInput=currentInput.slice(0,-1); else currentInput+=d;
-    answerEl.textContent = currentInput||'0';
-  }
-  function submitAnswer() {
-    if (inputLocked) return; inputLocked=true;
-    answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
-    sendBtnEl.disabled=true;
-    currentIndex<QUESTIONS.length-1 ? setTimeout(() => { currentIndex++; loadQuestion(); }, 300) : finishQuiz();
-  }
-  function finishQuiz(){
-    clearInterval(timerInterval);
-    localStorage.setItem('sorobanResults', JSON.stringify(answers));
-    window.location.href='results.html';
-  }
-  function startQuiz(){
-    currentIndex=0; answers=[]; timeLeft=600; loadQuestion(); updateTimer();
-    timerInterval=setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0) finishQuiz(); },1000);
-  }
-  ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{
-    const b=document.createElement('button');
-    if(d==='BACK') b.innerHTML='<svg width="24" height="24" viewBox="0 0 32 32"><g><path d="M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="17" y1="13" x2="23" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="23" y1="13" x2="17" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/></g></svg>';
-    else b.textContent=d;
-    b.addEventListener('click',()=>appendDigit(d));
-    padContainer.appendChild(b);
-  });
-  sendBtnEl.addEventListener('click',submitAnswer);
-  answerEl.addEventListener('click',submitAnswer);
-  $('#fullscreenBtn').addEventListener('click', () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
-  });
-  startQuiz();
-})();
+          bead.onpointermove = ev => {
+            const dy = ev.clientY - startY;
+            if ((region === 'heaven' && Math.abs(dy) > DEAD_ZONE) || (region === 'earth' && Math.abs(dy) > DEAD_ZONE)) {
+              setBead(bead, region === 'heaven' ? dy > 0 : dy < 0);
+              bead.onpointermove = null;
+            }
+          };
 
+          bead.onpointerup = bead.onpointercancel = () => {
+            bead.onpointermove = null;
+            bead.releasePointerCapture(e.pointerId);
+          };
+        });
+      });
+
+      function clearBoard() {
+        $$('.bead.active').forEach(b => b.classList.remove('active'));
+      }
+
+      if (window.DeviceMotionEvent) {
+        let last = 0;
+        window.addEventListener("devicemotion", ev => {
+          const { x, y, z } = ev.accelerationIncludingGravity;
+          const mag = Math.hypot(x, y, z);
+          const now = performance.now();
+          if (mag > SHAKE_G && now - last > 750) {
+            clearBoard();
+            last = now;
+          }
+        });
+      }
+
+      const QUESTIONS = shuffle([
+        { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
+        { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
+        { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
+        { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
+        { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
+      ]);
+      let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+      const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
+      const timerEl = $('#quizTimer'), padContainer = $('#numpad');
+
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function loadQuestion() {
+        const q = QUESTIONS[currentIndex];
+        qNumEl.textContent = `Q${currentIndex + 1}`;
+        qTextEl.textContent = `${q.q} =`;
+        currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
+      }
+
+      function updateTimer() {
+        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
+              s = String(timeLeft % 60).padStart(2, '0');
+        timerEl.textContent = `Time Left: ${m}:${s}`;
+      }
+
+      function appendDigit(d) {
+        if (inputLocked) return;
+        if (d === 'C') currentInput = '';
+        else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+        else currentInput += d;
+        answerEl.textContent = currentInput || '0';
+      }
+
+      function submitAnswer() {
+        if (inputLocked) return;
+        inputLocked = true;
+        answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+        sendBtnEl.disabled = true;
+        currentIndex < QUESTIONS.length - 1
+          ? setTimeout(() => { currentIndex++; loadQuestion(); }, 300)
+          : finishQuiz();
+      }
+
+      function finishQuiz() {
+        clearInterval(timerInterval);
+        localStorage.setItem('sorobanResults', JSON.stringify(answers));
+        window.location.href = 'results.html';
+      }
+
+      function startQuiz() {
+        currentIndex = 0;
+        answers = [];
+        timeLeft = 600;
+        loadQuestion();
+        updateTimer();
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          updateTimer();
+          if (timeLeft <= 0) finishQuiz();
+        }, 1000);
+      }
+
+      ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+        const b = document.createElement('button');
+        if (d === 'BACK') {
+          b.innerHTML = '<svg width="24" height="24" viewBox="0 0 32 32"><g><path d="M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="17" y1="13" x2="23" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="23" y1="13" x2="17" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/></g></svg>';
+        } else {
+          b.textContent = d;
+        }
+        b.addEventListener('click', () => appendDigit(d));
+        padContainer.appendChild(b);
+      });
+
+      sendBtnEl.addEventListener('click', submitAnswer);
+      answerEl.addEventListener('click', submitAnswer);
+      $('#fullscreenBtn').addEventListener('click', () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      });
+
+      startQuiz();
+    })();
   </script>
 </body>
 </html>
