@@ -41,15 +41,19 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
+      background: rgba(140,166,219,0.9);
     }
     .quiz-box {
+      background: none;
+      border-radius: 10px;
+      padding: 0;
+      width: 100%;
+    }
+    .quiz-box > * {
       background: rgba(140,166,219,0.9);
       border-radius: 10px;
       padding: 12px 10px 16px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-      width: 100%;
     }
     .question-row { margin-top: 5px; position: relative; }
     .q-num {
@@ -59,15 +63,16 @@
       border-radius: 8px; z-index: 1;
     }
     .question-text {
-      font-size: 35px; font-weight: bold;
+      font-size: 5vw; max-font-size: 35px;
+      font-weight: bold;
       text-align: center; padding-top: 2px;
     }
-    .input-label { font-size: 15px; font-weight: bold; margin: 8px 0 4px; }
+    .input-label { font-size: 1.2vw; max-font-size: 15px; font-weight: bold; margin: 8px 0 4px; }
     .input-section {
       display: flex; align-items: center; margin-bottom: 12px;
     }
     .answer-display {
-      flex-grow: 1; font-size: 20px; padding: 7px;
+      flex-grow: 1; font-size: 2vw; max-font-size: 20px; padding: 7px;
       background: #fff; color: #333; border-radius: 6px;
       border: 2px solid #b993d6; margin-right: 8px;
       cursor: pointer; transition: background 0.2s;
@@ -75,7 +80,7 @@
     }
     .answer-display:hover { background: #e0eaff; }
     .send-btn {
-      font-size: 15px; padding: 10px 12px;
+      font-size: 1.2vw; max-font-size: 15px; padding: 10px 12px;
       background: #668cff; color: #fff;
       border: none; border-radius: 8px; cursor: pointer;
     }
@@ -85,7 +90,7 @@
       margin-bottom: 10px;
     }
     .numpad button {
-      font-size: 20px; padding: 8px;
+      font-size: 2vw; max-font-size: 20px; padding: 8px;
       background: #668cff; color: #fff;
       border: none; border-radius: 8px;
       display: flex; justify-content: center; align-items: center;
@@ -93,14 +98,40 @@
     }
     /* Timer */
     #quizTimer {
-      font-size: 15px; font-weight: bold;
+      font-size: 1.2vw; max-font-size: 15px; font-weight: bold;
       text-align: center;
+    }
+
+    /* Tablet breakpoint */
+    @media (max-width: 1024px) {
+      .quiz-container {
+        width: 30vw; min-width: 200px;
+      }
+    }
+    /* Mobile breakpoint */
+    @media (max-width: 768px) {
+      .quiz-container {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100vw;
+        height: auto;
+        max-height: 40vh;
+        padding: 8px;
+        overflow-y: auto;
+        justify-content: flex-start;
+      }
+      .question-text { font-size: 6vw; }
+      .input-label, .send-btn, #quizTimer {
+        font-size: 3vw;
+      }
+      .numpad { gap: 4px; }
+      .numpad button { font-size: 4vw; padding: 6px; }
     }
   </style>
 </head>
 <body>
   <div class="soroban-container">
-    <iframe id="sorobanFrame" src="soroban.html" allow="fullscreen"></iframe>
+    <iframe id="sorobanFrame" src="soroban.html" allowfullscreen></iframe>
   </div>
 
   <div class="quiz-container">
@@ -141,8 +172,7 @@
       currentIndex = 0; answers = []; currentInput = ''; inputLocked = false; timeLeft = 600;
       loadQuestion(); updateTimer();
       timerInterval = setInterval(() => {
-        timeLeft--; updateTimer();
-        if (timeLeft <= 0) finishQuiz();
+        timeLeft--; updateTimer(); if (timeLeft <= 0) finishQuiz();
       }, 1000);
     }
     function updateTimer() {
@@ -154,11 +184,8 @@
       const q = QUESTIONS[currentIndex];
       document.getElementById('qNum').textContent = `Q${currentIndex + 1}:`;
       document.getElementById('questionText').textContent = `${q.q} =`;
-      currentInput = '';
-      inputLocked = false;
-      currentInputDisplay.textContent = '0';
+      currentInput = ''; inputLocked = false; currentInputDisplay.textContent = '0';
     }
-
     function appendDigit(d) {
       if (inputLocked) return;
       if (d === 'C') currentInput = '';
@@ -167,21 +194,15 @@
       currentInputDisplay.textContent = currentInput || '0';
     }
     function submitAnswer() {
-      if (inputLocked) return;
-      inputLocked = true;
-      const q = QUESTIONS[currentIndex];
-      answers.push({ question: q.q, correct: q.a, user: currentInput });
+      if (inputLocked) return; inputLocked = true;
+      const q = QUESTIONS[currentIndex]; answers.push({ question: q.q, correct: q.a, user: currentInput });
       currentIndex++;
       if (currentIndex < QUESTIONS.length) setTimeout(() => { loadQuestion(); inputLocked = false; }, 200);
       else finishQuiz();
     }
-    function finishQuiz() {
-      clearInterval(timerInterval);
-      localStorage.setItem('sorobanResults', JSON.stringify(answers));
-      location.href = 'results.html';
+    function finishQuiz() { clearInterval(timerInterval);
+      localStorage.setItem('sorobanResults', JSON.stringify(answers)); location.href = 'results.html';
     }
-
-    // Numpad generation (with SVG backspace)
     const pad = ['7','8','9','4','5','6','1','2','3','0','C','BACK'];
     const padWrap = document.getElementById('numpad');
     pad.forEach(d => {
@@ -196,9 +217,7 @@
             </g>
           </svg>`;
         btn.title = "Backspace";
-      } else {
-        btn.textContent = d;
-      }
+      } else { btn.textContent = d; }
       btn.onclick = () => appendDigit(d);
       padWrap.appendChild(btn);
     });
@@ -207,4 +226,3 @@
   </script>
 </body>
 </html>
-
