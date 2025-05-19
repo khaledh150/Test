@@ -2,150 +2,87 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Soroban Quiz</title>
   <style>
     html, body {
       margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
+      width: 100%; height: 100%;
       font-family: sans-serif;
       background: #b3c4e7;
       overflow: hidden;
+      position: relative; /* ensure body is non-static */
     }
-
-    /* FULLSCREEN SOROBAN BACKGROUND */
-    .soroban-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      z-index: 1;
-      background: #668cff;
-    }
-    .soroban-container iframe {
-      width: 100%; height: 100%;
-      border: none;
-      display: block;
-    }
-
-    /* QUIZ PANEL ON LEFT SIDE */
     .quiz-container {
-      position: absolute;
-      top: 0; left: 0;
-      height: 100vh;
-      width: 19vw;
-      min-width: 240px; max-width: 320px;
-      padding: 16px;
-      box-sizing: border-box;
-      color: white;
-      z-index: 2;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      position: absolute; top: 0; left: 0;
+      height: 100%; overflow-y: auto;
       background: rgba(140,166,219,0.9);
+      color: #fff; z-index: 2;
+      display: flex; flex-direction: column;
+      padding: 1rem; box-sizing: border-box;
     }
-    .quiz-box {
-      background: none;
-      border-radius: 10px;
-      padding: 0;
-      width: 100%;
-    }
-    .quiz-box > * {
-      background: rgba(140,166,219,0.9);
-      border-radius: 10px;
-      padding: 12px 10px 16px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    .question-row { margin-top: 5px; position: relative; }
+    .quiz-box { width: 100%; display: flex; flex-direction: column; gap: 1rem; }
+    .question-row { position: relative; }
     .q-num {
-      position: absolute; left: 10px; top: -15px;
-      font-size: 20px; font-weight: bold;
-      color: #fff; padding: 4px 12px 4px 10px;
-      border-radius: 8px; z-index: 1;
+      position: absolute; top: -1rem; left: 0;
+      background: #668cff; padding: 0.2rem 0.6rem;
+      border-radius: 0.4rem; font-weight: bold;
     }
-    .question-text {
-      font-size: 5vw; max-font-size: 35px;
-      font-weight: bold;
-      text-align: center; padding-top: 2px;
-    }
-    .input-label { font-size: 1.2vw; max-font-size: 15px; font-weight: bold; margin: 8px 0 4px; }
-    .input-section {
-      display: flex; align-items: center; margin-bottom: 12px;
-    }
+    .question-text { font-size: 1.5rem; font-weight: bold; text-align: center; margin-top: 1.2rem; }
+    .input-label { font-weight: bold; margin-bottom: 0.4rem; }
+    .input-section { display: flex; gap: 0.5rem; }
     .answer-display {
-      flex-grow: 1; font-size: 2vw; max-font-size: 20px; padding: 7px;
-      background: #fff; color: #333; border-radius: 6px;
-      border: 2px solid #b993d6; margin-right: 8px;
-      cursor: pointer; transition: background 0.2s;
-      text-align: right;
+      flex: 1; padding: 0.6rem; font-size: 1.2rem;
+      background: #fff; color: #333; border: 2px solid #b993d6;
+      border-radius: 0.4rem; text-align: right; cursor: pointer;
     }
-    .answer-display:hover { background: #e0eaff; }
     .send-btn {
-      font-size: 1.2vw; max-font-size: 15px; padding: 10px 12px;
+      padding: 0.6rem 1rem; font-size: 1rem;
       background: #668cff; color: #fff;
-      border: none; border-radius: 8px; cursor: pointer;
+      border: none; border-radius: 0.4rem; cursor: pointer;
     }
-    .numpad {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
-    }
+    .numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
     .numpad button {
-      font-size: 2vw; max-font-size: 20px; padding: 8px;
+      padding: 0.8rem; font-size: 1.2rem;
       background: #668cff; color: #fff;
-      border: none; border-radius: 8px;
-      display: flex; justify-content: center; align-items: center;
-      cursor: pointer;
+      border: none; border-radius: 0.4rem; cursor: pointer;
     }
-    /* Timer */
-    #quizTimer {
-      font-size: 1.2vw; max-font-size: 15px; font-weight: bold;
-      text-align: center;
-    }
-
-    /* Tablet breakpoint */
-    @media (max-width: 1024px) {
-      .quiz-container {
-        width: 30vw; min-width: 200px;
-      }
-    }
-    /* Mobile breakpoint */
+    #quizTimer { text-align: center; font-weight: bold; }
+    @media (min-width: 1025px) { .quiz-container { width: 20vw; min-width: 280px; max-width: 360px; } }
+    @media (min-width: 769px) and (max-width: 1024px) { .quiz-container { width: 30vw; min-width: 260px; } .question-text { font-size: 1.3rem; } }
     @media (max-width: 768px) {
       .quiz-container {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw;
-        height: auto;
-        max-height: 40vh;
-        padding: 8px;
-        overflow-y: auto;
-        justify-content: flex-start;
+        position: fixed; bottom: 0; left: 0;
+        width: 100%; height: auto; max-height: 45vh;
+        padding: 0.5rem;
       }
-      .question-text { font-size: 6vw; }
-      .input-label, .send-btn, #quizTimer {
-        font-size: 3vw;
-      }
-      .numpad { gap: 4px; }
-      .numpad button { font-size: 4vw; padding: 6px; }
+      .question-text { font-size: 1.2rem; }
+      .numpad { gap: 0.3rem; }
+      .numpad button { padding: 0.6rem; font-size: 1rem; }
     }
   </style>
 </head>
 <body>
-  <div class="soroban-container">
-    <iframe <iframe src="soroban.html" style="position:absolute; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;">
+  <!-- iframe covers parent container with absolute positioning -->
+  <iframe id="sorobanFrame" src="soroban.html"
+    style="position:absolute; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:1;"
+    allowfullscreen>
     Your browser doesn't support iframes
-</iframe>
-  </div>
+  </iframe>
 
+  <!-- Quiz panel -->
   <div class="quiz-container">
     <div class="quiz-box">
       <div class="question-row">
-        <div class="q-num" id="qNum">Q1:</div>
+        <div class="q-num" id="qNum">Q1</div>
         <div class="question-text" id="questionText">9 × 25 =</div>
       </div>
-      <label class="input-label">Answer</label>
-      <div class="input-section">
-        <div class="answer-display" id="currentInput">0</div>
-        <button class="send-btn" onclick="submitAnswer()">Send</button>
+      <div>
+        <label class="input-label">Answer</label>
+        <div class="input-section">
+          <div class="answer-display" id="currentInput">0</div>
+          <button class="send-btn" id="sendBtn">Send</button>
+        </div>
       </div>
       <div class="numpad" id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
@@ -153,77 +90,54 @@
   </div>
 
   <script>
-    // =============== QUIZ LOGIC ====================
+    // Remove display:none logic; iframe always present
     const QUESTIONS = [
-      { q: '9 × 25', a: '225' },
-      { q: '120 + 4', a: '124' },
-      { q: '250 - 10', a: '240' },
-      { q: '13 + 17', a: '30' },
-      { q: '5 × 9', a: '45' },
-      { q: '90 - 40', a: '50' },
-      { q: '3 + 4 + 2', a: '9' },
-      { q: '100 + 23', a: '123' },
-      { q: '80 - 15', a: '65' },
-      { q: '5 × 6', a: '30' }
+      { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
+      { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
+      { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
+      { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
+      { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
     ];
-    let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval = null, timeLeft = 600;
-    const currentInputDisplay = document.getElementById('currentInput');
-    const quizTimer = document.getElementById('quizTimer');
+    let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+    const currentDisplay = document.getElementById('currentInput'),
+          quizTimer = document.getElementById('quizTimer'),
+          sendBtn = document.getElementById('sendBtn'),
+          padContainer = document.getElementById('numpad');
 
-    function startQuiz() {
-      currentIndex = 0; answers = []; currentInput = ''; inputLocked = false; timeLeft = 600;
-      loadQuestion(); updateTimer();
-      timerInterval = setInterval(() => {
-        timeLeft--; updateTimer(); if (timeLeft <= 0) finishQuiz();
-      }, 1000);
-    }
-    function updateTimer() {
-      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-      const s = (timeLeft % 60).toString().padStart(2, '0');
-      quizTimer.textContent = `Time Left: ${m}:${s}`;
-    }
     function loadQuestion() {
       const q = QUESTIONS[currentIndex];
-      document.getElementById('qNum').textContent = `Q${currentIndex + 1}:`;
+      document.getElementById('qNum').textContent = `Q${currentIndex+1}`;
       document.getElementById('questionText').textContent = `${q.q} =`;
-      currentInput = ''; inputLocked = false; currentInputDisplay.textContent = '0';
+      currentInput = ''; inputLocked = false; currentDisplay.textContent = '0'; sendBtn.disabled = false;
+    }
+    function updateTimer() {
+      const m = String(Math.floor(timeLeft/60)).padStart(2,'0'), s = String(timeLeft%60).padStart(2,'0');
+      quizTimer.textContent = `Time Left: ${m}:${s}`;
     }
     function appendDigit(d) {
       if (inputLocked) return;
-      if (d === 'C') currentInput = '';
-      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
-      else currentInput += d;
-      currentInputDisplay.textContent = currentInput || '0';
+      if (d==='C') currentInput=''; else if(d==='BACK') currentInput=currentInput.slice(0,-1); else currentInput+=d;
+      currentDisplay.textContent = currentInput||'0';
     }
     function submitAnswer() {
       if (inputLocked) return; inputLocked = true;
-      const q = QUESTIONS[currentIndex]; answers.push({ question: q.q, correct: q.a, user: currentInput });
-      currentIndex++;
-      if (currentIndex < QUESTIONS.length) setTimeout(() => { loadQuestion(); inputLocked = false; }, 200);
+      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+      sendBtn.disabled = true; currentIndex++;
+      if (currentIndex < QUESTIONS.length) setTimeout(loadQuestion, 200);
       else finishQuiz();
     }
     function finishQuiz() { clearInterval(timerInterval);
-      localStorage.setItem('sorobanResults', JSON.stringify(answers)); location.href = 'results.html';
+      localStorage.setItem('sorobanResults', JSON.stringify(answers)); window.location.href='results.html'; }
+    function startQuiz() { currentIndex=0; answers=[]; timeLeft=600; loadQuestion(); updateTimer();
+      timerInterval = setInterval(() => { timeLeft--; updateTimer(); if(timeLeft<=0) finishQuiz(); },1000);
     }
-    const pad = ['7','8','9','4','5','6','1','2','3','0','C','BACK'];
-    const padWrap = document.getElementById('numpad');
-    pad.forEach(d => {
-      const btn = document.createElement('button');
-      if (d === 'BACK') {
-        btn.innerHTML = `
-          <svg width="24" height="24" viewBox="0 0 32 32">
-            <g>
-              <path d="M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
-              <line x1="17" y1="13" x2="23" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-              <line x1="23" y1="13" x2="17" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            </g>
-          </svg>`;
-        btn.title = "Backspace";
-      } else { btn.textContent = d; }
-      btn.onclick = () => appendDigit(d);
-      padWrap.appendChild(btn);
+    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+      const b = document.createElement('button');
+      if (d==='BACK') b.innerHTML = `<svg width="24" height="24" viewBox="0 0 32 32"><g><path d="M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="17" y1="13" x2="23" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="23" y1="13" x2="17" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
+      else b.textContent = d;
+      b.addEventListener('click', () => appendDigit(d)); padContainer.appendChild(b);
     });
-    currentInputDisplay.onclick = submitAnswer;
+    sendBtn.addEventListener('click', submitAnswer); currentDisplay.addEventListener('click', submitAnswer);
     startQuiz();
   </script>
 </body>
