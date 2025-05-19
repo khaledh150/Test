@@ -9,7 +9,7 @@
       margin: 0; padding: 0;
       width: 100vw; height: 100vh; overflow: hidden;
       background: #b3c4e7;
-      font-family: sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
     }
     #abacusRoot {
       position: absolute;
@@ -73,30 +73,35 @@
     #quizPanel {
       position: absolute;
       top: 0; left: 0;
-      width: clamp(240px, 20vw, 360px);
+      width: clamp(260px, 22vw, 400px);
       height: 100vh;
       background: rgba(140,166,219,0.95);
       color: #fff;
       z-index: 2;
       display: flex;
       flex-direction: column;
-      padding: 1rem;
+      padding: 1.2rem 1.1rem 1.1rem 1.1rem;
       overflow-y: auto;
+      box-shadow: 0 0 24px rgba(70,70,120,0.10);
+      border-radius: 0 1.5rem 1.5rem 0;
     }
     #topBtns {
       display: flex;
       justify-content: flex-end;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.3rem;
     }
-    #fullscreenBtn, #resetBtn {
+    #fullscreenBtn, #resetBtn, #fullscreenBtnResults {
       background: transparent;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       cursor: pointer;
       color: #fff;
+      transition: color 0.2s;
     }
+    #fullscreenBtn:hover, #resetBtn:hover, #fullscreenBtnResults:hover { color: #4165ff; }
+
     #quizContent {
       flex: 1;
       display: flex;
@@ -106,6 +111,7 @@
     .question { display: flex; align-items: center; gap: 0.5rem; }
     #qNum {
       background: #668cff;
+      color: #fff;
       padding: 0.3rem 0.8rem;
       border-radius: 0.3rem;
       font-weight: bold;
@@ -115,18 +121,20 @@
       text-align: center;
       font-size: 1.5rem;
       font-weight: bold;
+      margin-left: 0.5rem;
+      color: #fff;
     }
-    .input-label { font-weight: bold; }
+    .input-label { font-weight: bold; margin-bottom: 0.2rem;}
     .inputArea { display: flex; gap: 0.5rem; align-items: center; }
     #answerDisplay {
       flex: 1;
       background: #fff;
       color: #333;
       text-align: right;
-      padding: 0.5rem;
+      padding: 0.5rem 0.7rem;
       border: 2px solid #b993d6;
       border-radius: 0.4rem;
-      font-size: 1.2rem;
+      font-size: 1.22rem;
       cursor: pointer;
     }
     #sendBtn {
@@ -136,7 +144,8 @@
       padding: 0.5rem 1rem;
       border-radius: 0.4rem;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 1.05rem;
+      font-weight: bold;
     }
     #numpad {
       display: grid;
@@ -149,88 +158,378 @@
       color: #fff;
       padding: 0.6rem;
       border-radius: 0.4rem;
-      font-size: 1.2rem;
+      font-size: 1.15rem;
       cursor: pointer;
+      font-weight: 600;
     }
     #quizTimer {
       text-align: center;
       font-weight: bold;
       margin-top: auto;
+      color: #fff;
+      letter-spacing: 1px;
     }
-    #resultsSlide {
+
+    /* Results styles */
+    #resultsPanel {
       position: absolute;
       top: 0; left: 0;
       width: 100vw; height: 100vh;
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.97);
       z-index: 9999;
       display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
+      padding: 1.2rem 0.4rem;
       box-sizing: border-box;
       text-align: center;
+      animation: fadeInPanel 0.4s;
+    }
+    @keyframes fadeInPanel { from { opacity: 0; transform: translateY(-40px);} to {opacity:1;transform:none;} }
+    #resultsPanel h2 {
+      margin: 0.1em 0 0.7em 0;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #33344e;
+    }
+    .results-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.33em;
+      margin-bottom: 1em;
+      align-items: center;
     }
     .result-item {
-      font-size: 1.1rem;
-      margin: 0.25rem 0;
+      background: #fff;
+      border-radius: 0.7em;
+      padding: 0.28em 0.65em 0.19em 0.65em;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 2px 7px rgba(100,100,150,0.09);
+      align-items: flex-start;
+      font-size: 1em;
+      width: 97%;
+      max-width: 400px;
     }
-    .result-score {
-      margin: 1rem 0;
-      font-size: 1.3rem;
+    .result-q { font-weight: 600; color: #222; }
+    .result-ans {
+      margin-left: 0.2em;
+      display: flex;
+      align-items: center;
+      gap: 0.33em;
+      font-size: 1em;
+      margin-top: 2px;
+    }
+    .result-ans .mark {
+      font-size: 1.17em;
+      font-weight: 800;
+      vertical-align: middle;
+    }
+    #scoreResult {
+      text-align: center;
+      font-size: 1.17em;
+      margin-bottom: 0.8em;
       font-weight: bold;
+      background: #fff;
+      padding: 0.45em 1em 0.37em 1em;
+      border-radius: 0.7em;
+      color: #222;
+      box-shadow: 0 2px 8px rgba(100,120,180,0.05);
+      margin-top: 0.9em;
     }
-    .result-btn {
-      background: #668cff;
+    #tryAgainRow {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.7em;
+      margin-bottom: 0.2em;
+    }
+    #tryAgainBtn {
+      background: #3c65f5;
       color: #fff;
+      font-weight: bold;
       border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 0.4rem;
-      font-size: 1rem;
-      margin: 0.5rem;
+      border-radius: 0.55em;
+      padding: 0.66em 1.4em;
+      font-size: 1.08em;
       cursor: pointer;
+      box-shadow: 0 2px 12px rgba(80,100,220,0.09);
+      transition: background 0.15s;
+    }
+    #tryAgainBtn:hover {
+      background: #668cff;
+    }
+    #fullscreenBtnResults {
+      background: transparent;
+      border: none;
+      font-size: 1.6rem;
+      color: #668cff;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    #fullscreenBtnResults:hover { color: #3c65f5;}
+    @media (max-width: 1024px) {
+      #quizPanel, #resultsPanel { width: clamp(210px, 30vw, 350px); }
+      #qText { font-size: 1.22rem; }
+    }
+    @media (max-width: 700px) {
+      #quizPanel, #resultsPanel {
+        width: 100vw;
+        min-width: 0;
+        max-width: 100vw;
+        height: auto;
+        border-radius: 0 0 1.1em 1.1em;
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: auto;
+        right: auto;
+        box-shadow: 0 4px 24px rgba(120,120,200,0.15);
+        padding: 1.1em 0.7em 0.8em 0.7em;
+      }
+      .result-item { font-size: 0.99em;}
     }
   </style>
 </head>
 <body>
-  <!-- existing content remains the same -->
-  <div id="resultsSlide">
-    <h2>Results</h2>
-    <div id="resultList"></div>
-    <div class="result-score" id="resultScore"></div>
-    <button class="result-btn" onclick="location.reload()">↺ Try Again</button>
-    <button class="result-btn" id="fullscreenToggle">⛶</button>
+  <div id="abacusRoot">
+    <div class="soroban" id="sorobanBoard"></div>
   </div>
+  <div id="quizPanel">
+    <div id="topBtns">
+      <button id="resetBtn" title="Reset" tabindex="0">↻</button>
+      <button id="fullscreenBtn" title="Fullscreen" tabindex="0">⛶</button>
+    </div>
+    <div id="quizContent">
+      <div class="question">
+        <div id="qNum">Q1</div>
+        <div id="qText">Loading...</div>
+      </div>
+      <div>
+        <div class="input-label">Answer</div>
+        <div class="inputArea">
+          <div id="answerDisplay">0</div>
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+      <div id="numpad"></div>
+      <div id="quizTimer">Time Left: 10:00</div>
+    </div>
+  </div>
+  <div id="resultsPanel" style="display:none;">
+    <h2>Results</h2>
+    <div class="results-list" id="resultsList"></div>
+    <div id="scoreResult"></div>
+    <div id="tryAgainRow">
+      <button id="fullscreenBtnResults" title="Fullscreen">⛶</button>
+      <button id="tryAgainBtn">Try Again</button>
+    </div>
+  </div>
+  <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
+  <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
   <script>
-    const resultsSlide = document.getElementById("resultsSlide");
-    const resultList = document.getElementById("resultList");
-    const resultScore = document.getElementById("resultScore");
-    const fullscreenToggle = document.getElementById("fullscreenToggle");
+    // ABACUS LOGIC
+    const DEAD_ZONE = 10, SHAKE_G = 16, HAPTIC_MS = 12;
+    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+    const board = $('#sorobanBoard');
+    const clearBoard = () => $$('.bead.active').forEach(b => b.classList.remove('active'));
+    const soundOn = document.getElementById('soundOn');
+    const soundOff = document.getElementById('soundOff');
 
-    fullscreenToggle.addEventListener("click", () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-        fullscreenToggle.textContent = '⛶';
-      } else {
-        document.exitFullscreen();
-        fullscreenToggle.textContent = '🡽';
-      }
-    });
+    $('#resetBtn').addEventListener('click', clearBoard);
 
-    function showResults() {
-      let correct = 0;
-      resultList.innerHTML = '';
-      answers.forEach((a, i) => {
-        const isCorrect = a.user === a.correct;
-        const div = document.createElement('div');
-        div.className = 'result-item';
-        div.innerHTML = `Q${i + 1}: ${a.user} ${isCorrect ? '✔️' : '❌'}<br><small>Correct: ${a.correct}</small>`;
-        if (isCorrect) correct++;
-        resultList.appendChild(div);
-      });
-      resultScore.textContent = `You scored ${correct} / ${answers.length}`;
-      resultsSlide.style.display = 'flex';
+    function isFullscreen() {
+      return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
     }
+    function setFullscreenBtnIcon(btn) {
+      btn.textContent = isFullscreen() ? '❎' : '⛶';
+      btn.title = isFullscreen() ? 'Exit Fullscreen' : 'Enter Fullscreen';
+    }
+    function toggleFullscreen() {
+      if (!isFullscreen()) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    }
+    const fullscreenBtn = $('#fullscreenBtn');
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', () => setFullscreenBtnIcon(fullscreenBtn));
+    setFullscreenBtnIcon(fullscreenBtn);
+
+    // For results slide as well
+    const fullscreenBtnResults = $('#fullscreenBtnResults');
+    fullscreenBtnResults.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', () => setFullscreenBtnIcon(fullscreenBtnResults));
+    setFullscreenBtnIcon(fullscreenBtnResults);
+
+    // Build the abacus
+    for (let i = 0; i < 8; i++) board.appendChild(createRod());
+    function createRod() {
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      rod.innerHTML = `
+        <div class="rod-line"></div>
+        <div class="heaven"><div class="bead heaven"></div></div>
+        <div class="gap-space"></div>
+        <div class="earth">
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+        </div>
+        <div class="bar"></div>
+      `;
+      return rod;
+    }
+    function setBead(bead, makeActive) {
+      const heaven = bead.classList.contains("heaven");
+      const wasActive = bead.classList.contains("active");
+      if (heaven) bead.classList.toggle("active", makeActive);
+      else {
+        const earths = [...bead.parentElement.children];
+        const idx = earths.indexOf(bead);
+        if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
+        else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
+      }
+      if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+      if (makeActive && !wasActive) { soundOn.currentTime = 0; soundOn.play(); }
+      if (!makeActive && wasActive) { soundOff.currentTime = 0; soundOff.play(); }
+    }
+    $$('.bead').forEach(bead => {
+      bead.addEventListener("pointerdown", e => {
+        const region = bead.classList.contains("heaven") ? "heaven" : "earth";
+        const startY = e.clientY;
+        bead.setPointerCapture(e.pointerId);
+        bead.onpointermove = ev => {
+          const dy = ev.clientY - startY;
+          if ((region === 'heaven' && Math.abs(dy) > DEAD_ZONE) || (region === 'earth' && Math.abs(dy) > DEAD_ZONE)) {
+            setBead(bead, region === 'heaven' ? dy > 0 : dy < 0);
+            bead.onpointermove = null;
+          }
+        };
+        bead.onpointerup = bead.onpointercancel = () => {
+          bead.onpointermove = null;
+          bead.releasePointerCapture(e.pointerId);
+        };
+      });
+    });
+    if (window.DeviceMotionEvent) {
+      let last = 0;
+      window.addEventListener("devicemotion", ev => {
+        const { x, y, z } = ev.accelerationIncludingGravity;
+        const mag = Math.hypot(x, y, z), now = performance.now();
+        if (mag > SHAKE_G && now - last > 750) {window.clearBoard(); last = now; } }); }
+
+// QUIZ LOGIC
+const QUESTIONS = [
+  { q: '9 × 25', a: '225' },
+  { q: '120 + 4', a: '124' },
+  { q: '250 - 10', a: '240' },
+  { q: '13 + 17', a: '30' },
+  { q: '5 × 9', a: '45' },
+  { q: '90 - 40', a: '50' },
+  { q: '3 + 4 + 2', a: '9' },
+  { q: '100 + 23', a: '123' },
+  { q: '80 - 15', a: '65' },
+  { q: '5 × 6', a: '30' }
+];
+let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval = null, timeLeft = 600;
+const qNumEl = document.getElementById('qNum'), qTextEl = document.getElementById('qText');
+const answerEl = document.getElementById('answerDisplay'), sendBtnEl = document.getElementById('sendBtn');
+const timerEl = document.getElementById('quizTimer'), padContainer = document.getElementById('numpad');
+
+function shuffleQuestions() {
+  for (let i = QUESTIONS.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [QUESTIONS[i], QUESTIONS[j]] = [QUESTIONS[j], QUESTIONS[i]];
+  }
+}
+
+function loadQuestion() {
+  const q = QUESTIONS[currentIndex];
+  qNumEl.textContent = `Q${currentIndex + 1}`;
+  qTextEl.textContent = `${q.q} =`;
+  currentInput = ''; inputLocked = false;
+  answerEl.textContent = '0';
+  sendBtnEl.disabled = false;
+}
+
+function updateTimer() {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
+        s = String(timeLeft % 60).padStart(2, '0');
+  timerEl.textContent = `Time Left: ${m}:${s}`;
+}
+
+function appendDigit(d) {
+  if (inputLocked) return;
+  if (d === 'C') currentInput = '';
+  else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+  else currentInput += d;
+  answerEl.textContent = currentInput || '0';
+}
+
+function submitAnswer() {
+  if (inputLocked || currentInput === '') return;
+  inputLocked = true;
+  answers.push({
+    question: QUESTIONS[currentIndex].q,
+    correct: QUESTIONS[currentIndex].a,
+    user: currentInput.trim().replace(/^0+/, '')
+  });
+  sendBtnEl.disabled = true;
+  if (currentIndex < QUESTIONS.length - 1) {
+    currentIndex++;
+    setTimeout(loadQuestion, 250);
+  } else {
+    setTimeout(showResults, 400);
+  }
+}
+
+function showResults() {
+  clearInterval(timerInterval);
+  const resultsPanel = document.getElementById("resultsPanel");
+  const resultList = document.getElementById("resultsList");
+  const resultScore = document.getElementById("scoreResult");
+  let score = 0;
+  resultList.innerHTML = '';
+  answers.forEach((ans, i) => {
+    const isCorrect = ans.user === ans.correct;
+    if (isCorrect) score++;
+    const div = document.createElement('div');
+    div.className = 'result-item';
+    div.innerHTML = `<div class="result-q">Q${i + 1}: ${ans.question} = ${ans.correct}</div>
+                     <div class="result-ans">Your answer: ${ans.user || 0}
+                       <span class="mark">${isCorrect ? '✔️' : '❌'}</span></div>`;
+    resultList.appendChild(div);
+  });
+  resultScore.textContent = `You scored ${score} / ${answers.length}`;
+  resultsPanel.style.display = 'flex';
+}
+
+function startQuiz() {
+  currentIndex = 0; answers = []; timeLeft = 600;
+  shuffleQuestions();
+  loadQuestion(); updateTimer();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) showResults();
+  }, 1000);
+}
+
+['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+  const b = document.createElement('button');
+  b.textContent = d === 'BACK' ? '⌫' : d;
+  b.addEventListener('click', () => appendDigit(d));
+  padContainer.appendChild(b);
+});
+sendBtnEl.addEventListener('click', submitAnswer);
+answerEl.addEventListener('click', submitAnswer);
+$('#tryAgainBtn').addEventListener('click', () => location.reload());
+startQuiz();
+
   </script>
 </body>
 </html>
