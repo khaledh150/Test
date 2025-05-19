@@ -2,179 +2,259 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="color-scheme" content="light">
-  <title>Soroban</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Soroban Quiz</title>
   <style>
-    html, body {
-      margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden;
+    body {
+      margin: 0;
+      position: relative;
+      font-family: sans-serif;
       background: #b3c4e7;
+      overflow: hidden;
+    }
+    iframe {
+      display: block;
+      position: absolute;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      border: none;
+      z-index: 1;
+    }
+    .quiz-container {
+      position: absolute;
+      top: 0; left: 0;
+      width: 20vw;
+      min-width: 260px;
+      max-width: 360px;
+      height: 100vh;
+      background: rgba(140,166,219,0.9);
+      color: #fff;
+      z-index: 2;
       display: flex;
- justify-content: flex-start; /* <-- instead of center */ align-items: center;
-      touch-action: none;
- user-select: none; 
-overscroll-behavior: none;
-      -webkit-tap-highlight-color: transparent;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+      overflow-y: auto;
     }
-    #container {
-      width: 150%; 
-height: 100%;
-      display: flex; 
- justify-content: flex-start; /* <-- instead of center */ align-items: center;
+    .quiz-box {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
     }
-    .soroban {
-      display: flex; justify-content: center; align-items: center;
-      background: #4d79ff; padding: 5px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3); overflow: hidden;
+    .question-row {
+      position: relative;
     }
-    .rod {
-      position: relative; width: 95px; height: 390px;
-      background: #4d79ff; border-radius: 5px;
-      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    .q-num {
+      position: absolute;
+      top: -1rem;
+      left: 0;
+      background: #668cff;
+      padding: 0.2rem 0.6rem;
+      border-radius: 0.4rem;
+      font-weight: bold;
     }
-    .rod-line {
-      position: absolute; top: 0; bottom: 0; width: 3px;
-      background: #6666ff; z-index: 0;
+    .question-text {
+      margin-top: 1.2rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
     }
-    .heaven {
-      display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-      height: 14%; gap: 2px; z-index: 1;
+    .input-label {
+      font-weight: bold;
+      margin-bottom: 0.4rem;
     }
-    .gap-space { height: 2%; z-index: 1; }
-    .earth {
-      display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-      height: 53%; margin-top: 3px; z-index: 1; gap: 3px;
+    .input-section {
+      display: flex;
+      gap: 0.5rem;
     }
-    .bar {
-      position: absolute; top: 27%; width: 100%; height: 3px;
-      background: #6666ff; z-index: 2;
+    .answer-display {
+      flex: 1;
+      padding: 0.6rem;
+      font-size: 1.2rem;
+      background: #fff;
+      color: #333;
+      border: 2px solid #b993d6;
+      border-radius: 0.4rem;
+      text-align: right;
+      cursor: pointer;
     }
-    .bead {
-      width: 90px; height: 50px; margin: 0;
-      background: linear-gradient(to bottom, #002db3, #002080);
-      clip-path: polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);
-      box-shadow: inset -1px -1px 4px rgba(255,255,255,0.3), inset 1px 1px 4px rgba(0,0,0,0.3);
-      transition: transform 0.2s; touch-action: none; z-index: 3;
+    .send-btn {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      background: #668cff;
+      color: #fff;
+      border: none;
+      border-radius: 0.4rem;
+      cursor: pointer;
     }
-    .bead.active {
-      background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
-      box-shadow: inset -2px -2px 5px rgba(255,255,255,0.4), inset 2px 2px 5px rgba(0,0,0,0.3);
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
     }
-    .bead.heaven.active { transform: translateY(100%); }
-    .bead.earth.active { transform: translateY(-150%); }
-    @media (max-width: 768px) {
-  .rod { width: 80px; height: 300px; }
-  .bead { width: 75px; height: 38px; }
-}
-@media (max-width: 480px) {
-  .rod { width: 70px; height: 250px; }
-  .bead { width: 65px; height: 32px; }
-}
-
-    @media screen and (orientation: portrait) {
-      body::before {
-        content: "Please rotate your device";
-        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: #b3c6ff; color: #000099; font-size: 2rem;
-        display: flex; justify-content: center; align-items: center;
-        z-index: 9999; text-align: center; padding: 1em;
+    .numpad button {
+      padding: 0.8rem;
+      font-size: 1.2rem;
+      background: #668cff;
+      color: #fff;
+      border: none;
+      border-radius: 0.4rem;
+      cursor: pointer;
+    }
+    #quizTimer {
+      text-align: center;
+      font-weight: bold;
+    }
+    @media (max-width: 1024px) {
+      .quiz-container {
+        width: 30vw;
+        min-width: 200px;
       }
-      #container { display: none; }
+      .question-text {
+        font-size: 1.3rem;
+      }
+    }
+    @media (max-width: 768px) {
+      .quiz-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        max-height: 45vh;
+        padding: 0.5rem;
+      }
+      .question-text {
+        font-size: 1.2rem;
+      }
+      .numpad {
+        gap: 0.3rem;
+      }
+      .numpad button {
+        padding: 0.6rem;
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <div class="soroban">
-      <!-- 7 rods -->
-      <!-- ... (repeat this rod block 7x) ... -->
-      <div class="rod">
-        <div class="rod-line"></div>
-        <div class="heaven"><div class="bead heaven"></div></div>
-        <div class="gap-space"></div>
-        <div class="earth">
-          <div class="bead earth"></div>
-          <div class="bead earth"></div>
-          <div class="bead earth"></div>
-          <div class="bead earth"></div>
-        </div>
-        <div class="bar"></div>
+  <iframe src="soroban.html" allowfullscreen></iframe>
+  <div class="quiz-container">
+    <div class="quiz-box">
+      <div class="question-row">
+        <div class="q-num" id="qNum">Q1</div>
+        <div class="question-text" id="questionText">9 × 25 =</div>
       </div>
-      <!-- Copy the above .rod six more times for a total of 7 rods -->
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
-      <div class="rod"><div class="rod-line"></div><div class="heaven"><div class="bead heaven"></div></div><div class="gap-space"></div><div class="earth"><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div><div class="bead earth"></div></div><div class="bar"></div></div>
+      <div>
+        <label class="input-label">Answer</label>
+        <div class="input-section">
+          <div class="answer-display" id="currentInput">0</div>
+          <button class="send-btn" id="sendBtn">Send</button>
+        </div>
+      </div>
+      <div class="numpad" id="numpad"></div>
+      <div id="quizTimer">Time Left: 10:00</div>
     </div>
   </div>
-<script>
-  // Soroban abacus interactive logic (same as your original)
-  (() => {
-    const DEAD_ZONE = 10, SWIPE_DELAY = 40, SHAKE_G = 16, HAPTIC_MS = 12;
-    const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];
-    const touches = new Map();
-    function setBead(bead, makeActive) {
-      const heaven = bead.classList.contains("heaven");
-      if (heaven) { bead.classList.toggle("active", makeActive); }
-      else {
-        const earths = [...bead.parentElement.children];
-        const idx = earths.indexOf(bead);
-        if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
-        else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
-      }
-      if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+  <script>
+    const QUESTIONS = [
+      { q: '9 × 25', a: '225' },
+      { q: '120 + 4', a: '124' },
+      { q: '250 - 10', a: '240' },
+      { q: '13 + 17', a: '30' },
+      { q: '5 × 9', a: '45' },
+      { q: '90 - 40', a: '50' },
+      { q: '3 + 4 + 2', a: '9' },
+      { q: '100 + 23', a: '123' },
+      { q: '80 - 15', a: '65' },
+      { q: '5 × 6', a: '30' }
+    ];
+    let currentIndex = 0;
+    let answers = [];
+    let currentInput = '';
+    let inputLocked = false;
+    let timerInterval;
+    let timeLeft = 600;
+
+    const displayEl = document.getElementById('currentInput');
+    const timerEl = document.getElementById('quizTimer');
+    const sendBtn = document.getElementById('sendBtn');
+    const padEl = document.getElementById('numpad');
+
+    function loadQuestion() {
+      const q = QUESTIONS[currentIndex];
+      document.getElementById('qNum').textContent = `Q${currentIndex + 1}`;
+      document.getElementById('questionText').textContent = `${q.q} =`;
+      currentInput = '';
+      inputLocked = false;
+      displayEl.textContent = '0';
+      sendBtn.disabled = false;
     }
-    $$(".soroban").forEach((board) => (board.style.touchAction = "none"));
-    $$(".bead").forEach((bead) => {
-      bead.addEventListener("pointerdown", onDown);
-      bead.addEventListener("pointermove", onMove);
-      bead.addEventListener("pointerup", onUpCancel);
-      bead.addEventListener("pointercancel", onUpCancel);
+
+    function updateTimer() {
+      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+      const s = String(timeLeft % 60).padStart(2, '0');
+      timerEl.textContent = `Time Left: ${m}:${s}`;
+    }
+
+    function appendDigit(d) {
+      if (inputLocked) return;
+      if (d === 'C') currentInput = '';
+      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+      else currentInput += d;
+      displayEl.textContent = currentInput || '0';
+    }
+
+    function submitAnswer() {
+      if (inputLocked) return;
+      inputLocked = true;
+      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+      sendBtn.disabled = true;
+      currentIndex++;
+      if (currentIndex < QUESTIONS.length) {
+        setTimeout(loadQuestion, 200);
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      localStorage.setItem('sorobanResults', JSON.stringify(answers));
+      window.location.href = 'results.html';
+    }
+
+    function startQuiz() {
+      currentIndex = 0;
+      answers = [];
+      timeLeft = 600;
+      loadQuestion();
+      updateTimer();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) finishQuiz();
+      }, 1000);
+    }
+
+    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+      const b = document.createElement('button');
+      if (d === 'BACK') {
+        b.innerHTML = `<svg width="24" height="24" viewBox="0 0 32 32"><g><path d="M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z" fill="none" stroke="white" stroke-width="2.5" stroke-linejoin="round"/><line x1="17" y1="13" x2="23" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/><line x1="23" y1="13" x2="17" y2="19" stroke="white" stroke-width="2.5" stroke-linecap="round"/></g></svg>`;
+        b.title = 'Backspace';
+      } else {
+        b.textContent = d;
+      }
+      b.addEventListener('click', () => appendDigit(d));
+      padEl.appendChild(b);
     });
-    function onDown(e) {
-      const bead = e.currentTarget; bead.setPointerCapture(e.pointerId); bead.classList.add("pressed");
-      touches.set(e.pointerId, {
-        bead,
-        region: bead.classList.contains("heaven") ? "heaven" : "earth",
-        startX: e.clientX, startY: e.clientY,
-        lastRod: bead.closest(".rod"), mode: null, moved: false, lastCopy: performance.now()
-      });
-    }
-    function onMove(e) {
-      const t = touches.get(e.pointerId); if (!t) return;
-      const dy = e.clientY - t.startY, dx = e.clientX - t.startX;
-      if (!t.moved && Math.hypot(dx, dy) > DEAD_ZONE) t.moved = true;
-      if (t.mode === null && t.moved) {
-        if (t.region === "heaven") t.mode = dy > 0 ? "activate" : "deactivate";
-        else t.mode = dy < 0 ? "activate" : "deactivate";
-        setBead(t.bead, t.mode === "activate");
-      }
-      if (t.mode && performance.now() - t.lastCopy > SWIPE_DELAY) {
-        const elem = document.elementFromPoint(e.clientX, e.clientY);
-        const rod = elem?.closest?.(".rod");
-        if (rod && rod !== t.lastRod) {
-          const otherBead = rod.querySelector(`.bead.${t.region}`);
-          if (otherBead) setBead(otherBead, t.mode === "activate");
-          t.lastRod = rod; t.lastCopy = performance.now();
-        }
-      }
-    }
-    function onUpCancel(e) {
-      const t = touches.get(e.pointerId); if (!t) return;
-      t.bead.classList.remove("pressed"); touches.delete(e.pointerId);
-    }
-    if (window.DeviceMotionEvent) {
-      let last = 0;
-      window.addEventListener("devicemotion", (ev) => {
-        const { x, y, z } = ev.accelerationIncludingGravity;
-        const mag = Math.hypot(x, y, z); const now = performance.now();
-        if (mag > SHAKE_G && now - last > 750) { clearBoard(); last = now; }
-      });
-    }
-    function clearBoard() { $$(".bead.active").forEach((b) => b.classList.remove("active")); }
-  })();
-</script>
+
+    sendBtn.addEventListener('click', submitAnswer);
+    displayEl.addEventListener('click', submitAnswer);
+
+    startQuiz();
+  </script>
 </body>
 </html>
