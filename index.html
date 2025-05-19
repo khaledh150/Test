@@ -83,14 +83,19 @@
       padding: 1rem;
       overflow-y: auto;
     }
-    #fullscreenBtn {
-      align-self: flex-end;
+    #topBtns {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    #fullscreenBtn, #resetBtn {
       background: transparent;
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
       color: #fff;
-      margin-bottom: 0.5rem;
     }
     #quizContent {
       flex: 1;
@@ -159,7 +164,10 @@
     <div class="soroban" id="sorobanBoard"></div>
   </div>
   <div id="quizPanel">
-    <button id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
+    <div id="topBtns">
+      <button id="resetBtn" title="Reset">↻</button>
+      <button id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
+    </div>
     <div id="quizContent">
       <div class="question">
         <div id="qNum">Q1</div>
@@ -178,170 +186,158 @@
   </div>
 
   <script>
-    (() => {
-      const DEAD_ZONE = 10, SHAKE_G = 16, HAPTIC_MS = 12;
-      const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
-      const board = $('#sorobanBoard');
+    const DEAD_ZONE = 10, SHAKE_G = 16, HAPTIC_MS = 12;
+    const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+    const board = $('#sorobanBoard');
+    const clearBoard = () => $$('.bead.active').forEach(b => b.classList.remove('active'));
+    $('#resetBtn').addEventListener('click', clearBoard);
+    $('#fullscreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    });
 
-      for (let i = 0; i < 8; i++) board.appendChild(createRod());
+    for (let i = 0; i < 8; i++) board.appendChild(createRod());
+    function createRod() {
+      const rod = document.createElement('div');
+      rod.className = 'rod';
+      rod.innerHTML = `
+        <div class="rod-line"></div>
+        <div class="heaven"><div class="bead heaven"></div></div>
+        <div class="gap-space"></div>
+        <div class="earth">
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+          <div class="bead earth"></div>
+        </div>
+        <div class="bar"></div>
+      `;
+      return rod;
+    }
 
-      function createRod() {
-        const rod = document.createElement('div');
-        rod.className = 'rod';
-        rod.innerHTML = `
-          <div class="rod-line"></div>
-          <div class="heaven"><div class="bead heaven"></div></div>
-          <div class="gap-space"></div>
-          <div class="earth">
-            <div class="bead earth"></div>
-            <div class="bead earth"></div>
-            <div class="bead earth"></div>
-            <div class="bead earth"></div>
-          </div>
-          <div class="bar"></div>
-        `;
-        return rod;
+    function setBead(bead, makeActive) {
+      const heaven = bead.classList.contains("heaven");
+      if (heaven) bead.classList.toggle("active", makeActive);
+      else {
+        const earths = [...bead.parentElement.children];
+        const idx = earths.indexOf(bead);
+        if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
+        else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
       }
+      if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+    }
 
-      function setBead(bead, makeActive) {
-        const heaven = bead.classList.contains("heaven");
-        if (heaven) bead.classList.toggle("active", makeActive);
-        else {
-          const earths = [...bead.parentElement.children];
-          const idx = earths.indexOf(bead);
-          if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");
-          else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");
-        }
-        if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
-      }
+    $$('.bead').forEach(bead => {
+      bead.addEventListener("pointerdown", e => {
+        const region = bead.classList.contains("heaven") ? "heaven" : "earth";
+        const startY = e.clientY;
+        bead.setPointerCapture(e.pointerId);
 
-      $$('.bead').forEach(bead => {
-        bead.addEventListener("pointerdown", e => {
-          const region = bead.classList.contains("heaven") ? "heaven" : "earth";
-          const startY = e.clientY;
-          bead.setPointerCapture(e.pointerId);
-
-          bead.onpointermove = ev => {
-            const dy = ev.clientY - startY;
-            if ((region === 'heaven' && Math.abs(dy) > DEAD_ZONE) || (region === 'earth' && Math.abs(dy) > DEAD_ZONE)) {
-              setBead(bead, region === 'heaven' ? dy > 0 : dy < 0);
-              bead.onpointermove = null;
-            }
-          };
-
-          bead.onpointerup = bead.onpointercancel = () => {
+        bead.onpointermove = ev => {
+          const dy = ev.clientY - startY;
+          if ((region === 'heaven' && Math.abs(dy) > DEAD_ZONE) || (region === 'earth' && Math.abs(dy) > DEAD_ZONE)) {
+            setBead(bead, region === 'heaven' ? dy > 0 : dy < 0);
             bead.onpointermove = null;
-            bead.releasePointerCapture(e.pointerId);
-          };
-        });
-      });
-
-      function clearBoard() {
-        $$('.bead.active').forEach(b => b.classList.remove('active'));
-      }
-
-      if (window.DeviceMotionEvent) {
-        let last = 0;
-        window.addEventListener("devicemotion", ev => {
-          const { x, y, z } = ev.accelerationIncludingGravity;
-          const mag = Math.hypot(x, y, z);
-          const now = performance.now();
-          if (mag > SHAKE_G && now - last > 750) {
-            clearBoard();
-            last = now;
           }
-        });
-      }
+        };
 
-      const QUESTIONS = shuffle([
-        { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
-        { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
-        { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
-        { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
-        { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
-      ]);
-      let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
-      const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
-      const timerEl = $('#quizTimer'), padContainer = $('#numpad');
+        bead.onpointerup = bead.onpointercancel = () => {
+          bead.onpointermove = null;
+          bead.releasePointerCapture(e.pointerId);
+        };
+      });
+    });
 
-      function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
+    if (window.DeviceMotionEvent) {
+      let last = 0;
+      window.addEventListener("devicemotion", ev => {
+        const { x, y, z } = ev.accelerationIncludingGravity;
+        const mag = Math.hypot(x, y, z), now = performance.now();
+        if (mag > SHAKE_G && now - last > 750) {
+          clearBoard(); last = now;
         }
-        return arr;
-      }
+      });
+    }
 
-      function loadQuestion() {
-        const q = QUESTIONS[currentIndex];
-        qNumEl.textContent = `Q${currentIndex + 1}`;
-        qTextEl.textContent = `${q.q} =`;
-        currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
-      }
+    const QUESTIONS = shuffle([
+      { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
+      { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
+      { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
+      { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
+      { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
+    ]);
+    let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+    const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
+    const timerEl = $('#quizTimer'), padContainer = $('#numpad');
 
-      function updateTimer() {
-        const m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
-              s = String(timeLeft % 60).padStart(2, '0');
-        timerEl.textContent = `Time Left: ${m}:${s}`;
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
       }
+      return arr;
+    }
 
-      function appendDigit(d) {
-        if (inputLocked) return;
-        if (d === 'C') currentInput = '';
-        else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
-        else currentInput += d;
-        answerEl.textContent = currentInput || '0';
-      }
+    function loadQuestion() {
+      const q = QUESTIONS[currentIndex];
+      qNumEl.textContent = `Q${currentIndex + 1}`;
+      qTextEl.textContent = `${q.q} =`;
+      currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
+    }
 
-      function submitAnswer() {
-        if (inputLocked) return;
-        inputLocked = true;
-        answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
-        sendBtnEl.disabled = true;
-        currentIndex < QUESTIONS.length - 1
-          ? setTimeout(() => { currentIndex++; loadQuestion(); }, 300)
-          : finishQuiz();
-      }
+    function updateTimer() {
+      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
+            s = String(timeLeft % 60).padStart(2, '0');
+      timerEl.textContent = `Time Left: ${m}:${s}`;
+    }
 
-      function finishQuiz() {
-        clearInterval(timerInterval);
-        localStorage.setItem('sorobanResults', JSON.stringify(answers));
-        window.location.href = 'results.html';
-      }
+    function appendDigit(d) {
+      if (inputLocked) return;
+      if (d === 'C') currentInput = '';
+      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+      else currentInput += d;
+      answerEl.textContent = currentInput || '0';
+    }
 
-      function startQuiz() {
-        currentIndex = 0;
-        answers = [];
-        timeLeft = 600;
-        loadQuestion();
+    function submitAnswer() {
+      if (inputLocked) return;
+      inputLocked = true;
+      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+      sendBtnEl.disabled = true;
+      currentIndex < QUESTIONS.length - 1
+        ? setTimeout(() => { currentIndex++; loadQuestion(); }, 300)
+        : finishQuiz();
+    }
+
+    function finishQuiz() {
+      clearInterval(timerInterval);
+      localStorage.setItem('sorobanResults', JSON.stringify(answers));
+      window.location.href = 'results.html';
+    }
+
+    function startQuiz() {
+      currentIndex = 0;
+      answers = [];
+      timeLeft = 600;
+      loadQuestion();
+      updateTimer();
+      timerInterval = setInterval(() => {
+        timeLeft--;
         updateTimer();
-        timerInterval = setInterval(() => {
-          timeLeft--;
-          updateTimer();
-          if (timeLeft <= 0) finishQuiz();
-        }, 1000);
-      }
+        if (timeLeft <= 0) finishQuiz();
+      }, 1000);
+    }
 
-      ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
-        const b = document.createElement('button');
-        if (d === 'BACK') {
-          b.innerHTML = '<svg width=\"24\" height=\"24\" viewBox=\"0 0 32 32\"><g><path d=\"M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z\" fill=\"none\" stroke=\"white\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><line x1=\"17\" y1=\"13\" x2=\"23\" y2=\"19\" stroke=\"white\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><line x1=\"23\" y1=\"13\" x2=\"17\" y2=\"19\" stroke=\"white\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></g></svg>';
-        } else {
-          b.textContent = d;
-        }
-        b.addEventListener('click', () => appendDigit(d));
-        padContainer.appendChild(b);
-      });
+    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+      const b = document.createElement('button');
+      b.textContent = d === 'BACK' ? '⌫' : d;
+      b.addEventListener('click', () => appendDigit(d));
+      padContainer.appendChild(b);
+    });
 
-      sendBtnEl.addEventListener('click', submitAnswer);
-      answerEl.addEventListener('click', submitAnswer);
-      $('#fullscreenBtn').addEventListener('click', () => {
-        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-        else document.exitFullscreen();
-      });
-
-      startQuiz();
-    })();
+    sendBtnEl.addEventListener('click', submitAnswer);
+    answerEl.addEventListener('click', submitAnswer);
+    startQuiz();
   </script>
 </body>
 </html>
