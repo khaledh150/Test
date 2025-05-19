@@ -1,7 +1,8 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Soroban Canvas Quiz</title>
   <style>
     html, body {
@@ -123,8 +124,206 @@
       <div id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
     </div>
-  </div>  <!-- Full JS with complete logic and shake-to-reset support will be added next -->  <script>
-    // TODO: Implement full canvas-based Soroban logic that mirrors original HTML version
-    // including: dragging, toggling, swipe gestures, shake-to-reset
-  </script></body>
+  </div>
+  <script>
+    // --- CANVAS SOROBAN ABACUS LOGIC ---
+    const canvas = document.getElementById('abacusBg');
+    let ctx = canvas.getContext('2d');
+
+    // ABACUS MODEL
+    const RODS = 7, BEADS_BELOW = 4, BEADS_ABOVE = 1;
+    let beadState = Array.from({length: RODS}, ()=>({
+      above: [false], // 1 bead, false = up (inactive)
+      below: [false,false,false,false] // 4 beads, false = down (inactive)
+    }));
+
+    // --- ABACUS LAYOUT ---
+    function drawAbacus() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // Sizing
+      const leftOffset = canvas.width * 0.02;
+      const rightOffset = canvas.width * 0.02;
+      const topOffset = canvas.height * 0.04;
+      const botOffset = canvas.height * 0.08;
+      const abacusW = canvas.width - leftOffset - rightOffset;
+      const abacusH = canvas.height - topOffset - botOffset;
+      const rodGap = abacusW/(RODS-1);
+      const hexW = rodGap*0.90, hexH = abacusH/7.7;
+      const heavenY = topOffset+hexH/2, earthY0 = topOffset + abacusH*0.35;
+      const rodColor = '#333c85';
+      const beadColor = '#142266';
+      const beadActive = '#ffd700';
+      const beadShadow = '#758bde';
+
+      // Draw rods
+      for(let r=0;r<RODS;r++) {
+        let rx = leftOffset+rodGap*r;
+        ctx.save();
+        ctx.strokeStyle = '#8f79ef';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(rx, topOffset);
+        ctx.lineTo(rx, canvas.height-botOffset);
+        ctx.stroke();
+        ctx.restore();
+      }
+      // Draw horizontal bar (divider)
+      ctx.save();
+      ctx.strokeStyle = '#161e3d';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(leftOffset-hexW/2, topOffset + abacusH*0.33);
+      ctx.lineTo(canvas.width-rightOffset+hexW/2, topOffset + abacusH*0.33);
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw beads (above bar)
+      for(let r=0;r<RODS;r++) {
+        let rx = leftOffset+rodGap*r;
+        let active = beadState[r].above[0];
+        let y = heavenY + (active ? hexH*1.10 : 0);
+        drawHexBead(rx, y, hexW, hexH, beadColor, active, beadActive, beadShadow);
+      }
+      // Draw beads (below bar)
+      for(let r=0;r<RODS;r++) for(let b=0;b<BEADS_BELOW;b++) {
+        let rx = leftOffset+rodGap*r;
+        // Calculate y, stack up beads
+        let by = earthY0 + hexH*b - (beadState[r].below[b] ? hexH*1.08 : 0);
+        drawHexBead(rx, by, hexW, hexH, beadColor, beadState[r].below[b], beadActive, beadShadow);
+      }
+    }
+
+    function drawHexBead(cx, cy, w, h, fill, active, highlight, shadow) {
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        let angle = Math.PI/3 * i - Math.PI/6;
+        let x = cx + Math.cos(angle)*w/2;
+        let y = cy + Math.sin(angle)*h/2;
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+      ctx.shadowColor = shadow;
+      ctx.shadowBlur = 7;
+      ctx.fillStyle = active ? highlight : fill;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#26316a';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Mouse/touch events
+    function findBead(mx, my) {
+      // Heaven
+      const leftOffset = canvas.width * 0.02;
+      const rodGap = (canvas.width - leftOffset*2)/(RODS-1);
+      const hexW = rodGap*0.90, hexH = (canvas.height - canvas.height * 0.04 - canvas.height * 0.08)/7.7;
+      const heavenY = canvas.height * 0.04 + hexH/2, earthY0 = canvas.height * 0.04 + (canvas.height-canvas.height*0.04-canvas.height*0.08)*0.35;
+      // Find rod
+      let rod = Math.round((mx-leftOffset)/rodGap);
+      if (rod < 0 || rod >= RODS) return null;
+      // Heaven bead
+      let rx = leftOffset+rodGap*rod;
+      if (Math.abs(mx-rx)<hexW*0.45 && Math.abs(my-heavenY)<hexH*0.55)
+        return {rod, region:'above', index:0};
+      // Earth beads
+      for (let b=0;b<BEADS_BELOW;b++) {
+        let by = earthY0 + hexH*b - (beadState[rod].below[b] ? hexH*1.08 : 0);
+        if (Math.abs(mx-rx)<hexW*0.45 && Math.abs(my-by)<hexH*0.55)
+          return {rod, region:'below', index:b};
+      }
+      return null;
+    }
+
+    let dragging = null;
+    canvas.addEventListener('pointerdown', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX-rect.left)*canvas.width/rect.width;
+      const my = (e.clientY-rect.top)*canvas.height/rect.height;
+      let bead = findBead(mx, my);
+      if (!bead) return;
+      dragging = bead;
+    });
+    canvas.addEventListener('pointermove', function(e) {
+      if (!dragging) return;
+    });
+    canvas.addEventListener('pointerup', function(e) {
+      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX-rect.left)*canvas.width/rect.width;
+      const my = (e.clientY-rect.top)*canvas.height/rect.height;
+      let bead = findBead(mx, my);
+      if (!bead) { dragging = null; return;}
+      // Heaven: toggle if up/down
+      if (bead.region==='above') {
+        beadState[bead.rod].above[0] = !beadState[bead.rod].above[0];
+      }
+      // Earth: set this and all below active; all above inactive
+      if (bead.region==='below') {
+        const active = !beadState[bead.rod].below[bead.index];
+        for (let i=0;i<BEADS_BELOW;i++)
+          beadState[bead.rod].below[i] = i<=bead.index?active:false;
+      }
+      dragging = null;
+      drawAbacus();
+    });
+    // For touch devices: pointercancel
+    canvas.addEventListener('pointercancel',()=>{ dragging=null; });
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawAbacus();
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // -- QUIZ LOGIC (unchanged from previous) --
+    document.getElementById('fullscreenBtn').addEventListener('click', () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    });
+
+    const QUESTIONS = [
+      { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
+      { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
+      { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
+      { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
+      { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
+    ];
+    let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+    const qNumEl = document.getElementById('qNum'), qTextEl = document.getElementById('qText');
+    const answerEl = document.getElementById('answerDisplay'), sendBtnEl = document.getElementById('sendBtn');
+    const timerEl = document.getElementById('quizTimer'), padContainer = document.getElementById('numpad');
+
+    function loadQuestion() {
+      const q = QUESTIONS[currentIndex];
+      qNumEl.textContent = `Q${currentIndex+1}`;
+      qTextEl.textContent = `${q.q} =`;
+      currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
+    }
+    function updateTimer() {
+      const m = String(Math.floor(timeLeft/60)).padStart(2,'0'), s = String(timeLeft%60).padStart(2,'0');
+      timerEl.textContent = `Time Left: ${m}:${s}`;
+    }
+    function appendDigit(d) {
+      if (inputLocked) return;
+      if (d==='C') currentInput=''; else if(d==='BACK') currentInput=currentInput.slice(0,-1); else currentInput+=d;
+      answerEl.textContent = currentInput||'0';
+    }
+    function submitAnswer() { if (inputLocked) return; inputLocked=true;
+      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+      sendBtnEl.disabled=true; currentIndex<QUESTIONS.length-1?setTimeout(loadQuestion,200):finishQuiz(); }
+    function finishQuiz(){ clearInterval(timerInterval); localStorage.setItem('sorobanResults', JSON.stringify(answers)); window.location.href='results.html'; }
+    function startQuiz(){ currentIndex=0; answers=[]; timeLeft=600; loadQuestion(); updateTimer(); timerInterval=setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0) finishQuiz(); },1000); }
+    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{ const b=document.createElement('button');
+      if(d==='BACK') b.innerHTML='<svg width=\"24\" height=\"24\" viewBox=\"0 0 32 32\"><g><path d=\"M6 16 L14 8 H26 Q28 8 28 10 V22 Q28 24 26 24 H14 L6 16 Z\" fill=\"none\" stroke=\"white\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><line x1=\"17\" y1=\"13\" x2=\"23\" y2=\"19\" stroke=\"white\" stroke-width=\"2.5\" stroke-linecap=\"round\"/><line x1=\"23\" y1=\"13\" x2=\"17\" y2=\"19\" stroke=\"white\" stroke-width=\"2.5\" stroke-linecap=\"round\"/></g></svg>';
+      else b.textContent=d; b.addEventListener('click',()=>appendDigit(d)); padContainer.appendChild(b);
+    });
+    sendBtnEl.addEventListener('click',submitAnswer); answerEl.addEventListener('click',submitAnswer); startQuiz();
+
+  </script>
+</body>
 </html>
