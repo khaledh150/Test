@@ -246,38 +246,72 @@
       }
       return null;
     }
-
-    canvas.addEventListener('pointerdown', function(e) {
-      const rect = canvas.getBoundingClientRect();
-      const mx = (e.clientX-rect.left)*canvas.width/rect.width;
-      const my = (e.clientY-rect.top)*canvas.height/rect.height;
-      let bead = findBead(mx, my);
-      if (!bead) return;
-      pressed = bead;
-
-      // Logic from your HTML code: activate/deactivate
-      if (bead.region==="above") {
-        beadState[bead.rod].above[0] = !beadState[bead.rod].above[0];
-      }
-      if (bead.region==="below") {
-        let active = !beadState[bead.rod].below[bead.index];
-        for(let i=0;i<BEADS_BELOW;i++) {
-          if (i<=bead.index) beadState[bead.rod].below[i]=active;
-          else beadState[bead.rod].below[i]=false;
-        }
-      }
-      drawAbacus();
-    });
-    canvas.addEventListener('pointerup', function() { pressed=null; drawAbacus(); });
-    canvas.addEventListener('pointercancel', function() { pressed=null; drawAbacus(); });
-
-    function resize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawAbacus();
-    }
-    window.addEventListener('resize', resize);
-    resize();
+<script>  
+  // Soroban abacus interactive logic (same as your original)  
+  (() => {  
+    const DEAD_ZONE = 10, SWIPE_DELAY = 40, SHAKE_G = 16, HAPTIC_MS = 12;  
+    const $ = (s) => document.querySelector(s), $$ = (s) => [...document.querySelectorAll(s)];  
+    const touches = new Map();  
+    function setBead(bead, makeActive) {  
+      const heaven = bead.classList.contains("heaven");  
+      if (heaven) { bead.classList.toggle("active", makeActive); }  
+      else {  
+        const earths = [...bead.parentElement.children];  
+        const idx = earths.indexOf(bead);  
+        if (makeActive) for (let i = idx; i >= 0; i--) earths[i].classList.add("active");  
+        else for (let i = idx; i < earths.length; i++) earths[i].classList.remove("active");  
+      }  
+      if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);  
+    }  
+    $$(".soroban").forEach((board) => (board.style.touchAction = "none"));  
+    $$(".bead").forEach((bead) => {  
+      bead.addEventListener("pointerdown", onDown);  
+      bead.addEventListener("pointermove", onMove);  
+      bead.addEventListener("pointerup", onUpCancel);  
+      bead.addEventListener("pointercancel", onUpCancel);  
+    });  
+    function onDown(e) {  
+      const bead = e.currentTarget; bead.setPointerCapture(e.pointerId); bead.classList.add("pressed");  
+      touches.set(e.pointerId, {  
+        bead,  
+        region: bead.classList.contains("heaven") ? "heaven" : "earth",  
+        startX: e.clientX, startY: e.clientY,  
+        lastRod: bead.closest(".rod"), mode: null, moved: false, lastCopy: performance.now()  
+      });  
+    }  
+    function onMove(e) {  
+      const t = touches.get(e.pointerId); if (!t) return;  
+      const dy = e.clientY - t.startY, dx = e.clientX - t.startX;  
+      if (!t.moved && Math.hypot(dx, dy) > DEAD_ZONE) t.moved = true;  
+      if (t.mode === null && t.moved) {  
+        if (t.region === "heaven") t.mode = dy > 0 ? "activate" : "deactivate";  
+        else t.mode = dy < 0 ? "activate" : "deactivate";  
+        setBead(t.bead, t.mode === "activate");  
+      }  
+      if (t.mode && performance.now() - t.lastCopy > SWIPE_DELAY) {  
+        const elem = document.elementFromPoint(e.clientX, e.clientY);  
+        const rod = elem?.closest?.(".rod");  
+        if (rod && rod !== t.lastRod) {  
+          const otherBead = rod.querySelector(`.bead.${t.region}`);  
+          if (otherBead) setBead(otherBead, t.mode === "activate");  
+          t.lastRod = rod; t.lastCopy = performance.now();  
+        }  
+      }  
+    }  
+    function onUpCancel(e) {  
+      const t = touches.get(e.pointerId); if (!t) return;  
+      t.bead.classList.remove("pressed"); touches.delete(e.pointerId);  
+    }  
+    if (window.DeviceMotionEvent) {  
+      let last = 0;  
+      window.addEventListener("devicemotion", (ev) => {  
+        const { x, y, z } = ev.accelerationIncludingGravity;  
+        const mag = Math.hypot(x, y, z); const now = performance.now();  
+        if (mag > SHAKE_G && now - last > 750) { clearBoard(); last = now; }  
+      });  
+    }  
+    function clearBoard() { $$(".bead.active").forEach((b) => b.classList.remove("active")); }  
+  })();  
 
     // -- QUIZ LOGIC (unchanged from previous) --
     document.getElementById('fullscreenBtn').addEventListener('click', () => {
