@@ -258,6 +258,87 @@
   }
 
   $('#resetBtn').addEventListener('click', clearBoard);
+
+  const QUESTIONS = [
+    { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' },
+    { q: '250 - 10', a: '240' }, { q: '13 + 17', a: '30' },
+    { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
+    { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' },
+    { q: '80 - 15', a: '65' }, { q: '5 × 6', a: '30' }
+  ];
+  let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+  const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
+  const timerEl = $('#quizTimer'), padContainer = $('#numpad');
+
+  function loadQuestion() {
+    const q = QUESTIONS[currentIndex];
+    qNumEl.textContent = `Q${currentIndex + 1}`;
+    qTextEl.textContent = `${q.q} =`;
+    currentInput = ''; inputLocked = false; answerEl.textContent = '0'; sendBtnEl.disabled = false;
+  }
+
+  function updateTimer() {
+    const m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
+          s = String(timeLeft % 60).padStart(2, '0');
+    timerEl.textContent = `Time Left: ${m}:${s}`;
+  }
+
+  function appendDigit(d) {
+    if (inputLocked) return;
+    if (d === 'C') currentInput = '';
+    else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+    else currentInput += d;
+    answerEl.textContent = currentInput || '0';
+  }
+
+  function submitAnswer() {
+    if (inputLocked) return;
+    inputLocked = true;
+    answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+    sendBtnEl.disabled = true;
+    currentIndex < QUESTIONS.length - 1
+      ? setTimeout(() => { currentIndex++; loadQuestion(); }, 300)
+      : finishQuiz();
+  }
+
+  function finishQuiz() {
+    clearInterval(timerInterval);
+    localStorage.setItem('sorobanResults', JSON.stringify(answers));
+    window.location.href = 'results.html';
+  }
+
+  function startQuiz() {
+    currentIndex = 0;
+    answers = [];
+    timeLeft = 600;
+    loadQuestion();
+    updateTimer();
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateTimer();
+      if (timeLeft <= 0) finishQuiz();
+    }, 1000);
+  }
+
+  ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
+    const b = document.createElement('button');
+    if (d === 'BACK') {
+      b.innerHTML = '←';
+    } else {
+      b.textContent = d;
+    }
+    b.addEventListener('click', () => appendDigit(d));
+    padContainer.appendChild(b);
+  });
+
+  sendBtnEl.addEventListener('click', submitAnswer);
+  answerEl.addEventListener('click', submitAnswer);
+  $('#fullscreenBtn').addEventListener('click', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+  });
+
+  startQuiz();
 })();
 
   </script>
