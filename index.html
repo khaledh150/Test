@@ -13,273 +13,137 @@
       font-family: sans-serif;
     }
     /* Abacus Styles */
-    #abacusRoot {
-      position: absolute;
-      top: 0; bottom: 0;
-      left: clamp(240px, 20vw, 360px);
-      right: 0;
-      background: #4d79ff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1;
+    #abacusRoot { position: absolute; top: 0; right: 0; width: 100vw; height: 100vh;
+      display: flex; justify-content: flex-end; align-items: center;
+      background: #4d79ff; z-index: 1;
     }
-    .soroban {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      transform: none;
+    .soroban { display: flex; justify-content: center; align-items: center;
+      width: 160%; height: 100%; padding: 5px;
     }
-    .rod {
-      position: relative;
-      width: 95px; height: 390px;
-      background: #4d79ff;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
+    .rod { position: relative; width: 95px; height: 390px; background: #4d79ff;
+      border-radius: 5px; display: flex; flex-direction: column;
+      align-items: center; justify-content: space-between;
     }
-    .rod-line { position: absolute; top: 0; bottom: 0; width: 3px; background: #6666ff; }
-    .heaven, .earth, .gap-space, .bar {
-      position: absolute;
-      /* adjust separation line slightly lower to align with modified bead size */
-      top: 29%;
-      width: 100%;
-      height: 3px;
-      background: #6666ff;
+    .rod-line { position: absolute; top: 0; bottom: 0; width: 3px;
+      background: #6666ff; z-index: 0;
     }
-    .heaven { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 14%; gap: 2px; }
-    .gap-space { height: 2%; }
-    .earth { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; height: 53%; gap: 3px; }
-    .bar { position: absolute; top: 27%; width: 100%; height: 3px; background: #6666ff; }
-    .bead {
-      width: 90px; height: 50px;
-      background: linear-gradient(to bottom, #002db3, #002080);
+    .heaven, .earth, .gap-space, .bar { z-index: 1; }
+    .heaven { display:flex; flex-direction:column; justify-content:flex-end;
+      align-items:center; height:14%; gap:2px;
+    }
+    .gap-space { height:2%; }
+    .earth { display:flex; flex-direction:column; justify-content:flex-start;
+      align-items:center; height:53%; margin-top:3px; gap:3px;
+    }
+    .bar { position:absolute; top:27%; width:100%; height:3px;
+      background:#6666ff;
+    }
+    .bead { width:90px; height:50px; background: linear-gradient(to bottom, #002db3, #002080);
       clip-path: polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);
-      box-shadow: inset -1px -1px 4px rgba(255,255,255,0.3),inset 1px 1px 4px rgba(0,0,0,0.3);
-      transition: transform .2s;
-      touch-action: none;
+      box-shadow: inset -1px -1px 4px rgba(255,255,255,0.3),
+                  inset 1px 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.2s; touch-action: none; z-index: 3;
     }
-    .bead.active {
-      background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
-      box-shadow: inset -2px -2px 5px rgba(255,255,255,0.4),inset 2px 2px 5px rgba(0,0,0,0.3);
+    .bead.active { background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
+      box-shadow: inset -2px -2px 5px rgba(255,255,255,0.4),
+                  inset 2px 2px 5px rgba(0,0,0,0.3);
     }
-    .bead.heaven.active { transform: translateY(100%); }
-    .bead.earth.active { transform: translateY(-150%); }
-
+    .bead.heaven.active { transform: translateY(100%);}    
+    .bead.earth.active { transform: translateY(-150%);}    
     /* Quiz Panel Styles */
-    #quizPanel {
-      position: absolute; top: 0; left: 0;
-      width: clamp(240px,20vw,360px); height: 100vh;
-      background: rgba(140,166,219,0.95); color: #fff;
-      z-index: 2; display: flex; flex-direction: column;
-      padding: 1rem; overflow-y: auto;
-      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+    #quizPanel { position:absolute; top:0; left:0;
+      width:clamp(240px,20vw,360px); height:100vh;
+      background:rgba(140,166,219,0.95); color:#fff;
+      z-index:2; display:flex; flex-direction:column;
+      padding:1rem; overflow-y:auto;
+      box-shadow:0 0 16px rgba(0,0,0,0.1);
     }
-    #topBtns {
-      display: flex; justify-content: flex-end; gap: 0.5rem;
-      margin-bottom: 0.5rem;
+    #topBtns { display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:0.5rem; }
+    #resetBtn, #fullscreenBtn { background:transparent; border:none;
+      font-size:1.5rem; cursor:pointer; color:#fff;
     }
-    #resetBtn, #fullscreenBtn {
-      background: transparent; border: none;
-      font-size: 1.5rem; cursor: pointer; color: #fff;
+    #quizContent { flex:1; display:flex; flex-direction:column; gap:1rem; }
+    .question { display:flex; align-items:center; gap:0.5rem; }
+    #qNum { background:#668cff; padding:0.3rem 0.8rem;
+      border-radius:0.3rem; font-weight:bold;
     }
-    #settingsBtn {
-      background: transparent; border: none;
-      font-size: 1.5rem; cursor: pointer; color: #fff;
+    #qText { flex:1; text-align:center; font-size:1.5rem;
+      font-weight:bold;
     }
-    #quizContent {
-      flex: 1; display: flex; flex-direction: column; gap: 1rem;
+    .input-label { font-weight:bold; }
+    .inputArea { display:flex; gap:0.5rem; align-items:center; }
+    #answerDisplay { flex:1; background:#fff; color:#333;
+      text-align:right; padding:0.5rem; border:2px solid #b993d6;
+      border-radius:0.4rem; font-size:1.2rem; cursor:pointer;
     }
-    .question {
-      display: flex; align-items: center; gap: 0.5rem;
+    #sendBtn { background:#668cff; border:none; color:#fff;
+      padding:0.5rem 1rem; border-radius:0.4rem; font-size:1rem;
+      cursor:pointer;
     }
-    #qNum {
-      background: #668cff; padding: 0.3rem 0.8rem;
-      border-radius: 0.3rem; font-weight: bold;
+    #numpad { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; }
+    #numpad button { background:#668cff; border:none; color:#fff;
+      padding:0.6rem; border-radius:0.4rem; font-size:1.2rem;
+      cursor:pointer;
     }
-    #qText {
-      flex: 1; text-align: center; font-size: 1.7rem;
-      font-weight: bold;
-    }
-    .input-label { font-weight: bold; }
-    .inputArea {
-      display: flex; gap: 0.5rem; align-items: center;
-    }
-    #answerDisplay {
-      flex: 1; background: #fff; color: #333;
-      text-align: right; padding: 0.5rem;
-      border: 2px solid #b993d6; border-radius: 0.4rem;
-      font-size: 1.2rem; cursor: pointer;
-    }
-    #sendBtn {
-      background: #668cff; border: none; color: #fff;
-      padding: 0.5rem 1rem; border-radius: 0.4rem;
-      font-size: 1rem; cursor: pointer;
-    }
-    #numpad {
-      display: grid; grid-template-columns: repeat(4,1fr);
-      gap: 0.5rem;
-    }
-    #numpad button {
-      background: #668cff; border: none; color: #fff;
-      padding: 0.6rem; border-radius: 0.4rem;
-      font-size: 1.2rem; cursor: pointer;
-    }
-    #quizTimer {
-      text-align: center; font-weight: bold;
-      font-size: 1.2rem; margin-top: 1rem;
-    }
-
-    /* Settings Panel */
-    #settingsPanel {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5); display: none;
-      align-items: center; justify-content: center; z-index: 4;
-    }
-    .settings-card {
-      background: #fff; border-radius: 0.8rem;
-      width: 80vw; max-width: 360px; padding: 1rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column; gap: 1rem;
-    }
-    .settings-row {
-      display: flex; flex-direction: column; gap: 0.3rem;
-    }
-    .settings-row label { font-weight: bold; }
-    .settings-row input, .settings-row select {
-      padding: 0.5rem; border-radius: 0.4rem; border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-    .settings-actions {
-      display: flex; justify-content: flex-end; gap: 0.5rem;
-    }
-    .settings-actions button {
-      padding: 0.5rem 1rem; border: none; border-radius: 0.4rem;
-      cursor: pointer; font-size: 1rem;
-    }
-
+    #quizTimer { text-align:center; font-weight:bold; margin-top:auto; }
     /* Results Overlay */
-    #resultsPanel {
-      position: absolute; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.5);
-      display: none; align-items: center; justify-content: center;
-      z-index: 3;
+    #resultsPanel { position:absolute; top:0; left:0;
+      width:100vw; height:100vh;
+      background:rgba(0,0,0,0.5);
+      display:none; align-items:center; justify-content:center;
+      z-index:3;
     }
     .results-card {
-      background: rgba(255,255,255,0.9); border-radius: 0.8rem;
-      width: 90vw; max-width: 800px; padding: 1rem;
-      display: flex; flex-direction: column; box-sizing: border-box;
+      background:rgba(255,255,255,0.9);
+      border-radius:0.8rem;
+      width:90vw; max-width:800px;
+      padding:1rem;
+      display:flex; flex-direction:column;
+      box-sizing:border-box;
     }
     .results-row {
-      display: flex; flex-wrap: wrap;
-      justify-content: space-between; margin-bottom: 1rem;
+      display:flex; flex-wrap:wrap;
+      justify-content:space-between;
+      margin-bottom:1rem;
     }
     .result-item {
-      flex: 0 0 19%; display: flex; flex-direction: column;
-      align-items: flex-start; padding: 0.5rem;
+      flex: 0 0 19%; /* five per row */
+      display:flex; flex-direction:column; align-items:flex-start;
+      padding:0.5rem;
     }
-    .result-item .question-text {
-      font-weight: bold; font-size: 1rem;
-    }
-    .result-item .your-answer {
-      margin-top: 0.3rem; font-size: 0.95rem;
-    }
-    .result-item .your-answer .mark {
-      margin-right: 0.3rem;
-    }
-    .result-item .correct-answer {
-      font-size: 0.9rem; color: #444; margin-top: 0.2rem;
-    }
+    .result-item .question-text { font-weight:bold; font-size:1rem; }
+    .result-item .your-answer { margin-top:0.3rem; }
+    .result-item .your-answer .mark { margin-right:0.3rem; }
+    .result-item .correct-answer { font-size:0.9rem; color:#444; margin-top:0.2rem; }
+
     #resultScore {
-      text-align: center; font-size: 1.3rem; font-weight: bold;
-      margin-bottom: 1rem;
+      text-align:center; font-size:1.3rem; font-weight:bold;
+      margin-bottom:1rem;
     }
-    .results-footer {
-      display: flex; justify-content: center; gap: 1rem;
-    }
-    .results-footer button {
-      background: #668cff; color: #fff; border: none;
-      padding: 0.6rem 1.2rem; border-radius: 0.4rem;
-      font-size: 1rem; cursor: pointer;
-    }
-
-    /* Mobile Landscape Rod/Bead Resize */
-    @media (max-width: 500px) and (orientation: landscape) {
-      .rod {
-        width: 50px; height: 100px;
-      }
-      .bead {
-        width: 50px; height: 45px;
-      }
-    }
-
-    /* Desktop/Tablet scaling */
-    @media (min-width: 700px) {
-      .rod {
-        width: 220px; height: 780px;
-      }
-      .bead {
-        width: 220px; height: 600px;
-      }
+    .results-footer { display:flex; justify-content:center; gap:1rem; }
+    .results-footer button { background:#668cff; color:#fff; border:none;
+      padding:0.6rem 1.2rem; border-radius:0.4rem; font-size:1rem;
+      cursor:pointer;
     }
   </style>
 </head>
 <body>
-  <div id="abacusRoot">
-    <div class="soroban" id="sorobanBoard"></div>
-  </div>
-
+  <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
   <div id="quizPanel">
     <div id="topBtns">
-      <button id="settingsBtn" title="Settings">⚙️</button>
       <button id="resetBtn" title="Reset">↻</button>
       <button id="fullscreenBtn" title="Fullscreen">⛶</button>
     </div>
     <div id="quizContent">
-      <div class="question">
-        <div id="qNum">Q1</div>
-      </div>
-      <div class="question-text-row">
-        <div id="qText">Loading...</div>
-      </div>
-      <div>
-        <div class="input-label">Answer</div>
+      <div class="question"><div id="qNum">Q1</div><div id="qText">Loading...</div></div>
+      <div><div class="input-label">Answer</div>
         <div class="inputArea">
           <div id="answerDisplay">0</div>
-          <button id="sendBtn" disabled>Send</button>
+          <button id="sendBtn">Send</button>
         </div>
       </div>
       <div id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
-    </div>
-  </div>
-
-  <div id="settingsPanel">
-    <div class="settings-card">
-      <h2>Settings</h2>
-      <div class="settings-row">
-        <label for="numQuestions">Number of questions</label>
-        <input id="numQuestions" type="number" min="1" max="20" value="10">
-      </div>
-      <div class="settings-row">
-        <label for="timerSelect">Timer (minutes)</label>
-        <select id="timerSelect">
-          ${[...Array(10)].map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
-        </select>
-      </div>
-      <div class="settings-row">
-        <label><input id="muteSound" type="checkbox"> Mute sound effects</label>
-      </div>
-      <div class="settings-actions">
-        <button id="cancelSettings">Cancel</button>
-        <button id="saveSettings">Save</button>
-      </div>
     </div>
   </div>
 
@@ -297,174 +161,39 @@
 
   <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
   <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
-
   <script>
-    // Utility
     const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-
-    // Abacus Logic
     const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12;
-    const board=$('#sorobanBoard');
-    function createRod(){let r=document.createElement('div');r.className='rod';r.innerHTML=
-      "<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div>"
-      + "<div class='earth'>"+'<div class="bead earth"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}
-    for(let i=0;i<8;i++) board.appendChild(createRod());
-    function clearBoard(){ $$('.bead.active').forEach(b=>b.classList.remove('active')); }
+    const board=$('#sorobanBoard'), clearBoard=()=>$$('.bead.active').forEach(b=>b.classList.remove('active'));
     $('#resetBtn').onclick=clearBoard;
-
     const soundOn=$('#soundOn'), soundOff=$('#soundOff');
-    function setBead(b, active) {
-      const hv=b.classList.contains('heaven'), was=b.classList.contains('active');
-      if(hv) b.classList.toggle('active', active);
-      else {
-        const cs=[...b.parentElement.children], idx=cs.indexOf(b);
-        cs.forEach((el,i)=>el.classList.toggle('active', active? i<=idx : i<idx));
-      }
-      if(HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
-      if(active && !was && !mute) soundOn.play();
-      if(!active && was && !mute) soundOff.play();
-    }
-    let mute=false;
-    $$('.bead').forEach(b=>{
-      b.addEventListener('pointerdown', e=>{
-        const rg=b.classList.contains('heaven')?'heaven':'earth', sy=e.clientY;
-        b.setPointerCapture(e.pointerId);
-        b.onpointermove=ev=>{
-          if(Math.abs(ev.clientY-sy)>DEAD_ZONE) {
-            setBead(b, rg==='heaven'? ev.clientY>sy : ev.clientY<sy);
-            b.onpointermove=null;
-          }
-        };
-        b.onpointerup=b.onpointercancel=()=>{
-          b.onpointermove=null; b.releasePointerCapture(e.pointerId);
-        };
-      });
-    });
-    if(window.DeviceMotionEvent) {
-      let last=0;
-      window.addEventListener('devicemotion', ev=>{
-        const {x,y,z}=ev.accelerationIncludingGravity, mag=Math.hypot(x,y,z), now=Date.now();
-        if(mag>SHAKE_G && now-last>750) { clearBoard(); last=now; }
-      });
-    }
-
-    // Fullscreen
-    function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
+    function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}    
     function setFsBtn(btn){btn.textContent=isFs()?'❎':'⛶';}
-    function toggleFs(){ if(!isFs()) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-    $('#fullscreenBtn').onclick=toggleFs;
-    $('#fullscreenBtnResults').onclick=toggleFs;
-    document.addEventListener('fullscreenchange', ()=>{
-      setFsBtn($('#fullscreenBtn')); setFsBtn($('#fullscreenBtnResults'));
-    });
-    setFsBtn($('#fullscreenBtn')); setFsBtn($('#fullscreenBtnResults'));
-
-    // Quiz Logic
-    let QUESTIONS=[]; let ci=0, answers=[], inp='', locked=false;
-    let ti, tl=600; // default 10 min
-    const qn=$('#qNum'), qt=$('#qText'), ad=$('#answerDisplay'), sb=$('#sendBtn');
-    const tm=$('#quizTimer'), np=$('#numpad');
-
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
-    function genQuestions(n){
-      QUESTIONS=[]; for(let i=0;i<n;i++){
-        // simple random soroban ops
-        let a=Math.floor(Math.random()*100), b=Math.floor(Math.random()*100),
-            ops=['+','-','×'][Math.floor(Math.random()*3)],
-            expr=`${a} ${ops} ${b}`, ans=eval(expr.replace('×','*'));
-        QUESTIONS.push({q:expr, a: String(ans)});
-      }
-      shuffle(QUESTIONS);
-    }
-    function loadQ(){
-      let q=QUESTIONS[ci];
-      qn.textContent=`Q${ci+1}:`; qt.textContent=q.q+' =';
-      inp=''; locked=false; ad.textContent=''; sb.disabled=true;
-    }
-    function updateT(){
-      let m=String(Math.floor(tl/60)).padStart(2,'0'),
-          s=String(tl%60).padStart(2,'0');
-      tm.textContent=`Time Left: ${m}:${s}`;
-    }
-    function appendD(d){
-      if(locked) return;
-      if(d==='C') inp=''; else if(d==='BACK') inp=inp.slice(0,-1); else inp+=d;
-      ad.textContent=inp||'';
-      sb.disabled = !inp;
-    }
-    function submitA(){
-      if(locked||!inp) return;
-      locked=true;
-      answers.push({q:QUESTIONS[ci].q, c:QUESTIONS[ci].a, u:inp});
-      clearTimeout(ti);
-      if(ci<QUESTIONS.length-1){
-        setTimeout(()=>{ci++;loadQ();},200);
-      } else {
-        setTimeout(showRes,200);
-      }
-    }
-    function startT(){
-      updateT();
-      ti=setTimeout(()=>{
-        tl--; if(tl<=0) showRes(); else startT();
-      },1000);
-    }
-    function startQuiz(){
-      ci=0; answers=[]; tl= +$('#timerSelect').value * 60; mute=$('#muteSound').checked;
-      genQuestions(+$('#numQuestions').value);
-      loadQ(); startT();
-    }
-
-    // Build numpad
-    np.innerHTML=''; ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{
-      let b=document.createElement('button'); b.textContent=d==='BACK'?'⌫':d;
-      b.onclick=()=>appendD(d); np.appendChild(b);
-    });
+    function toggleFs(){if(!isFs())document.documentElement.requestFullscreen();else document.exitFullscreen();}
+    const fsBtn=$('#fullscreenBtn'), fsBtnRes=$('#fullscreenBtnResults');
+    fsBtn.onclick=toggleFs; fsBtnRes.onclick=toggleFs;
+    document.addEventListener('fullscreenchange',()=>{setFsBtn(fsBtn);setFsBtn(fsBtnRes);});
+    setFsBtn(fsBtn); setFsBtn(fsBtnRes);
+    for(let i=0;i<8;i++)board.appendChild(createRod());
+    function createRod(){let r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class="bead earth"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}
+    function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv)b.classList.toggle('active',active);else{let cs=[...b.parentElement.children],i=cs.indexOf(b);cs.forEach((e,idx)=>e.classList.toggle('active',active?idx<=i:idx<i));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);if(active&&!was)soundOn.play();if(!active&&was)soundOff.play();}
+    $$('.bead').forEach(b=>{b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} });});
+    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}    
+    function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    const QUESTIONS=shuffle([{q:'9 × 25',a:'225'},{q:'120 + 4',a:'124'},{q:'250 - 10',a:'240'},{q:'13 + 17',a:'30'},{q:'5 × 9',a:'45'},{q:'90 - 40',a:'50'},{q:'3 + 4 + 2',a:'9'},{q:'100 + 23',a:'123'},{q:'80 - 15',a:'65'},{q:'5 × 6',a:'30'}]);
+    let ci=0,answers=[],inp='',locked=false,ti,tl=600;
+    const qn=$('#qNum'),qt=$('#qText'),ad=$('#answerDisplay'),sb=$('#sendBtn');
+    const tm=$('#quizTimer'),np=$('#numpad');
+    function loadQ(){let q=QUESTIONS[ci];qn.textContent='Q'+(ci+1);qt.textContent=q.q+' =';inp='';locked=false;ad.textContent='0';sb.disabled=false;}
+    function updateT(){let m=String(Math.floor(tl/60)).padStart(2,'0'),s=String(tl%60).padStart(2,'0');tm.textContent='Time Left: '+m+':'+s;}
+    function appendD(d){if(locked)return;if(d==='C')inp='';else if(d==='BACK')inp=inp.slice(0,-1);else inp+=d;ad.textContent=inp||'0';}
+    function submitA(){if(locked)return;locked=true;answers.push({q:QUESTIONS[ci].q,c:QUESTIONS[ci].a,u:inp||'0'});sb.disabled=true;clearTimeout(ti);if(ci<QUESTIONS.length-1){setTimeout(()=>{ci++;loadQ();startT();},250);}else{setTimeout(showRes,350);}}
+    function startT(){tl=600;updateT();ti=setTimeout(()=>{tl--;updateT();if(tl<=0)showRes();else startT();},1000);}
+    np.innerHTML='';['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{let b=document.createElement('button');b.textContent=d==='BACK'?'⌫':d;b.onclick=()=>appendD(d);np.appendChild(b);});
     sb.onclick=submitA;
-
-    // Settings
-    $('#settingsBtn').onclick=()=>$('#settingsPanel').style.display='flex';
-    $('#cancelSettings').onclick=()=>$('#settingsPanel').style.display='none';
-    $('#saveSettings').onclick=()=>{
-      $('#settingsPanel').style.display='none';
-      startQuiz();
-    };
-
-    // Results
-    function showRes(){
-      clearTimeout(ti);
-      $('#quizPanel').style.display='none';
-      const rp=$('#resultsPanel'), rl=$('#resultsList'), rs=$('#resultScore');
-      rl.innerHTML=''; let score=0;
-      answers.forEach((a,i)=>{
-        let cor=a.u===a.c; if(cor) score++;
-        let di=document.createElement('div'); di.className='result-item';
-        di.innerHTML=`
-          <div class='question-text'>Q${i+1}: ${a.q}</div>
-          <div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span>${a.u}</div>
-          ${!cor?`<div class='correct-answer'>Correct: ${a.c}</div>`:''}
-        `;
-        rl.appendChild(di);
-      });
-      rs.textContent=`You scored ${score}/${answers.length}`;
-      rp.style.display='flex';
-    }
-    $('#tryAgainBtn').onclick=()=>{
-      $('#resultsPanel').style.display='none';
-      $('#quizPanel').style.display='flex';
-      clearBoard(); startQuiz();
-    };
-
-    // Initialize
-    $('#settingsPanel').style.display='none';
-    // Populate timer dropdown
-    const select=$('#timerSelect');
-    for(let i=1;i<=10;i++){
-      let opt=document.createElement('option');
-      opt.value=opt.textContent=i; select.appendChild(opt);
-    }
-    $('#timerSelect').value = 10;
-    startQuiz();
+    function showRes(){clearTimeout(ti);$('#quizPanel').style.display='none';const rp=$('#resultsPanel'),rl=$('#resultsList'),rs=$('#resultScore');rl.innerHTML='';let sc=0;answers.forEach((a,i)=>{let cor=a.u===a.c; if(cor)sc++; let di=document.createElement('div');di.className='result-item';di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.q}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span><span>${a.u}</span></div>${!cor?`<div class='correct-answer'>Correct: ${a.c}</div>`:''}`;rl.appendChild(di);});rs.textContent=`You scored ${sc}/${answers.length}`;rp.style.display='flex';}
+    loadQ();startT();
+    $('#tryAgainBtn').onclick=()=>{$('#resultsPanel').style.display='none';$('#quizPanel').style.display='flex';ci=0;answers=[];loadQ();startT();};
   </script>
 </body>
 </html>
