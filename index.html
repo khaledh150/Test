@@ -64,7 +64,23 @@
     #resultScore { text-align:center; font-size:1.3rem; font-weight:bold; }
     .results-footer { display:flex; justify-content:center; gap:1rem; }
     .results-footer button { background:#668cff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:0.4rem; cursor:pointer; }
-  </style>
+    @media (max-width: 699px) {
+      /* Mobile optimizations */
+      .soroban {
+        width: 100vw;
+        height: 100vh;
+        transform: none;
+      }
+      .rod {
+        width: 12vw;
+        height: 60vh;
+      }
+      .bead {
+        width: 11vw;
+        height: 7vh;
+      }
+    }
+</style>
 </head>
 <body>
   <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
