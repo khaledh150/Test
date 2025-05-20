@@ -7,14 +7,23 @@
   <style>
     html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:#b3c4e7; font-family:sans-serif; }
     /* Abacus Styles */
-    #abacusRoot { position:absolute; top:0; right:0; bottom:0; left:0; background:#4d79ff; display:flex; justify-content:flex-end; align-items:center; z-index:1; }
+    #abacusRoot {
+      position: absolute;
+      top: 0; bottom: 0;
+      /* push right past the quiz panel */
+      left: clamp(240px, 20vw, 360px);
+      right: 0;
+      background: #4d79ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
     .soroban {
       flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100vw;
-      height: 100vh;
       overflow: hidden;
     }
     .rod { position:relative; width:95px; height:390px; background:#4d79ff; border-radius:5px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; }
@@ -64,11 +73,20 @@
     .results-actions { display:flex; justify-content:center; gap:1rem; width:100%; }
     .results-actions button { background:#668cff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:0.4rem; cursor:pointer; }
     @media (min-width:700px) {
-      .soroban { transform: scale(1.4); transform-origin: center; }
+      .soroban { transform: scale(1.2); transform-origin: center; }
       .rod { width: 120px; height: 480px; }
       .bead { width: 110px; height: 60px; }
-    } .rod{width:120px;height:480px;} .bead{width:110px;height:60px;} }
-  </style>
+    }
+      .rod { width: 120px; height: 480px; }
+      .bead { width: 110px; height: 60px; }
+    }  }
+  @media (max-width: 700px) {
+  .soroban {
+    transform: none !important;
+    /* ensure default sizing on small screens */
+  }
+}
+</style>
 </head>
 <body>
   <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
