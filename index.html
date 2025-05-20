@@ -8,7 +8,13 @@
     html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:#b3c4e7; font-family:sans-serif; }
     /* Abacus Styles */
     #abacusRoot { position:absolute; top:0; right:0; bottom:0; left:0; background:#4d79ff; display:flex; justify-content:flex-end; align-items:center; z-index:1; }
-    .soroban { flex:1; display:flex; justify-content:center; align-items:center; }
+    .soroban {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%; /* fill container on all screens */
+    }
     .rod { position:relative; width:95px; height:390px; background:#4d79ff; border-radius:5px; display:flex; flex-direction:column; align-items:center; justify-content:space-between; }
     .rod-line { position:absolute; top:0; bottom:0; width:3px; background:#6666ff; }
     .heaven, .earth, .gap-space, .bar { z-index:1; }
@@ -148,7 +154,13 @@
     function tick(){ if(timeLeft<=0){ showResults(); return; } timeLeft--; updateT(); ti=setTimeout(tick,1000); }
     function startTimer(){ clearTimeout(ti); timeLeft=timerMin*60; updateT(); tick(); }
     function appendD(d){ if(locked) return; if(d==='C') inp=''; else if(d==='BACK') inp=inp.slice(0,-1); else inp+=d; ad.textContent=inp||'0'; sb.disabled=(inp===''); }
-    function submitA(){ if(locked||!inp) return; locked=true; answers.push({q:QUESTIONS[ci].q,c:QUESTIONS[ci].a,u:inp}); sb.disabled=true; clearTimeout(ti); if(ci<QUESTIONS.length-1){ setTimeout(()=>{ci++; loadQ(); startTimer();},250); } else { setTimeout(showResults,350); } }
+    function submitA(){ if(locked||!inp) return; locked=true; answers.push({q:QUESTIONS[ci].q,c:QUESTIONS[ci].a,u:inp}); sb.disabled=true; clearTimeout(ti); if (ci < QUESTIONS.length - 1) {
+        setTimeout(() => {
+          ci++;
+          loadQ();
+          // timer continues running for the whole set
+        }, 250);
+      } else { setTimeout(showResults,350); } }
     np.innerHTML=''; ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{ let b=document.createElement('button'); b.textContent=d==='BACK'?'⌫':d; b.onclick=()=>appendD(d); np.appendChild(b); });
     sb.onclick=submitA;
     function showResults(){ clearTimeout(ti); $('#quizPanel').style.display='none'; $('#resultsPanel').style.display='flex'; const rl=$('#resultsList'), rs=$('#resultScore'); rl.innerHTML=''; let sc=0; answers.forEach((a,i)=>{ const cor=(a.u===a.c); if(cor) sc++; const di=document.createElement('div'); di.className='result-item'; di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.q}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span>${a.u}</div>${!cor?`<div class='correct-answer'>Correct: ${a.c}</div>`:''}`; rl.appendChild(di); }); rs.textContent=`You scored ${sc}/${answers.length}`; }
