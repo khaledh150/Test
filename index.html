@@ -59,7 +59,7 @@
       box-shadow:0 0 16px rgba(0,0,0,0.1);
     }
     #topBtns { display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:0.5rem; }
-    #resetBtn, #fullscreenBtn { background:transparent; border:none;
+    #resetBtn, #settingsBtn, #fullscreenBtn { background:transparent; border:none;
       font-size:1.5rem; cursor:pointer; color:#fff;
     }
     #quizContent { flex:1; display:flex; flex-direction:column; gap:1rem; }
@@ -67,7 +67,7 @@
     #qNum { background:#668cff; padding:0.3rem 0.8rem;
       border-radius:0.3rem; font-weight:bold;
     }
-    #qText { flex:1; text-align:center; font-size:1.5rem;
+    #qText { flex:1; text-align:center; font-size:1.7rem;
       font-weight:bold;
     }
     .input-label { font-weight:bold; }
@@ -86,6 +86,18 @@
       cursor:pointer;
     }
     #quizTimer { text-align:center; font-weight:bold; margin-top:auto; }
+    /* Settings Modal */
+    #settingsPanel { position:absolute; top:0; left:0; width:100vw; height:100vh;
+      background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center;
+      z-index:3;
+    }
+    .settings-card { background:rgba(255,255,255,0.9); border-radius:0.8rem; width:80vw; max-width:360px;
+      padding:1rem; display:flex; flex-direction:column; gap:1rem;
+    }
+    .settings-card label { display:flex; justify-content:space-between; align-items:center; }
+    .settings-card input, .settings-card select { width:4rem; }
+    .settings-card .actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+    .settings-card button { padding:0.5rem 1rem; border:none; border-radius:0.4rem; cursor:pointer; }
     /* Results Overlay */
     #resultsPanel { position:absolute; top:0; left:0;
       width:100vw; height:100vh;
@@ -132,6 +144,7 @@
   <div id="quizPanel">
     <div id="topBtns">
       <button id="resetBtn" title="Reset">↻</button>
+      <button id="settingsBtn" title="Settings">⚙️</button>
       <button id="fullscreenBtn" title="Fullscreen">⛶</button>
     </div>
     <div id="quizContent">
@@ -139,11 +152,25 @@
       <div><div class="input-label">Answer</div>
         <div class="inputArea">
           <div id="answerDisplay">0</div>
-          <button id="sendBtn">Send</button>
+          <button id="sendBtn" disabled>Send</button>
         </div>
       </div>
       <div id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
+    </div>
+  </div>
+
+  <div id="settingsPanel">
+    <div class="settings-card">
+      <label>Questions per set: <input type="number" id="numQuestionsInput" min="1" max="20" value="10"></label>
+      <label>Timer (min): <select id="timerSelect">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+      </select></label>
+      <label><input type="checkbox" id="muteCheckbox"> Mute sound effects</label>
+      <div class="actions">
+        <button id="cancelSettingsBtn">Cancel</button>
+        <button id="saveSettingsBtn">Save</button>
+      </div>
     </div>
   </div>
 
@@ -164,36 +191,42 @@
   <script>
     const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
     const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12;
+    let mute=false;
+    // Abacus Init
     const board=$('#sorobanBoard'), clearBoard=()=>$$('.bead.active').forEach(b=>b.classList.remove('active'));
     $('#resetBtn').onclick=clearBoard;
-    const soundOn=$('#soundOn'), soundOff=$('#soundOff');
+    for(let i=0;i<8;i++) board.appendChild(createRod());
+    function createRod(){const r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class="bead earth"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}
+    function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv) b.classList.toggle('active',active); else{const cs=[...b.parentElement.children],idx=cs.indexOf(b);cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS); if(active&&!was) $('#soundOn').play(); if(!active&&was) $('#soundOff').play();}
+    $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{if(Math.abs(ev.clientY-sy)>DEAD_ZONE){setBead(b,rg==='heaven'?ev.clientY>sy:ev.clientY<sy);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);};}));
+    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}    
+    // Fullscreen Toggle
     function isFs(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}    
     function setFsBtn(btn){btn.textContent=isFs()?'❎':'⛶';}
-    function toggleFs(){if(!isFs())document.documentElement.requestFullscreen();else document.exitFullscreen();}
-    const fsBtn=$('#fullscreenBtn'), fsBtnRes=$('#fullscreenBtnResults');
-    fsBtn.onclick=toggleFs; fsBtnRes.onclick=toggleFs;
-    document.addEventListener('fullscreenchange',()=>{setFsBtn(fsBtn);setFsBtn(fsBtnRes);});
-    setFsBtn(fsBtn); setFsBtn(fsBtnRes);
-    for(let i=0;i<8;i++)board.appendChild(createRod());
-    function createRod(){let r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class="bead earth"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}
-    function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv)b.classList.toggle('active',active);else{let cs=[...b.parentElement.children],i=cs.indexOf(b);cs.forEach((e,idx)=>e.classList.toggle('active',active?idx<=i:idx<i));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);if(active&&!was)soundOn.play();if(!active&&was)soundOff.play();}
-    $$('.bead').forEach(b=>{b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} });});
-    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}    
+    function toggleFs(){isFs()?document.exitFullscreen():document.documentElement.requestFullscreen();}
+    [$('#fullscreenBtn'),$('#fullscreenBtnResults')].forEach(btn=>btn.onclick=toggleFs);
+    document.addEventListener('fullscreenchange',()=>{setFsBtn($('#fullscreenBtn'));setFsBtn($('#fullscreenBtnResults'));});
+    setFsBtn($('#fullscreenBtn')); setFsBtn($('#fullscreenBtnResults'));
+    // Settings Panel
+    $('#settingsBtn').onclick=()=>$('#settingsPanel').style.display='flex';
+    $('#cancelSettingsBtn').onclick=()=>$('#settingsPanel').style.display='none';
+    $('#saveSettingsBtn').onclick=()=>$('#settingsPanel').style.display='none';
+    // Quiz Logic
     function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
     const QUESTIONS=shuffle([{q:'9 × 25',a:'225'},{q:'120 + 4',a:'124'},{q:'250 - 10',a:'240'},{q:'13 + 17',a:'30'},{q:'5 × 9',a:'45'},{q:'90 - 40',a:'50'},{q:'3 + 4 + 2',a:'9'},{q:'100 + 23',a:'123'},{q:'80 - 15',a:'65'},{q:'5 × 6',a:'30'}]);
-    let ci=0,answers=[],inp='',locked=false,ti,tl=600;
-    const qn=$('#qNum'),qt=$('#qText'),ad=$('#answerDisplay'),sb=$('#sendBtn');
-    const tm=$('#quizTimer'),np=$('#numpad');
-    function loadQ(){let q=QUESTIONS[ci];qn.textContent='Q'+(ci+1);qt.textContent=q.q+' =';inp='';locked=false;ad.textContent='0';sb.disabled=false;}
-    function updateT(){let m=String(Math.floor(tl/60)).padStart(2,'0'),s=String(tl%60).padStart(2,'0');tm.textContent='Time Left: '+m+':'+s;}
-    function appendD(d){if(locked)return;if(d==='C')inp='';else if(d==='BACK')inp=inp.slice(0,-1);else inp+=d;ad.textContent=inp||'0';}
-    function submitA(){if(locked)return;locked=true;answers.push({q:QUESTIONS[ci].q,c:QUESTIONS[ci].a,u:inp||'0'});sb.disabled=true;clearTimeout(ti);if(ci<QUESTIONS.length-1){setTimeout(()=>{ci++;loadQ();startT();},250);}else{setTimeout(showRes,350);}}
-    function startT(){tl=600;updateT();ti=setTimeout(()=>{tl--;updateT();if(tl<=0)showRes();else startT();},1000);}
-    np.innerHTML='';['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{let b=document.createElement('button');b.textContent=d==='BACK'?'⌫':d;b.onclick=()=>appendD(d);np.appendChild(b);});
+    let ci=0, answers=[], inp='', locked=false, ti, tl=600;
+    const qn=$('#qNum'), qt=$('#qText'), ad=$('#answerDisplay'), sb=$('#sendBtn');
+    const tm=$('#quizTimer'), np=$('#numpad');
+    function loadQ(){const q=QUESTIONS[ci];qn.textContent='Q'+(ci+1);qt.textContent=q.q+' =';inp='';locked=false;ad.textContent='0';sb.disabled=true;}
+    function updateT(){const m=String(Math.floor(tl/60)).padStart(2,'0'),s=String(tl%60).padStart(2,'0');tm.textContent='Time Left: '+m+':'+s;}
+    function appendD(d){if(locked) return; if(d==='C') inp=''; else if(d==='BACK') inp=inp.slice(0,-1); else inp+=d; ad.textContent=inp||'0'; sb.disabled = (inp===''); }
+    function submitA(){if(locked||!inp) return; locked=true; answers.push({q:QUESTIONS[ci].q, c:QUESTIONS[ci].a, u:inp}); sb.disabled=true; clearTimeout(ti); if(ci<QUESTIONS.length-1){ setTimeout(()=>{ci++; loadQ(); startT();},250); } else { setTimeout(showRes,350);} }
+    function startT(){clearTimeout(ti); updateT(); ti=setTimeout(()=>{ tl--; if(tl<=0) showRes(); else startT(); },1000); }
+    np.innerHTML=''; ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{ const b=document.createElement('button'); b.textContent=d==='BACK'?'⌫':d; b.onclick=()=>appendD(d); np.appendChild(b); });
     sb.onclick=submitA;
-    function showRes(){clearTimeout(ti);$('#quizPanel').style.display='none';const rp=$('#resultsPanel'),rl=$('#resultsList'),rs=$('#resultScore');rl.innerHTML='';let sc=0;answers.forEach((a,i)=>{let cor=a.u===a.c; if(cor)sc++; let di=document.createElement('div');di.className='result-item';di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.q}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span><span>${a.u}</span></div>${!cor?`<div class='correct-answer'>Correct: ${a.c}</div>`:''}`;rl.appendChild(di);});rs.textContent=`You scored ${sc}/${answers.length}`;rp.style.display='flex';}
-    loadQ();startT();
-    $('#tryAgainBtn').onclick=()=>{$('#resultsPanel').style.display='none';$('#quizPanel').style.display='flex';ci=0;answers=[];loadQ();startT();};
+    function showRes(){clearTimeout(ti);$('#quizPanel').style.display='none';const rp=$('#resultsPanel'), rl=$('#resultsList'), rs=$('#resultScore'); rl.innerHTML=''; let sc=0; answers.forEach((a,i)=>{ const cor=a.u===a.c; if(cor) sc++; let di=document.createElement('div'); di.className='result-item'; di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.q}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span><span>${a.u}</span></div>${!cor?`<div class='correct-answer'>Correct: ${a.c}</div>`:''}`; rl.appendChild(di); }); rs.textContent=`You scored ${sc}/${answers.length}`; rp.style.display='flex'; }
+    loadQ(); startT();
+    $('#tryAgainBtn').onclick=()=>{ $('#resultsPanel').style.display='none'; $('#quizPanel').style.display='flex'; ci=0; answers=[]; loadQ(); startT(); };
   </script>
 </body>
 </html>
