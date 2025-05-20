@@ -3,215 +3,225 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Soroban Quiz</title>
+  <title>Soroban Canvas Quiz</title>
   <style>
     html, body {
       margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
-      display: flex; flex-direction: row;
-      font-family: sans-serif;
+      width: 100vw; height: 100vh; overflow: hidden;
       background: #b3c4e7;
-      overflow: hidden;
+      font-family: sans-serif;
     }
-    #quizPanel {
-      width: clamp(260px, 24vw, 360px);
-      height: 100vh;
-      background: rgba(140,166,219,0.95);
-      color: #fff;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      box-sizing: border-box;
-      z-index: 10;
-    }
-    #resultsPanel {
-      display: none;
-      flex-direction: column;
-      width: clamp(260px, 24vw, 360px);
-      height: 100vh;
-      background: #f6f9ff;
-      color: #222;
-      padding: 1rem;
-      overflow-y: auto;
-      box-sizing: border-box;
-      z-index: 10;
-    }
+    /* Abacus styles */
     #abacusRoot {
-      flex: 1;
-      background: #4d79ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
+      position: absolute; top: 0; right: 0;
+      width: 100vw; height: 100vh;
+      display: flex; justify-content: flex-end; align-items: center;
+      background: #4d79ff; overflow: hidden; z-index: 1;
     }
-    .question { font-size: 1.3rem; font-weight: bold; margin-bottom: 1rem; }
-    #answerDisplay {
-      padding: 0.6rem;
-      font-size: 1.2rem;
-      background: #fff;
-      border: 2px solid #b993d6;
-      border-radius: 0.4rem;
-      text-align: right;
-      color: #222;
+    .soroban { display: flex; justify-content: center; align-items: center; padding: 5px; width: 160%; height: 100%; }
+    .rod { position: relative; width: 95px; height: 390px; background: #4d79ff; border-radius: 5px;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     }
-    #numpad {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.5rem;
-      margin-top: 1rem;
+    .rod-line { position: absolute; top: 0; bottom: 0; width: 3px; background: #6666ff; z-index: 0; }
+    .heaven { display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+      height: 14%; gap: 2px; z-index: 1; }
+    .gap-space { height: 2%; z-index: 1; }
+    .earth { display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
+      height: 53%; margin-top: 3px; z-index: 1; gap: 3px;
     }
-    #numpad button {
-      padding: 0.8rem;
-      font-size: 1.1rem;
-      background: #668cff;
-      color: #fff;
-      border: none;
-      border-radius: 0.4rem;
-      font-weight: bold;
+    .bar { position: absolute; top: 27%; width: 100%; height: 3px; background: #6666ff; z-index: 2; }
+    .bead { width: 90px; height: 50px; background: linear-gradient(to bottom, #002db3, #002080);
+      clip-path: polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);
+      box-shadow: inset -1px -1px 4px rgba(255,255,255,0.3), inset 1px 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.2s; touch-action: none; z-index: 3;
     }
-    #sendBtn {
-      background: #668cff;
-      color: white;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 0.4rem;
-      font-weight: bold;
+    .bead.active { background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
+      box-shadow: inset -2px -2px 5px rgba(255,255,255,0.4), inset 2px 2px 5px rgba(0,0,0,0.3);
+    }
+    .bead.heaven.active { transform: translateY(100%); }
+    .bead.earth.active { transform: translateY(-150%); }
+
+    /* Quiz panel */
+    #quizPanel {
+      position: absolute; top: 0; left: 0;
+      width: clamp(240px,20vw,360px); height: 100vh;
+      background: rgba(140,166,219,0.95); color: #fff;
+      z-index: 2; display: flex; flex-direction: column;
+      padding: 1rem; overflow-y: auto;
+      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+    }
+    #topBtns { display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    #resetBtn, #fullscreenBtn { background: transparent; border: none; font-size: 1.5rem;
+      color: #fff; cursor: pointer;
+    }
+    #quizContent { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+    .question { display: flex; align-items: center; gap: 0.5rem; }
+    #qNum { background: #668cff; padding: 0.3rem 0.8rem; border-radius: 0.3rem; font-weight: bold; }
+    #qText { flex: 1; text-align: center; font-size: 1.5rem; font-weight: bold; }
+    .input-label { font-weight: bold; }
+    .inputArea { display: flex; gap: 0.5rem; align-items: center; }
+    #answerDisplay { flex: 1; background: #fff; color: #333; text-align: right;
+      padding: 0.5rem; border: 2px solid #b993d6; border-radius: 0.4rem; font-size: 1.2rem;
       cursor: pointer;
-      margin-top: 1rem;
     }
-    #quizTimer {
-      text-align: center;
-      font-weight: bold;
-      margin-top: auto;
+    #sendBtn { background: #668cff; border: none; color: #fff; padding: 0.5rem 1rem;
+      border-radius: 0.4rem; font-size: 1rem; cursor: pointer;
     }
-    .result-item {
-      margin: 0.5rem 0;
+    #numpad { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.5rem; }
+    #numpad button { background: #668cff; border: none; color: #fff;
+      padding: 0.6rem; border-radius: 0.4rem; font-size: 1.2rem; cursor: pointer;
+    }
+    #quizTimer { text-align: center; font-weight: bold; margin-top: auto; }
+
+    /* Results panel */
+    #resultsPanel {
+      position: absolute; top: 0; left: 0;
+      width: clamp(240px,20vw,360px); height: 100vh;
+      background: rgba(245,245,255,0.97); color: #222;
+      z-index: 2; display: none; flex-direction: column;
+      padding: 1rem; overflow-y: auto;
+      box-shadow: 0 0 16px rgba(0,0,0,0.1);
+    }
+    #resultsTopBtns { display: flex; justify-content: flex-end; align-items: center;
+      gap: 0.5rem; margin-bottom: 0.5rem;
+    }
+    #fullscreenBtnResults { background: transparent; border: none;
+      font-size: 1.5rem; color: #668cff; cursor: pointer;
+    }
+    #resultsPanel h2 { text-align: center; font-size: 2rem; margin: 0.5rem 0; }
+    .results-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .result-item { background: #fff; color: #333; padding: 0.5rem;
+      border-radius: 0.4rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       font-size: 1rem;
     }
-    .result-item .mark { font-weight: bold; margin-left: 0.4rem; }
-    #scoreResult { margin: 1rem 0; font-size: 1.2rem; font-weight: bold; }
-    #tryAgainRow { display: flex; gap: 0.7rem; justify-content: center; align-items: center; margin-top: 1rem; }
-    .result-btn {
-      background: #668cff;
-      color: #fff;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 0.4rem;
-      font-size: 1rem;
-      cursor: pointer;
+    .result-item .mark { float: right; font-size: 1.2rem; }
+    #resultScore { text-align: center; font-size: 1.3rem; font-weight: bold;
+      margin: 1rem 0;
+    }
+    #tryAgainBtn { background: #668cff; border: none; color: #fff;
+      padding: 0.6rem 1.2rem; border-radius: 0.4rem; font-size: 1rem;
+      cursor: pointer; margin: 0 auto;
     }
   </style>
 </head>
 <body>
+  <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
+
   <div id="quizPanel">
-    <div class="question" id="qText">Loading...</div>
-    <div>Answer</div>
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
-      <div id="answerDisplay">0</div>
-      <button id="sendBtn">Send</button>
+    <div id="topBtns">
+      <button id="resetBtn" title="Reset">↻</button>
+      <button id="fullscreenBtn" title="Fullscreen">⛶</button>
     </div>
-    <div id="numpad"></div>
-    <div id="quizTimer">Time Left: 10:00</div>
+    <div id="quizContent">
+      <div class="question">
+        <div id="qNum">Q1</div>
+        <div id="qText">Loading...</div>
+      </div>
+      <div>
+        <div class="input-label">Answer</div>
+        <div class="inputArea">
+          <div id="answerDisplay">0</div>
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+      <div id="numpad"></div>
+      <div id="quizTimer">Time Left: 10:00</div>
+    </div>
   </div>
 
   <div id="resultsPanel">
-    <h2>Results</h2>
-    <div id="resultsList"></div>
-    <div id="scoreResult"></div>
-    <div id="tryAgainRow">
-      <button id="fullscreenBtnResults" class="result-btn">⛶</button>
-      <button id="tryAgainBtn" class="result-btn">Try Again</button>
+    <div id="resultsTopBtns">
+      <button id="fullscreenBtnResults" title="Fullscreen">⛶</button>
     </div>
+    <h2>Results</h2>
+    <div class="results-list" id="resultsList"></div>
+    <div id="resultScore"></div>
+    <button id="tryAgainBtn">Try Again</button>
   </div>
 
-  <div id="abacusRoot">
-    <!-- This will be replaced by the original functional soroban implementation you had before -->
-    <!-- Keep the soroban.html code block from your working version and embed here directly. -->
-  </div>
+  <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
+  <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
 
   <script>
-    const QUESTIONS = [
-      { q: '9 × 25', a: '225' }, { q: '120 + 4', a: '124' }, { q: '250 - 10', a: '240' },
-      { q: '13 + 17', a: '30' }, { q: '5 × 9', a: '45' }, { q: '90 - 40', a: '50' },
-      { q: '3 + 4 + 2', a: '9' }, { q: '100 + 23', a: '123' }, { q: '80 - 15', a: '65' },
-      { q: '5 × 6', a: '30' }
-    ];
-    let currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timeLeft = 600;
+    // Abacus logic
+    const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12;
+    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+    const board=$('#sorobanBoard');
+    const clearBoard=()=>$$('.bead.active').forEach(b=>b.classList.remove('active'));
+    $('#resetBtn').onclick=clearBoard;
+    const soundOn=document.getElementById('soundOn'), soundOff=document.getElementById('soundOff');
 
-    const qTextEl = document.getElementById('qText');
-    const answerEl = document.getElementById('answerDisplay');
-    const sendBtn = document.getElementById('sendBtn');
-    const timerEl = document.getElementById('quizTimer');
-    const pad = document.getElementById('numpad');
-    const resultsPanel = document.getElementById('resultsPanel');
-    const quizPanel = document.getElementById('quizPanel');
+    function isFullscreen(){return !!(document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement);}
+    function setFsIcon(btn){btn.textContent=isFullscreen()?'❎':'⛶';}
+    function toggleFs(){if(!isFullscreen())document.documentElement.requestFullscreen();else document.exitFullscreen();}
+    const fsBtn=$('#fullscreenBtn'), fsBtnRes=$('#fullscreenBtnResults');
+    fsBtn.onclick=toggleFs; fsBtnRes.onclick=toggleFs;
+    document.addEventListener('fullscreenchange',()=>{setFsIcon(fsBtn);setFsIcon(fsBtnRes);});
+    setFsIcon(fsBtn); setFsIcon(fsBtnRes);
 
-    function loadQuestion() {
-      const q = QUESTIONS[currentIndex];
-      qTextEl.textContent = `${q.q} =`;
-      currentInput = '';
-      inputLocked = false;
-      answerEl.textContent = '0';
+    for(let i=0;i<8;i++)board.appendChild(createRod());
+    function createRod(){let rod=document.createElement('div');rod.className='rod';rod.innerHTML=
+      '<div class="rod-line"></div>'+
+      '<div class="heaven"><div class="bead heaven"></div></div>'+
+      '<div class="gap-space"></div>'+
+      '<div class="earth">'+
+        '<div class="bead earth"></div>'.repeat(4)+
+      '</div>'+
+      '<div class="bar"></div>';
+      return rod;
     }
-    function updateTimer() {
-      const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
-      const s = String(timeLeft % 60).padStart(2, '0');
-      timerEl.textContent = `Time Left: ${m}:${s}`;
+    function setBead(bead, makeActive){
+      const heaven=bead.classList.contains('heaven');
+      const was=bead.classList.contains('active');
+      if(heaven)bead.classList.toggle('active',makeActive);
+      else{let earths=[...bead.parentElement.children],idx=earths.indexOf(bead);
+        for(let i=0;i<earths.length;i++)earths[i].classList.toggle('active', makeActive?i<=idx:i<idx);
+      }
+      if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);
+      if(makeActive&&!was) soundOn.play();
+      if(!makeActive&&was) soundOff.play();
     }
-    function appendDigit(d) {
-      if (inputLocked) return;
-      if (d === 'C') currentInput = '';
-      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
-      else currentInput += d;
-      answerEl.textContent = currentInput || '0';
-    }
-    function submitAnswer() {
-      if (inputLocked || currentInput === '') return;
-      inputLocked = true;
-      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
-      currentIndex++;
-      if (currentIndex < QUESTIONS.length) setTimeout(loadQuestion, 300);
-      else showResults();
-    }
-    function showResults() {
-      quizPanel.style.display = 'none';
-      resultsPanel.style.display = 'flex';
-      const list = document.getElementById('resultsList');
-      list.innerHTML = '';
-      let score = 0;
-      answers.forEach((a, i) => {
-        const correct = a.user.trim() === a.correct;
-        if (correct) score++;
-        const item = document.createElement('div');
-        item.className = 'result-item';
-        item.innerHTML = `${i + 1}. ${a.question} =<br> Your answer: ${a.user || '0'} <span class="mark">${correct ? '✔️' : '❌'}</span>`;
-        list.appendChild(item);
+    $$('.bead').forEach(bead=>{
+      bead.addEventListener('pointerdown',e=>{
+        const reg=bead.classList.contains('heaven')?'heaven':'earth',startY=e.clientY;
+        bead.setPointerCapture(e.pointerId);
+        bead.onpointermove=ev=>{
+          let dy=ev.clientY-startY;
+          if((reg==='heaven'?Math.abs(dy)>DEAD_ZONE:Math.abs(dy)>DEAD_ZONE)){
+            setBead(bead,reg==='heaven'?dy>0:dy<0);
+            bead.onpointermove=null;
+          }
+        };
+        bead.onpointerup=bead.onpointercancel=()=>{bead.onpointermove=null;bead.releasePointerCapture(e.pointerId);};
       });
-      document.getElementById('scoreResult').textContent = `You scored ${score} / ${QUESTIONS.length}`;
-    }
-
-    document.getElementById('tryAgainBtn').onclick = () => location.reload();
-    document.getElementById('fullscreenBtnResults').onclick = () => {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    };
-
-    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d => {
-      const btn = document.createElement('button');
-      btn.textContent = d === 'BACK' ? '⌫' : d;
-      btn.onclick = () => appendDigit(d);
-      pad.appendChild(btn);
     });
+    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',ev=>{const{x,y,z}=ev.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
 
-    sendBtn.onclick = submitAnswer;
-    answerEl.onclick = submitAnswer;
-    loadQuestion();
-    updateTimer();
-    setInterval(() => {
-      timeLeft--;
-      updateTimer();
-      if (timeLeft <= 0) showResults();
-    }, 1000);
+    // Quiz logic
+    function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    const QUESTIONS=shuffle([
+      {q:'9 × 25',a:'225'},{q:'120 + 4',a:'124'},{q:'250 - 10',a:'240'},{q:'13 + 17',a:'30'},
+      {q:'5 × 9',a:'45'},{q:'90 - 40',a:'50'},{q:'3 + 4 + 2',a:'9'},{q:'100 + 23',a:'123'},
+      {q:'80 - 15',a:'65'},{q:'5 × 6',a:'30'}
+    ]);
+    let currentIndex=0,answers=[],currentInput='',inputLocked=false,timerInterval,timeLeft=600;
+    const qNumEl=$('#qNum'),qTextEl=$('#qText'),answerEl=$('#answerDisplay'),sendBtnEl=$('#sendBtn');
+    const timerEl=$('#quizTimer'),padContainer=$('#numpad');
+
+    function loadQuestion(){let q=QUESTIONS[currentIndex];qNumEl.textContent="Q"+(currentIndex+1);qTextEl.textContent=q.q+" =";currentInput='';inputLocked=false;answerEl.textContent='0';sendBtnEl.disabled=false;}
+    function updateTimer(){let m=String(Math.floor(timeLeft/60)).padStart(2,'0'),s=String(timeLeft%60).padStart(2,'0');timerEl.textContent="Time Left: "+m+":"+s;}
+    function appendDigit(d){if(inputLocked)return;if(d==='C')currentInput='';else if(d==='BACK')currentInput=currentInput.slice(0,-1);else currentInput+=d;answerEl.textContent=currentInput||'0';}
+    function submitAnswer(){if(inputLocked)return;inputLocked=true;answers.push({question:QUESTIONS[currentIndex].q,correct:QUESTIONS[currentIndex].a,user:currentInput||'0'});sendBtnEl.disabled=true;clearTimeout(timerInterval);if(currentIndex<QUESTIONS.length-1){setTimeout(()=>{currentIndex++;loadQuestion();startTimer();},250);}else{setTimeout(showResults,350);}}
+    function startTimer(){timeLeft=600;updateTimer();timerInterval=setTimeout(()=>{timeLeft--;updateTimer();if(timeLeft<=0)showResults();else startTimer();},1000);}    
+    padContainer.innerHTML='';['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{let b=document.createElement('button');b.textContent=d==='BACK'?'⌫':d;b.onclick=()=>appendDigit(d);padContainer.appendChild(b);});
+    sendBtnEl.onclick=submitAnswer;
+
+    // Results
+    const quizPanel=$('#quizPanel'),resultsPanel=$('#resultsPanel'),resultsList=$('#resultsList'),resultScore=$('#resultScore'),tryAgainBtn=$('#tryAgainBtn');
+    tryAgainBtn.onclick=()=>{resultsPanel.style.display='none';quizPanel.style.display='flex';answers=[];startTimer();loadQuestion();};
+    function showResults(){clearTimeout(timerInterval);quizPanel.style.display='none';resultsPanel.style.display='flex';resultsList.innerHTML='';let score=0;answers.forEach((a,i)=>{let correct=a.user===a.correct; if(correct)score++; let div=document.createElement('div');div.className='result-item';div.innerHTML=`Q${i+1}: ${a.user} <span class='mark'>${correct?'✔️':'❌'}</span><br><small>Ans: ${a.correct}</small>`;resultsList.appendChild(div);});resultScore.textContent=`You scored ${score} / ${answers.length}`;}
+    // init
+    loadQuestion();startTimer();
   </script>
 </body>
 </html>
