@@ -38,7 +38,7 @@
     #sendBtn:disabled { opacity:0.6; cursor:default;}
     #numpad { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem;}
     #numpad button { background:#668cff; border:none; color:#fff; padding:0.6rem; border-radius:0.4rem; font-size:1.2rem; cursor:pointer;}
-    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; padding_top: 1px; }
+    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; padding_top:1px;}
     /* Settings, Results, Time Up Panels */
     #settingsPanel, #resultsPanel, #timeUpPanel { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:4; }
     .settings-card { background:#fff; border-radius:0.8rem; width:80vw; max-width:380px; padding:1rem; display:flex; flex-direction:column; gap:1rem; }
@@ -105,19 +105,45 @@
     $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
     if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
     // --- Quiz logic with flashing ---
-    function randomChapter1(nQuestions, nNumbers) {
+    function randomChapter1() {
       const arr = [];
-      while (arr.length < nQuestions) {
-        const nums = [];
-        for(let i=0;i<nNumbers;i++) nums.push(Math.floor(Math.random()*5)+1);
-        const ops = Array.from({length: nNumbers-1}, () => Math.random()<0.5?'+':'-');
-        let question = ""+nums[0];
+      while (arr.length < numQuestions) {
+        // 1. Generate nNumbers random numbers between 1–5
+        const nums = Array.from({length: numNumbers}, () => Math.floor(Math.random() * 5) + 1);
+        if (nums[0] === 5) continue; // First number cannot be 5
+
+        let steps = [""+nums[0]];
         let result = nums[0];
-        for(let i=0;i<ops.length;i++) {
-          question += ` ${ops[i]} ${nums[i+1]}`;
-          result = ops[i]==='+' ? result+nums[i+1] : result-nums[i+1];
+        let valid = true;
+        let stageTotals = [result];
+
+        for (let i = 1; i < numNumbers; i++) {
+          // Randomly pick operation
+          let op = Math.random() < 0.5 ? '+' : '-';
+
+          // Subtraction rule: If result is 5 and op is "-", only allow if nums[i] is 5
+          if (op === '-' && result === 5 && nums[i] !== 5) {
+            valid = false; break;
+          }
+
+          let next;
+          if (op === '+') next = result + nums[i];
+          else next = result - nums[i];
+
+          // Must stay between 0 and 9 and never be 5 at any stage
+          if (next < 0 || next > 9 || next === 5) {
+            valid = false; break;
+          }
+
+          steps.push(`${op} ${nums[i]}`);
+          result = next;
+          stageTotals.push(result);
         }
-        if(result>=0 && result<=9) arr.push({q:question,a:result.toString()});
+
+        // Final check: No stage total equals 5
+        if (!valid || stageTotals.includes(5)) continue;
+
+        arr.push({ q: steps.join(' '), a: result.toString() });
       }
       return arr;
     }
