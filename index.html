@@ -228,6 +228,111 @@
   <audio id="tickSound" src="tick.wav"></audio>
   <script>
     // Confetti animation for "Start Quiz!" click
+    /**
+ * Generates an array of question objects { q: string, a: string }
+ * adhering to all specified Soroban rules:
+ * - A, B, C always 1–5
+ * - D (the final answer) always 0–9
+ * - First number A ≠ 5
+ * - No two numbers sum to 5
+ * - A±B and subsequent stages must obey your detailed constraints
+ */
+function randomChapter1(numQuestions, numNumbers) {
+  const arr = [];
+  while (arr.length < numQuestions) {
+    // 1. Generate numNumbers random values 1–5
+    const nums = Array.from({ length: numNumbers }, () =>
+      Math.floor(Math.random() * 5) + 1
+    );
+
+    // Rule: A (nums[0]) cannot be 5
+    if (nums[0] === 5) continue;
+
+    // Rule: no two numbers in the set can sum to 5
+    let ok = true;
+    for (let i = 0; i < nums.length && ok; i++) {
+      for (let j = i + 1; j < nums.length; j++) {
+        if (nums[i] + nums[j] === 5) {
+          ok = false;
+          break;
+        }
+      }
+    }
+    if (!ok) continue;
+
+    let steps = ["" + nums[0]];
+    let result = nums[0];
+    let stageTotals = [result];
+
+    // Build operations one by one
+    for (let i = 1; i < numNumbers; i++) {
+      // pick + or –
+      let op = Math.random() < 0.5 ? "+" : "-";
+
+      // Rule: if A is 4 and first op is "-", B∈{1,2,3,4}
+      if (i === 1 && nums[0] === 4 && op === "-" && !(nums[i] >= 1 && nums[i] <= 4)) {
+        ok = false;
+      }
+      // Rule: if A is 4 and first op is "+", B must be 5
+      if (i === 1 && nums[0] === 4 && op === "+" && nums[i] !== 5) {
+        ok = false;
+      }
+      // Rule: if A is 5 and first op is "-" then B must be 5
+      if (i === 1 && nums[0] === 5 && op === "-" && nums[i] !== 5) {
+        ok = false;
+      }
+
+      if (!ok) break;
+
+      // compute next stage
+      let next = op === "+" ? result + nums[i] : result - nums[i];
+
+      // Rule: result must stay 0–9 and never be 5
+      if (next < 0 || next > 9 || next === 5) {
+        ok = false;
+        break;
+      }
+
+      // Rule: if first‐stage result <4 then either final answer<4 or C=5
+      if (i === 1 && next < 4) {
+        // cannot decide yet until end, but we'll record
+      }
+      // Rule: if first‐stage result ==0 then second op must be "+"
+      if (i === 1 && next === 0 && op !== "+") {
+        ok = false;
+        break;
+      }
+
+      steps.push(`${op} ${nums[i]}`);
+      result = next;
+      stageTotals.push(result);
+    }
+
+    if (!ok) continue;
+
+    // Rule: if A is 5 and second op is "+" then second stage result must be 5–9
+    if (numNumbers >= 3 && nums[0] === 5 && steps[1].startsWith("+")) {
+      const second = stageTotals[1];
+      if (second < 5 || second > 9) continue;
+    }
+    // Rule: if A is 5 and second op is "-" then B must be > C
+    if (numNumbers >= 3 && nums[0] === 5 && steps[1].startsWith("-")) {
+      if (!(nums[1] > nums[2])) continue;
+    }
+    // Rule: if A±B <4 then final D<4 or C===5
+    if (stageTotals[1] < 4) {
+      if (!(result < 4 || nums[2] === 5)) continue;
+    }
+    // Rule: if A±B ==4 then C must be 5
+    if (stageTotals[1] === 4 && nums[2] !== 5) continue;
+
+    // Final safeguard: never see a 5 in any intermediate total
+    if (stageTotals.includes(5)) continue;
+
+    arr.push({ q: steps.join(" "), a: result.toString() });
+  }
+  return arr;
+}
     function launchConfetti() {
       const confetti = document.getElementById('confettiBox');
       confetti.innerHTML = '';
@@ -253,80 +358,7 @@
     if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
     // Quiz logic
     function randomChapter1(numQuestions = 10) {
-  const arr = [];
-  while (arr.length < numQuestions) {
-    // 1. Generate A
-    let A = Math.floor(Math.random() * 5) + 1;
-
-    // 2. Select op1 and B (with special rules for A==4 and A==5)
-    let op1, B;
-    if (A === 4) {
-      op1 = Math.random() < 0.5 ? '+' : '-';
-      B = (op1 === '+') ? 5 : (Math.floor(Math.random() * 4) + 1); // "+" → B=5, "-" → 1–4
-    } else if (A === 5) {
-      B = Math.floor(Math.random() * 4) + 1; // B: 1–4
-      op1 = Math.random() < 0.5 ? '+' : '-';
-    } else {
-      // A = 1–3
-      let possible = [];
-      for (let b = 1; b <= 5; ++b) {
-        if ((A + b <= 4) || (A - b <= 4 && A - b >= 0)) possible.push(b);
-      }
-      if (!possible.length) continue;
-      B = possible[Math.floor(Math.random() * possible.length)];
-      op1 = (A + B <= 4 && A - B <= 4 && A - B >= 0)
-        ? (Math.random() < 0.5 ? '+' : '-') // Either works
-        : (A + B <= 4 ? '+' : '-');
-    }
-
-    // Intermediate result
-    let abRes = op1 === '+' ? A + B : A - B;
-    if (abRes < 0 || abRes > 9) continue;
-
-    // C, op2, D logic
-    let op2, C, D;
-    let possibleCs = [];
-    // Rule: If abRes == 0, op2 = "+"
-    let op2List = abRes === 0 ? ['+'] : ['+', '-'];
-
-    // Generate candidates for C based on all the constraints
-    for (let op of op2List) {
-      for (let c = 1; c <= 5; ++c) {
-        // --- A=5 special rules
-        if (A === 5 && op === '-') {
-          if (!(B > c)) continue; // B must be more than C
-        }
-        if (A === 5 && op === '+') {
-          if ((B + c > 4) || (B - c > 4 && B - c >= 0)) continue; // B±C not more than 4
-        }
-        // --- abRes==4, C==5 only
-        if (abRes === 4 && c !== 5) continue;
-        // --- abRes<4: D<4 or C==5
-        let d = op === '+' ? abRes + c : abRes - c;
-        if (d < 0 || d > 9) continue;
-        if (abRes < 4 && !(d < 4 || c === 5)) continue;
-
-        possibleCs.push({op2: op, C: c, D: d});
-      }
-    }
-    if (!possibleCs.length) continue;
-
-    // Random pick
-    let pick = possibleCs[Math.floor(Math.random() * possibleCs.length)];
-    op2 = pick.op2;
-    C = pick.C;
-    D = pick.D;
-
-    // Final: No invalid (out-of-range) values
-    if (A < 1 || A > 5 || B < 1 || B > 5 || C < 1 || C > 5 || D < 0 || D > 9) continue;
-
-    arr.push({
-      q: `${A} ${op1} ${B} ${op2} ${C}`,
-      a: D.toString()
-    });
-  }
-  return arr;
-}
+  co
 
     // Settings & state
     let numQuestions = 10, numNumbers = 4, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
