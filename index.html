@@ -38,9 +38,9 @@
     #sendBtn:disabled { opacity:0.6; cursor:default;}
     #numpad { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem;}
     #numpad button { background:#668cff; border:none; color:#fff; padding:0.6rem; border-radius:0.4rem; font-size:1.2rem; cursor:pointer;}
-    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; padding_top:0px;}
+    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; }
     /* Settings, Results, Time Up Panels */
-    #settingsPanel, #resultsPanel, #timeUpPanel { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:4; }
+    #settingsPanel, #resultsPanel, #timeUpPanel, #startPanel { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:100; }
     .settings-card { background:#fff; border-radius:0.8rem; width:80vw; max-width:380px; padding:1rem; display:flex; flex-direction:column; gap:1rem; }
     .settings-card label { display:flex; justify-content:space-between; align-items:center; }
     .settings-card input, .settings-card select { width:5rem; padding:0.3rem; }
@@ -57,16 +57,147 @@
     .results-footer button { background:#668cff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:0.4rem; cursor:pointer; }
     .timeup-card { background:#fff; padding:2rem; border-radius:1rem; text-align:center; max-height:80vh; overflow-y:auto; }
     .timeup-card h2 { margin:0 0 1rem; } .timeup-card .results-footer { margin-top:1rem; flex-wrap:wrap; justify-content:center; }
+    /* Start panel styles */
+    #startPanel .start-card {
+      background: #fff;
+      border-radius: 1.2rem;
+      width: 85vw;
+      max-width: 390px;
+      padding: 2rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.8rem;
+      box-shadow: 0 8px 32px rgba(80,110,190,0.12);
+      animation: popin .6s cubic-bezier(.51,1.77,.62,.91);
+      position: relative;
+    }
+    @keyframes popin {
+      0% { transform: scale(.75); opacity:0; }
+      80% { transform: scale(1.05); opacity:1;}
+      100% { transform: scale(1); }
+    }
+    .abacus-mascot {
+      width: 115px; height: 135px; margin-bottom: 0.2rem; position:relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .abacus-face {
+      position: absolute; left: 48px; top: 64px; width: 20px; height: 15px;
+      background: #ffe680; border-radius: 50% 50% 60% 60%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px #fff8, 0 0 0 3px #fff4;
+    }
+    .abacus-face:before {
+      content: '';
+      display: block;
+      width: 4px; height: 4px;
+      background: #222;
+      border-radius: 50%;
+      margin-right: 3px;
+      margin-left: 2px;
+      box-shadow: 9px 0 0 0 #222;
+    }
+    .abacus-body {
+      width: 100%; height: 90px; position:relative;
+      background: #4d79ff;
+      border-radius: 22px;
+      border: 3px solid #4761b8;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px #7db1ff44;
+    }
+    .abacus-rod {
+      width: 88px; height: 7px; background: #fff; border-radius: 6px; margin: 13px auto 0 auto;
+      position:relative; box-shadow: 0 1px 4px #fff5;
+    }
+    .abacus-beads {
+      display: flex; flex-direction: row; gap: 12px; margin-top: -10px; margin-bottom: -5px;
+      justify-content: center;
+    }
+    .abacus-bead {
+      width: 20px; height: 20px; background: #ffd700; border-radius: 50%;
+      border: 2px solid #ffe05b;
+      margin-top: 4px; margin-bottom: 2px;
+      box-shadow: 0 2px 6px #fff8, 0 0 0 2px #fff8;
+      animation: beadbounce 1s infinite alternate cubic-bezier(.71,1.64,.51,.88);
+    }
+    .abacus-bead:nth-child(2) { animation-delay: .17s;}
+    .abacus-bead:nth-child(3) { animation-delay: .31s;}
+    .abacus-bead:nth-child(4) { animation-delay: .46s;}
+    @keyframes beadbounce {
+      from { transform: translateY(0);}
+      to { transform: translateY(-9px);}
+    }
+    .start-title {
+      font-size: 2.4rem; font-weight: 700; color: #4d79ff; text-shadow: 0 2px 0 #fff6, 0 0 12px #fff8;
+      letter-spacing: 0.07em; text-align:center; margin:0;
+    }
+    .start-btn {
+      font-size: 1.4rem; font-weight: 700;
+      padding: 1rem 2.2rem;
+      background: linear-gradient(90deg, #668cff 0%, #b993d6 100%);
+      color: #fff; border: none; border-radius: 0.8rem; cursor: pointer;
+      box-shadow: 0 3px 16px #a3c6f966, 0 0 0 #fff0;
+      transition: background .17s, transform .14s;
+      animation: btnpulse 1.2s infinite alternate cubic-bezier(.82,.13,.65,1.31);
+      outline: none;
+    }
+    @keyframes btnpulse {
+      from { box-shadow: 0 3px 16px #a3c6f966, 0 0 0 #fff0;}
+      to { box-shadow: 0 8px 40px #b993d6cc, 0 0 12px #668cff33; transform: scale(1.035);}
+    }
+    .start-settings-btn {
+      margin-top: 0.4rem; font-size: 1.1rem; color: #4d79ff; background: none; border: none; cursor: pointer; text-decoration: underline; font-weight: 500;
+      opacity: 0.85;
+      transition: opacity .14s;
+    }
+    .start-settings-btn:hover { opacity: 1; }
+    .confetti {
+      pointer-events:none;
+      position:absolute; left:0; top:0; width:100%; height:100%;
+      z-index:10; overflow:visible;
+    }
+    .confetti span {
+      position:absolute; width:12px; height:12px; border-radius:50%; opacity:0.78;
+      animation: confetti-fall 1.4s linear forwards;
+    }
+    @keyframes confetti-fall {
+      from { transform:translateY(-40px);}
+      to { transform:translateY(340px);}
+    }
     @media (max-width: 600px) {
       #quizPanel { width: 100vw; max-width: 100vw; min-width: 0; padding: .7rem; }
       #qText, .full-question-text, .flash-center { font-size: 2.1rem!important; }
       .results-card { width: 97vw; }
+      #startPanel .start-card { width: 99vw; }
     }
   </style>
 </head>
 <body>
+  <!-- Start Panel -->
+  <div id="startPanel">
+    <div class="start-card">
+      <div class="abacus-mascot">
+        <div class="abacus-body">
+          <div class="abacus-rod"></div>
+          <div class="abacus-beads">
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+          </div>
+          <div class="abacus-rod"></div>
+        </div>
+        <div class="abacus-face"></div>
+      </div>
+      <div class="start-title">Soroban Quiz!</div>
+      <button class="start-btn" id="startQuizBtn">Start Quiz!</button>
+      <button class="start-settings-btn" id="startSettingsBtn">Settings ⚙️</button>
+      <div class="confetti" id="confettiBox"></div>
+    </div>
+  </div>
+  <!-- Abacus and Quiz Panel as before -->
   <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
-  <div id="quizPanel">
+  <div id="quizPanel" style="display:none;">
     <div id="topBtns"><button id="settingsBtn">⚙️</button><button id="resetBtn">↻</button><button id="fullscreenBtn">⛶</button></div>
     <div id="quizContent">
       <div class="question"><div id="qNum">Q1</div><div id="qText"></div></div>
@@ -96,7 +227,23 @@
   <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
   <audio id="tickSound" src="tick.wav"></audio>
   <script>
-    // --- Soroban logic (unchanged) ---
+    // Confetti animation for "Start Quiz!" click
+    function launchConfetti() {
+      const confetti = document.getElementById('confettiBox');
+      confetti.innerHTML = '';
+      const colors = ['#ffd700','#b993d6','#4d79ff','#66e6ff','#ffb3e6','#ff7878','#c8ffb0'];
+      for(let i=0;i<36;i++) {
+        const el = document.createElement('span');
+        el.style.left = (Math.random()*96+2)+'%';
+        el.style.background = colors[Math.floor(Math.random()*colors.length)];
+        el.style.animationDuration = (1.1+Math.random()*0.5)+'s';
+        el.style.opacity = 0.82 + Math.random()*0.18;
+        el.style.transform = `rotate(${Math.random()*360}deg)`;
+        confetti.appendChild(el);
+      }
+      setTimeout(()=>{ confetti.innerHTML=''; }, 1600);
+    }
+    // Soroban abacus logic unchanged...
     const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
     const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12; let mute=false;
     const board=$('#sorobanBoard'); function createRod(){const r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class=\"bead earth\"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}for(let i=0;i<8;i++)board.appendChild(createRod());
@@ -104,49 +251,83 @@
     function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv)b.classList.toggle('active',active);else{const cs=[...b.parentElement.children],idx=cs.indexOf(b);cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);if(!mute){if(active&&!was)$('#soundOn').play();if(!active&&was)$('#soundOff').play();}}
     $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
     if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
-    // --- Quiz logic with flashing ---
-    function randomChapter1() {
-      const arr = [];
-      while (arr.length < numQuestions) {
-        // 1. Generate nNumbers random numbers between 1–5
-        const nums = Array.from({length: numNumbers}, () => Math.floor(Math.random() * 5) + 1);
-        if (nums[0] === 5) continue; // First number cannot be 5
+    // Quiz logic
+    function randomChapter1(numQuestions = 10) {
+  const arr = [];
+  while (arr.length < numQuestions) {
+    // 1. Generate A
+    let A = Math.floor(Math.random() * 5) + 1;
 
-        let steps = [""+nums[0]];
-        let result = nums[0];
-        let valid = true;
-        let stageTotals = [result];
-
-        for (let i = 1; i < numNumbers; i++) {
-          // Randomly pick operation
-          let op = Math.random() < 0.5 ? '+' : '-';
-
-          // Subtraction rule: If result is 5 and op is "-", only allow if nums[i] is 5
-          if (op === '-' && result === 5 && nums[i] !== 5) {
-            valid = false; break;
-          }
-
-          let next;
-          if (op === '+') next = result + nums[i];
-          else next = result - nums[i];
-
-          // Must stay between 0 and 9 and never be 5 at any stage
-          if (next < 0 || next > 9 || next === 5) {
-            valid = false; break;
-          }
-
-          steps.push(`${op} ${nums[i]}`);
-          result = next;
-          stageTotals.push(result);
-        }
-
-        // Final check: No stage total equals 5
-        if (!valid || stageTotals.includes(5)) continue;
-
-        arr.push({ q: steps.join(' '), a: result.toString() });
+    // 2. Select op1 and B (with special rules for A==4 and A==5)
+    let op1, B;
+    if (A === 4) {
+      op1 = Math.random() < 0.5 ? '+' : '-';
+      B = (op1 === '+') ? 5 : (Math.floor(Math.random() * 4) + 1); // "+" → B=5, "-" → 1–4
+    } else if (A === 5) {
+      B = Math.floor(Math.random() * 4) + 1; // B: 1–4
+      op1 = Math.random() < 0.5 ? '+' : '-';
+    } else {
+      // A = 1–3
+      let possible = [];
+      for (let b = 1; b <= 5; ++b) {
+        if ((A + b <= 4) || (A - b <= 4 && A - b >= 0)) possible.push(b);
       }
-      return arr;
+      if (!possible.length) continue;
+      B = possible[Math.floor(Math.random() * possible.length)];
+      op1 = (A + B <= 4 && A - B <= 4 && A - B >= 0)
+        ? (Math.random() < 0.5 ? '+' : '-') // Either works
+        : (A + B <= 4 ? '+' : '-');
     }
+
+    // Intermediate result
+    let abRes = op1 === '+' ? A + B : A - B;
+    if (abRes < 0 || abRes > 9) continue;
+
+    // C, op2, D logic
+    let op2, C, D;
+    let possibleCs = [];
+    // Rule: If abRes == 0, op2 = "+"
+    let op2List = abRes === 0 ? ['+'] : ['+', '-'];
+
+    // Generate candidates for C based on all the constraints
+    for (let op of op2List) {
+      for (let c = 1; c <= 5; ++c) {
+        // --- A=5 special rules
+        if (A === 5 && op === '-') {
+          if (!(B > c)) continue; // B must be more than C
+        }
+        if (A === 5 && op === '+') {
+          if ((B + c > 4) || (B - c > 4 && B - c >= 0)) continue; // B±C not more than 4
+        }
+        // --- abRes==4, C==5 only
+        if (abRes === 4 && c !== 5) continue;
+        // --- abRes<4: D<4 or C==5
+        let d = op === '+' ? abRes + c : abRes - c;
+        if (d < 0 || d > 9) continue;
+        if (abRes < 4 && !(d < 4 || c === 5)) continue;
+
+        possibleCs.push({op2: op, C: c, D: d});
+      }
+    }
+    if (!possibleCs.length) continue;
+
+    // Random pick
+    let pick = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+    op2 = pick.op2;
+    C = pick.C;
+    D = pick.D;
+
+    // Final: No invalid (out-of-range) values
+    if (A < 1 || A > 5 || B < 1 || B > 5 || C < 1 || C > 5 || D < 0 || D > 9) continue;
+
+    arr.push({
+      q: `${A} ${op1} ${B} ${op2} ${C}`,
+      a: D.toString()
+    });
+  }
+  return arr;
+}
+
     // Settings & state
     let numQuestions = 10, numNumbers = 4, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
     let QUESTIONS = [], currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
@@ -170,6 +351,25 @@
       b.onclick=()=>appendDigit(d);
       padContainer.appendChild(b);
     });
+    // Start Panel logic
+    function showStartPanel() {
+      $('#startPanel').style.display='flex';
+      $('#quizPanel').style.display='none';
+      $('#resultsPanel').style.display='none';
+      $('#timeUpPanel').style.display='none';
+    }
+    function hideStartPanel() {
+      $('#startPanel').style.display='none';
+    }
+    $('#startQuizBtn').onclick = () => {
+      hideStartPanel();
+      setTimeout(() => launchConfetti(), 100);
+      startQuiz();
+    };
+    $('#startSettingsBtn').onclick = () => {
+      settingsPanel.style.display='flex';
+    };
+    // Settings panel setup
     settingsBtn.onclick=()=>{settingsPanel.style.display='flex';
       numQuestionsInput.value=numQuestions;
       numNumbersInput.value=numNumbers;
@@ -187,7 +387,6 @@
       timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
       mute = muteSoundInput.checked;
       settingsPanel.style.display='none';
-      startQuiz();
     };
     // ---- Tokenize logic for flash
     function parseQuestionToTokens(q) {
@@ -358,8 +557,8 @@
     };
     // --- Mute
     muteSoundInput.onchange = () => { mute = muteSoundInput.checked; };
-    // --- Init
-    startQuiz();
+    // --- Init: show start panel
+    showStartPanel();
   </script>
 </body>
 </html>
