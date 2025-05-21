@@ -375,7 +375,15 @@
       $('#quizPanel').style.display='none'; $('#resultsPanel').style.display='none';
       $('#timeUpPanel').style.display='flex'; }
     $('#tryAgainBtn').onclick=()=>{ $('#resultsPanel').style.display='none'; idx=0; answers=[]; loadQuestion(); startTimer(); $('#quizPanel').style.display='flex'; };
-    $('#tryAgainTimeUpBtn').onclick=()=>{ $('#timeUpPanel').style.display='none'; idx=0; answers=[]; loadQuestion(); startTimer(); $('#quizPanel').style.display='flex'; };
+    $('#tryAgainTimeUpBtn').onclick = () => {
+      $('#timeUpPanel').style.display = 'none';
+      idx = 0;
+      answers = [];
+      tl = +$('#timerSelect').value * 60;  // reset timer duration
+      loadQuestion();
+      startTimer();
+      $('#quizPanel').style.display = 'flex';
+    };
 
     // Init
     for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=o.textContent=i; $('#timerSelect').appendChild(o); }
