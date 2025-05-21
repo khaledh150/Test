@@ -5,50 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Soroban Canvas Quiz</title>
   <style>
-    html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:#b3c4e7; font-family:sans-serif; }
-    /* Abacus */
-    #abacusRoot{position:absolute;top:0;right:0;width:100vw;height:100vh;display:flex;justify-content:flex-end;align-items:center;background:#4d79ff;z-index:1;overflow:hidden;}
-    .soroban{display:flex;justify-content:center;align-items:center;padding:5px;width:160%;height:100%;}
-    .rod{position:relative;width:95px;height:390px;background:#4d79ff;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;}
-    .rod-line{position:absolute;top:0;bottom:0;width:3px;background:#6666ff;z-index:0;}
-    .heaven{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:14%;gap:2px;z-index:1;}
-    .gap-space{height:2%;z-index:1;}
-    .earth{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;height:53%;margin-top:3px;gap:3px;z-index:1;}
-    .bar{position:absolute;top:27%;width:100%;height:3px;background:#6666ff;z-index:2;}
-    .bead{width:90px;height:50px;background:linear-gradient(to bottom,#002db3,#002080);clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);box-shadow:inset -1px -1px 4px rgba(255,255,255,0.3),inset 1px 1px 4px rgba(0,0,0,0.3);transition:transform 0.2s;touch-action:none;z-index:3;}
-    .bead.active{background:radial-gradient(circle at 30% 30%,#ffd700,#ffa500);box-shadow:inset -2px -2px 5px rgba(255,255,255,0.4),inset 2px 2px 5px rgba(0,0,0,0.3);}
-    .bead.heaven.active{transform:translateY(100%);} .bead.earth.active{transform:translateY(-150%);}
-    /* Quiz Panel */
-    #quizPanel{position:absolute;top:0;left:0;width:clamp(240px,20vw,360px);height:100vh;background:rgba(140,166,219,0.95);color:#fff;z-index:2;display:flex;flex-direction:column;padding:1rem;}
-    #topBtns{position:sticky;top:0;display:flex;justify-content:flex-end;align-items:center;margin-bottom:0.5rem;background:rgba(140,166,219,0.95);z-index:3;gap:0.5rem;}
-    #topBtns button{background:transparent;border:none;color:#fff;font-size:1.5rem;cursor:pointer;}
-    #quizContent{flex:1;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;}
-    .question{display:flex;align-items:center;gap:0.5rem;}
-    #qNum{background:#668cff;padding:0.3rem 0.8rem;border-radius:0.3rem;font-weight:bold;}
-    #qText{flex:1;text-align:center;font-size:1.5rem;font-weight:bold;}
-    .input-label{font-weight:bold;}
-    .inputArea{display:flex;gap:0.5rem;align-items:center;}
-    #answerDisplay{flex:1;background:#fff;color:#333;text-align:right;padding:0.5rem;border:2px solid #b993d6;border-radius:0.4rem;font-size:1.2rem;user-select:none;}
-    #sendBtn{background:#668cff;border:none;color:#fff;padding:0.5rem 1rem;border-radius:0.4rem;font-size:1rem;cursor:pointer;}#sendBtn:disabled{opacity:0.6;cursor:default;}
-    #numpad{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;}#numpad button{background:#668cff;border:none;color:#fff;padding:0.6rem;border-radius:0.4rem;font-size:1.2rem;cursor:pointer;}
-    #quizTimer{width:100%;text-align:center;font-weight:bold;margin:16px 0 0;align-self:center;}
-    /* Settings */
-    #settingsPanel{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:3;}
-    .settings-card{background:#fff;border-radius:0.8rem;width:80vw;max-width:360px;padding:1rem;display:flex;flex-direction:column;gap:1rem;}
-    .settings-card label{display:flex;justify-content:space-between;align-items:center;}
-    .settings-card input,.settings-card select{width:4rem;padding:0.3rem;}
-    .settings-actions{display:flex;justify-content:flex-end;gap:0.5rem;}.settings-actions button{padding:0.5rem 1rem;border:none;border-radius:0.4rem;cursor:pointer;}
-    /* Results */
-    #resultsPanel{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:4;}
-    .results-card{background:#fff;border-radius:0.8rem;width:90vw;max-width:800px;padding:1rem;display:flex;flex-direction:column;align-items:center;gap:1rem;max-height:90vh;overflow-y:auto;}
-    .results-row{display:flex;flex-wrap:wrap;justify-content:space-between;width:100%;}
-    .result-item{flex:0 0 19%;background:rgba(200,200,200,0.3);border-radius:0.5rem;padding:0.5rem;}
-    .question-text{font-weight:bold;font-size:1rem;} .your-answer{margin-top:0.3rem;display:flex;align-items:center;} .mark{margin-right:0.3rem;} .correct-answer{font-size:0.9rem;color:#444;margin-top:0.2rem;} #resultScore{font-size:1.3rem;font-weight:bold;}
-    .results-footer{display:flex;justify-content:center;gap:1rem;width:100%;flex-wrap:wrap;} .results-footer button{background:#668cff;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:0.4rem;cursor:pointer;}
-    /* Time Up */
-    #timeUpPanel{display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:5;}
-    .timeup-card{background:#fff;padding:2rem;border-radius:1rem;text-align:center;max-height:80vh;overflow-y:auto;}
-    .timeup-card h2{margin:0 0 1rem;} .timeup-card .results-footer{margin-top:1rem;flex-wrap:wrap;justify-content:center;}
+    html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:#b3c4e7; font-family:sans-serif;}
+    #abacusRoot { position:absolute; top:0; right:0; width:100vw; height:100vh; display:flex; justify-content:flex-end; align-items:center; background:#4d79ff; overflow:hidden; z-index:1; }
+    .soroban { display:flex; justify-content:center; align-items:center; padding:5px; width:160%; height:100%; }
+    .rod { position:relative; width:95px; height:390px; background:#4d79ff; border-radius:5px; display:flex; flex-direction:column; align-items:center; justify-content:space-between;}
+    .rod-line { position:absolute; top:0; bottom:0; width:3px; background:#6666ff; z-index:0;}
+    .heaven, .earth, .gap-space, .bar { z-index:1; }
+    .heaven { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:14%; gap:2px;}
+    .gap-space { height:2%; }
+    .earth { display:flex; flex-direction:column; justify-content:flex-start; align-items:center; height:53%; margin-top:3px; gap:3px;}
+    .bar { position:absolute; top:27%; width:100%; height:3px; background:#6666ff;}
+    .bead { width:90px; height:50px; margin:0; background:linear-gradient(to bottom, #002db3, #002080); clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%); box-shadow:inset -1px -1px 4px rgba(255,255,255,0.3),inset 1px 1px 4px rgba(0,0,0,0.3); transition:transform 0.2s; touch-action:none; z-index:3;}
+    .bead.active { background:radial-gradient(circle at 30% 30%, #ffd700, #ffa500); box-shadow:inset -2px -2px 5px rgba(255,255,255,0.4),inset 2px 2px 5px rgba(0,0,0,0.3);}
+    .bead.heaven.active { transform:translateY(100%);}
+    .bead.earth.active { transform:translateY(-150%);}
+    #quizPanel { position:absolute; top:0; left:0; width:clamp(260px,22vw,380px); height:100vh; background:rgba(140,166,219,0.95); color:#fff; z-index:2; display:flex; flex-direction:column; padding:1rem;}
+    #topBtns { display:flex; justify-content:flex-end; align-items:center; margin-bottom:0.5rem; gap:0.5rem; }
+    #topBtns button { background:transparent; border:none; color:#fff; font-size:1.5rem; cursor:pointer;}
+    #quizContent { flex:1; display:flex; flex-direction:column; gap:1rem; overflow-y:auto; }
+    .question { display:flex; align-items:center; gap:0.5rem; }
+    #qNum { background:#668cff; padding:0.3rem 0.8rem; border-radius:0.3rem; font-weight:bold;}
+    #qText { flex:1; display:flex; justify-content:center; align-items:center; min-height:3.4rem; font-size:2.6rem; font-weight:bold; text-align:center; letter-spacing:1px; transition:.2s; position:relative;}
+    .flash-center { display:flex; align-items:center; justify-content:center; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:100%; text-align:center; z-index:2; font-size:2.8rem; font-weight:bold; color:#fff; letter-spacing:0.08em; min-width:1em;}
+    .flash-center .qmark { color:#e53; font-size:1em; font-weight:bold; margin-left:0.18em; vertical-align:middle; }
+    .flash-center .diff-num { color:#ffd700; }
+    .flash-center .diff-op { color:#ff5757; }
+    .full-question-text { font-size:2rem; color:#fff; font-weight:bold; letter-spacing:0.06em; text-align:center; width:100%; opacity:1;}
+    .input-label { font-weight:bold; }
+    .inputArea { display:flex; gap:0.5rem; align-items:center; }
+    #answerDisplay { flex:1; background:#fff; color:#333; text-align:right; padding:0.5rem; border:2px solid #b993d6; border-radius:0.4rem; font-size:1.2rem; user-select:none;}
+    #sendBtn { background:#668cff; border:none; color:#fff; padding:0.5rem 1rem; border-radius:0.4rem; font-size:1rem; cursor:pointer;}
+    #sendBtn:disabled { opacity:0.6; cursor:default;}
+    #numpad { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem;}
+    #numpad button { background:#668cff; border:none; color:#fff; padding:0.6rem; border-radius:0.4rem; font-size:1.2rem; cursor:pointer;}
+    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; }
+    /* Settings, Results, Time Up Panels */
+    #settingsPanel, #resultsPanel, #timeUpPanel { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:4; }
+    .settings-card { background:#fff; border-radius:0.8rem; width:80vw; max-width:380px; padding:1rem; display:flex; flex-direction:column; gap:1rem; }
+    .settings-card label { display:flex; justify-content:space-between; align-items:center; }
+    .settings-card input, .settings-card select { width:5rem; padding:0.3rem; }
+    .settings-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
+    .settings-actions button { padding:0.5rem 1rem; border:none; border-radius:0.4rem; cursor:pointer; }
+    .results-card { background:#fff; border-radius:0.8rem; width:90vw; max-width:800px; padding:1rem; display:flex; flex-direction:column; align-items:center; gap:1rem; max-height:90vh; overflow-y:auto; }
+    .results-row { display:flex; flex-wrap:wrap; justify-content:space-between; width:100%; }
+    .result-item { flex:0 0 19%; background:rgba(200,200,200,0.3); border-radius:0.5rem; padding:0.5rem; }
+    .question-text { font-weight:bold; font-size:1rem; }
+    .your-answer { margin-top:0.3rem; display:flex; align-items:center; } .mark { margin-right:0.3rem; }
+    .correct-answer { font-size:0.9rem; color:#444; margin-top:0.2rem; }
+    #resultScore { font-size:1.3rem; font-weight:bold; }
+    .results-footer { display:flex; justify-content:center; gap:1rem; width:100%; flex-wrap:wrap; }
+    .results-footer button { background:#668cff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:0.4rem; cursor:pointer; }
+    .timeup-card { background:#fff; padding:2rem; border-radius:1rem; text-align:center; max-height:80vh; overflow-y:auto; }
+    .timeup-card h2 { margin:0 0 1rem; } .timeup-card .results-footer { margin-top:1rem; flex-wrap:wrap; justify-content:center; }
+    @media (max-width: 600px) {
+      #quizPanel { width: 100vw; max-width: 100vw; min-width: 0; padding: .7rem; }
+      #qText, .full-question-text, .flash-center { font-size: 2.1rem!important; }
+      .results-card { width: 97vw; }
+    }
   </style>
 </head>
 <body>
@@ -56,91 +69,271 @@
   <div id="quizPanel">
     <div id="topBtns"><button id="settingsBtn">⚙️</button><button id="resetBtn">↻</button><button id="fullscreenBtn">⛶</button></div>
     <div id="quizContent">
-      <div class="question"><div id="qNum">Q1</div><div id="qText">...</div></div>
+      <div class="question"><div id="qNum">Q1</div><div id="qText"></div></div>
       <div><div class="input-label">Your Answer</div><div class="inputArea"><div id="answerDisplay">0</div><button id="sendBtn" disabled>Send</button></div></div>
       <div id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
     </div>
   </div>
-  <div id="settingsPanel"><div class="settings-card"><label>Questions per set: <input type="number" id="numQuestions" min="1" max="50" value="10"></label><label>Numbers per problem: <input type="number" id="numNumbers" min="2" max="50" value="4"></label><label>Timer (min): <select id="timerSelect"></select></label><label><input type="checkbox" id="muteSound"> Mute</label><div class="settings-actions"><button id="cancelSettings">Cancel</button><button id="saveSettings">Save</button></div></div></div>
+  <div id="settingsPanel"><div class="settings-card">
+      <label>Questions per set: <input type="number" id="numQuestions" min="1" max="50" value="10"></label>
+      <label>Numbers per problem: <input type="number" id="numNumbers" min="2" max="50" value="4"></label>
+      <label>Flash speed (sec): <select id="flashSpeedSec">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select></label>
+      <label>Flash tokens: <input type="checkbox" id="flashToggle" checked></label>
+      <label>Timer (min): <select id="timerSelect"></select></label>
+      <label><input type="checkbox" id="muteSound"> Mute</label>
+      <div class="settings-actions"><button id="cancelSettings">Cancel</button><button id="saveSettings">Save</button></div>
+    </div></div>
   <div id="resultsPanel"><div class="results-card"><h2>Results</h2><div class="results-row" id="resultsList"></div><div id="resultScore"></div><div class="results-footer"><button id="tryAgainBtn">↺ Try Again</button><button id="fullscreenBtnResults">⛶</button></div></div></div>
   <div id="timeUpPanel"><div class="timeup-card"><h2>Time's Up!</h2><div class="results-footer"><button id="tryAgainTimeUpBtn">↺ Try Again</button><button id="fullscreenBtnTimeUp">⛶</button></div></div></div>
-  <audio id="soundOn" src="abacus sound effect 1.wav"></audio><audio id="soundOff" src="abacus sound effect 2.wav"></audio>
+  <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
+  <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
+  <audio id="tickSound" src="tick.wav"></audio>
   <script>
+    // --- Soroban logic (unchanged) ---
     const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-    const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12;
-    let mute=false;
-    // Soroban Logic
-    const board=$('#sorobanBoard');
-    function createRod(){
-      const r=document.createElement('div'); r.className='rod';
-      r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class="bead earth"></div>'.repeat(4)+"</div><div class='bar'></div>";
-      return r;
+    const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12; let mute=false;
+    const board=$('#sorobanBoard'); function createRod(){const r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class=\"bead earth\"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}for(let i=0;i<8;i++)board.appendChild(createRod());
+    function clearBoard(){ $$('.bead.active').forEach(b=>b.classList.remove('active')); }$('#resetBtn').onclick=clearBoard;
+    function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv)b.classList.toggle('active',active);else{const cs=[...b.parentElement.children],idx=cs.indexOf(b);cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);if(!mute){if(active&&!was)$('#soundOn').play();if(!active&&was)$('#soundOff').play();}}
+    $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
+    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
+    // --- Quiz logic with flashing ---
+    function randomChapter1(nQuestions, nNumbers) {
+      const arr = [];
+      while (arr.length < nQuestions) {
+        const nums = [];
+        for(let i=0;i<nNumbers;i++) nums.push(Math.floor(Math.random()*5)+1);
+        const ops = Array.from({length: nNumbers-1}, () => Math.random()<0.5?'+':'-');
+        let question = ""+nums[0];
+        let result = nums[0];
+        for(let i=0;i<ops.length;i++) {
+          question += ` ${ops[i]} ${nums[i+1]}`;
+          result = ops[i]==='+' ? result+nums[i+1] : result-nums[i+1];
+        }
+        if(result>=0 && result<=9) arr.push({q:question,a:result.toString()});
+      }
+      return arr;
     }
-    for(let i=0;i<8;i++) board.appendChild(createRod());
-    function clearBoard(){ $$('.bead.active').forEach(b=>b.classList.remove('active')); }
-    $('#resetBtn').onclick=clearBoard;
-    function setBead(b,active){
-      const hv=b.classList.contains('heaven'), was=b.classList.contains('active');
-      if(hv) b.classList.toggle('active',active);
-      else { const cs=[...b.parentElement.children], idx=cs.indexOf(b); cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx)); }
-      if(HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
-      if(!mute){ if(active&&!was) $('#soundOn').play(); if(!active&&was) $('#soundOff').play(); }
+    // Settings & state
+    let numQuestions = 10, numNumbers = 4, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
+    let QUESTIONS = [], currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
+    let flashTokenTimer = null;
+    const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
+    const timerEl = $('#quizTimer'), padContainer = $('#numpad');
+    const settingsBtn = $('#settingsBtn'), settingsPanel = $('#settingsPanel');
+    const flashSpeedSec = $('#flashSpeedSec'), flashToggle = $('#flashToggle');
+    const numQuestionsInput = $('#numQuestions'), numNumbersInput = $('#numNumbers');
+    const timerSelect = $('#timerSelect'), muteSoundInput = $('#muteSound');
+    for(let i=1;i<=10;i++) {
+      let opt = document.createElement('option');
+      opt.value = i; opt.textContent = i;
+      if(i===10) opt.selected = true;
+      timerSelect.appendChild(opt);
     }
-    $$('.bead').forEach(b=> b.addEventListener('pointerdown',e=>{ const rg=b.classList.contains('heaven')?'heaven':'earth', sy=e.clientY; b.setPointerCapture(e.pointerId); b.onpointermove=ev=>{ if(Math.abs(ev.clientY-sy)>DEAD_ZONE){ setBead(b, rg==='heaven'? ev.clientY>sy: ev.clientY<sy); b.onpointermove=null; } }; b.onpointerup=b.onpointercancel=()=>{ b.onpointermove=null; b.releasePointerCapture(e.pointerId); }; }));
-    if(window.DeviceMotionEvent){ let last=0; window.addEventListener('devicemotion',ev=>{ const{x,y,z}=ev.accelerationIncludingGravity, mag=Math.hypot(x,y,z), now=Date.now(); if(mag>SHAKE_G && now-last>750){ clearBoard(); last=now; } }); }
-    // Fullscreen
-    function isFs(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
-    function toggleFs(){ isFs()?document.exitFullscreen():document.documentElement.requestFullscreen(); }
-    function setFsBtn(btn){ btn.textContent=isFs()? '❎':'⛶'; }
-    $('#fullscreenBtn').onclick=()=>{ toggleFs(); setFsBtn($('#fullscreenBtn')); };
-    $('#fullscreenBtnResults').onclick=()=>{ toggleFs(); setFsBtn($('#fullscreenBtnResults')); };
-    $('#fullscreenBtnTimeUp').onclick=()=>{ toggleFs(); setFsBtn($('#fullscreenBtnTimeUp')); };
-    document.addEventListener('fullscreenchange',()=>{ setFsBtn($('#fullscreenBtn')); setFsBtn($('#fullscreenBtnResults')); setFsBtn($('#fullscreenBtnTimeUp')); });
-    // Quiz Generation
-    function randomChapter1(qCount=10, nCount=4){ const arr=[]; while(arr.length<qCount){ const nums=Array.from({length:nCount},()=>Math.floor(Math.random()*5)+1); const ops=Array.from({length:nCount-1},()=>Math.random()<0.5?'+':'-'); let question=`${nums[0]}`, result=nums[0]; for(let i=0;i<ops.length;i++){ if(ops[i]==='+'){ question+=` + ${nums[i+1]}`; result+=nums[i+1]; } else { question+=` - ${nums[i+1]}`; result-=nums[i+1]; } } if(result>=0&&result<=9) arr.push({q:question,a:result.toString()}); } return arr; }
-    // Initialize with settings values
-    let QUESTIONS = randomChapter1(+$('#numQuestions').value, +$('#numNumbers').value);
-    let idx=0, answers=[], inp='', locked=false, ti, tl=600;
-    const qNumEl=$('#qNum'), qTextEl=$('#qText'), ansEl=$('#answerDisplay'), sendBtnEl=$('#sendBtn');
-    const timerEl=$('#quizTimer'), padEl=$('#numpad');
-    function updateTimer(){ const m=String(Math.floor(tl/60)).padStart(2,'0'), s=String(tl%60).padStart(2,'0'); timerEl.textContent=`Time Left: ${m}:${s}`; }
-    function loadQuestion(){ const q=QUESTIONS[idx]; qNumEl.textContent=`Q${idx+1}`; qTextEl.textContent=`${q.q} =`; inp=''; locked=false; ansEl.textContent='0'; sendBtnEl.disabled=true; }
-    function startTimer(){ clearTimeout(ti);  updateTimer(); ti=setTimeout(()=>{ tl--; if(tl<=0) showTimeUp(); else startTimer(); },1000); }
-    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{ const b=document.createElement('button'); b.textContent=d==='BACK'?'⌫':d; b.onclick=()=>{ if(locked) return; if(d==='C') inp=''; else if(d==='BACK') inp=inp.slice(0,-1); else inp+=d; ansEl.textContent=inp||'0'; sendBtnEl.disabled=!inp; }; padEl.appendChild(b); });
-    sendBtnEl.onclick=()=>{ if(locked||!inp) return; locked=true; answers.push({q:QUESTIONS[idx].q,a:QUESTIONS[idx].a,u:inp}); if(idx<QUESTIONS.length-1){ idx++; setTimeout(loadQuestion,200); } else showResults(); };
-    // Settings Handlers
-    $('#settingsBtn').onclick=()=>$('#settingsPanel').style.display='flex';
-    $('#cancelSettings').onclick=()=>$('#settingsPanel').style.display='none';
-    $('#saveSettings').onclick=()=>{ const nQ=+$('#numQuestions').value, nN=+$('#numNumbers').value, tM=+$('#timerSelect').value; tl=tM*60; mute=$('#muteSound').checked; QUESTIONS=randomChapter1(nQ,nN); idx=0; answers=[]; loadQuestion(); startTimer(); $('#settingsPanel').style.display='none'; $('#quizPanel').style.display='flex'; $('#resultsPanel').style.display='none'; $('#timeUpPanel').style.display='none'; };
-    // Results & TimeUp
-    function showResults(){ clearTimeout(ti); $('#quizPanel').style.display='none'; $('#timeUpPanel').style.display='none'; const rl=$('#resultsList'), rs=$('#resultScore'); rl.innerHTML=''; let sc=0; answers.forEach((o,i)=>{ const ok=o.u===o.a; if(ok) sc++; const el=document.createElement('div'); el.className='result-item'; el.innerHTML=`<div class='question-text'>Q${i+1}: ${o.q}</div><div class='your-answer'><span class='mark'>${ok?'✔️':'❌'}</span>${o.u}</div>${!ok?`<div class='correct-answer'>Correct: ${o.a}</div>`:''}`; rl.appendChild(el); }); rs.textContent=`You scored ${sc}/${answers.length}`; $('#resultsPanel').style.display='flex'; }
-    function showTimeUp(){ clearTimeout(ti); $('#quizPanel').style.display='none'; $('#resultsPanel').style.display='none'; $('#timeUpPanel').style.display='flex'; }
-    $('#tryAgainBtn').onclick = () => {
-      $('#resultsPanel').style.display = 'none';
-      idx = 0;
-      answers = [];
-      // reset timer duration
-      tl = +$('#timerSelect').value * 60;
-      clearTimeout(ti);
-      loadQuestion();
-      startTimer();
-      $('#quizPanel').style.display = 'flex';
+    padContainer.innerHTML='';
+    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{
+      const b=document.createElement('button');
+      b.innerHTML = d==='BACK' ? '⌫' : d;
+      b.onclick=()=>appendDigit(d);
+      padContainer.appendChild(b);
+    });
+    settingsBtn.onclick=()=>{settingsPanel.style.display='flex';
+      numQuestionsInput.value=numQuestions;
+      numNumbersInput.value=numNumbers;
+      flashSpeedSec.value=flashSpeed;
+      flashToggle.checked=flashEnabled;
+      timerSelect.value=timerMinutes;
+      muteSoundInput.checked=mute;
     };
-    $('#tryAgainTimeUpBtn').onclick = () => {
-      $('#timeUpPanel').style.display = 'none';
-      idx = 0;
-      answers = [];
-      // reset timer duration
-      tl = +$('#timerSelect').value * 60;
-      clearTimeout(ti);
-      loadQuestion();
-      startTimer();
-      $('#quizPanel').style.display = 'flex';
+    $('#cancelSettings').onclick=()=>settingsPanel.style.display='none';
+    $('#saveSettings').onclick=()=>{
+      numQuestions = Math.max(1, Math.min(50, Number(numQuestionsInput.value)));
+      numNumbers = Math.max(2, Math.min(50, Number(numNumbersInput.value)));
+      flashSpeed = Math.max(1, Math.min(5, Number(flashSpeedSec.value)));
+      flashEnabled = !!flashToggle.checked;
+      timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
+      mute = muteSoundInput.checked;
+      settingsPanel.style.display='none';
+      startQuiz();
     };
-    // Initialize
-    for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=o.textContent=i; $('#timerSelect').appendChild(o); }
-    $('#timerSelect').value=10; loadQuestion(); startTimer();
+    // ---- Tokenize logic for flash
+    function parseQuestionToTokens(q) {
+      let arr = q.split(/([+-])/).map(s=>s.trim()).filter(Boolean);
+      let tokens = [];
+      tokens.push({type: 'first', val: arr[0]});
+      for(let i=1;i<arr.length;i+=2) {
+        tokens.push({type:'op', op:arr[i], val:arr[i+1]});
+      }
+      return tokens;
+    }
+    function flashQuestionTokens(questionString, cb) {
+      if (flashTokenTimer) clearTimeout(flashTokenTimer);
+      let tokens = parseQuestionToTokens(questionString);
+      let idx = 0;
+      qTextEl.innerHTML = '';
+      let centerDiv = document.createElement('div');
+      centerDiv.className = 'flash-center';
+      qTextEl.appendChild(centerDiv);
+      inputLocked=true; sendBtnEl.disabled=true;
+      function showNext() {
+        centerDiv.innerHTML = '';
+        if (idx < tokens.length) {
+          let html = '';
+          if(tokens[idx].type === 'first') {
+            html = tokens[idx].val;
+          } else {
+            // Check previous op/num for consecutive duplicates
+            let highlight = false;
+            if (idx > 1) {
+              let prev = tokens[idx-1];
+              if (prev.type === 'op' &&
+                  prev.op === tokens[idx].op &&
+                  prev.val === tokens[idx].val) {
+                highlight = true;
+              }
+            }
+            let opClass = highlight ? 'diff-op' : '';
+            let numClass = highlight ? 'diff-num' : '';
+            html = `<span class="${opClass}">${tokens[idx].op}</span> <span class="${numClass}">${tokens[idx].val}</span>`;
+            if(idx === tokens.length-1) {
+              html += `<span class="qmark">?</span>`;
+            }
+          }
+          centerDiv.innerHTML = html;
+          if(!mute){ $('#tickSound').currentTime=0; $('#tickSound').play();}
+          if(idx === tokens.length-1) {
+            flashTokenTimer = setTimeout(()=>{
+              // Show the full question at the end
+              qTextEl.innerHTML = `<span class="full-question-text">${questionString.replace(/\s*$/, '')} <span class="qmark">?</span></span>`;
+              inputLocked=false; sendBtnEl.disabled=(currentInput==='');
+              cb&&cb();
+            }, flashSpeed*1000);
+            sendBtnEl.disabled=false;
+          } else {
+            flashTokenTimer = setTimeout(()=>{
+              idx++;
+              showNext();
+            }, flashSpeed*1000);
+          }
+        }
+      }
+      showNext();
+    }
+    // ---- Quiz logic ----
+    function appendDigit(d) {
+      if (inputLocked) return;
+      if (d === 'C') currentInput = '';
+      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
+      else currentInput += d;
+      answerEl.textContent = currentInput || '0';
+      sendBtnEl.disabled = (currentInput.length === 0);
+    }
+    function loadQuestion() {
+      const q = QUESTIONS[currentIndex];
+      qNumEl.textContent = 'Q'+(currentIndex + 1);
+      answerEl.textContent = '0';
+      currentInput = ''; inputLocked=true; sendBtnEl.disabled=true;
+      if (flashEnabled) {
+        flashQuestionTokens(q.q, ()=>{
+          inputLocked=false;
+          sendBtnEl.disabled=(currentInput==='');
+        });
+      } else {
+        qTextEl.innerHTML = `<span class="full-question-text">${q.q} <span class="qmark">?</span></span>`;
+        inputLocked=false;
+        sendBtnEl.disabled=(currentInput==='');
+      }
+    }
+    function updateTimer() {
+      let m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
+          s = String(timeLeft % 60).padStart(2, '0');
+      timerEl.textContent = "Time Left: " + m + ":" + s;
+    }
+    function submitAnswer() {
+      if (inputLocked || currentInput.length===0) return;
+      inputLocked=true;
+      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+      sendBtnEl.disabled = true;
+      if(currentIndex < QUESTIONS.length - 1) {
+        setTimeout(()=>{
+          currentIndex++; loadQuestion();
+        }, 350);
+      } else {
+        showResults();
+      }
+    }
+    function startQuiz() {
+      if (flashTokenTimer) clearTimeout(flashTokenTimer);
+      currentIndex=0; answers=[]; currentInput=''; inputLocked=true;
+      timeLeft = timerMinutes * 60;
+      $('#quizPanel').style.display='flex';
+      $('#resultsPanel').style.display='none';
+      $('#timeUpPanel').style.display='none';
+      QUESTIONS = randomChapter1(numQuestions, numNumbers);
+      loadQuestion();
+      updateTimer();
+      if(timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(()=>{
+        timeLeft--; updateTimer();
+        if(timeLeft<=0){
+          clearInterval(timerInterval);
+          showTimeUp();
+        }
+      },1000);
+    }
+    sendBtnEl.onclick=submitAnswer;
+    answerEl.onclick=submitAnswer;
+    // --- Results panel
+    function showResults() {
+      $('#quizPanel').style.display='none';
+      $('#resultsPanel').style.display='flex';
+      $('#timeUpPanel').style.display='none';
+      clearInterval(timerInterval);
+      const rl = $('#resultsList'), rs = $('#resultScore');
+      rl.innerHTML='';
+      let sc=0;
+      answers.forEach((a,i)=>{
+        let cor = a.user===a.correct;
+        if (cor) sc++;
+        let di = document.createElement('div');
+        di.className='result-item';
+        di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.question}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span><span>Your: ${a.user}</span></div>${!cor?`<div class='correct-answer'>Correct: ${a.correct}</div>`:''}`;
+        rl.appendChild(di);
+      });
+      rs.textContent=`You scored ${sc}/${answers.length}`;
+    }
+    $('#tryAgainBtn').onclick = startQuiz;
+    $('#fullscreenBtnResults').onclick = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    };
+    // --- Time Up panel
+    function showTimeUp() {
+      $('#quizPanel').style.display='none';
+      $('#resultsPanel').style.display='none';
+      $('#timeUpPanel').style.display='flex';
+    }
+    $('#tryAgainTimeUpBtn').onclick = startQuiz;
+    $('#fullscreenBtnTimeUp').onclick = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    };
+    // --- Fullscreen button
+    $('#fullscreenBtn').onclick = () => {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
+    };
+    // --- Mute
+    muteSoundInput.onchange = () => { mute = muteSoundInput.checked; };
+    // --- Init
+    startQuiz();
   </script>
 </body>
 </html>
