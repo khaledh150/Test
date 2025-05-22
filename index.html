@@ -3,180 +3,286 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Soroban Canvas Quiz</title>
+  <title>Soroban Quiz - Fun Edition</title>
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
   <style>
-    html, body { margin:0; padding:0; width:100vw; height:100vh; overflow:hidden; background:#b3c4e7; font-family:sans-serif;}
-    #abacusRoot { position:absolute; top:0; right:0; width:100vw; height:100vh; display:flex; justify-content:flex-end; align-items:center; background:#4d79ff; overflow:hidden; z-index:1; }
-    .soroban { display:flex; justify-content:center; align-items:center; padding:5px; width:160%; height:100%; }
-    .rod { position:relative; width:95px; height:390px; background:#4d79ff; border-radius:5px; display:flex; flex-direction:column; align-items:center; justify-content:space-between;}
-    .rod-line { position:absolute; top:0; bottom:0; width:3px; background:#6666ff; z-index:0;}
-    .heaven, .earth, .gap-space, .bar { z-index:1; }
-    .heaven { display:flex; flex-direction:column; justify-content:flex-end; align-items:center; height:14%; gap:2px;}
-    .gap-space { height:2%; }
-    .earth { display:flex; flex-direction:column; justify-content:flex-start; align-items:center; height:53%; margin-top:3px; gap:3px;}
-    .bar { position:absolute; top:27%; width:100%; height:3px; background:#6666ff;}
-    .bead { width:90px; height:50px; margin:0; background:linear-gradient(to bottom, #002db3, #002080); clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%); box-shadow:inset -1px -1px 4px rgba(255,255,255,0.3),inset 1px 1px 4px rgba(0,0,0,0.3); transition:transform 0.2s; touch-action:none; z-index:3;}
-    .bead.active { background:radial-gradient(circle at 30% 30%, #ffd700, #ffa500); box-shadow:inset -2px -2px 5px rgba(255,255,255,0.4),inset 2px 2px 5px rgba(0,0,0,0.3);}
-    .bead.heaven.active { transform:translateY(100%);}
-    .bead.earth.active { transform:translateY(-150%);}
-    #quizPanel { position:absolute; top:0; left:0; width:clamp(260px,22vw,380px); height:100vh; background:rgba(140,166,219,0.95); color:#fff; z-index:2; display:flex; flex-direction:column; padding:1rem;}
-    #topBtns { display:flex; justify-content:flex-end; align-items:center; margin-bottom:0.5rem; gap:0.5rem; }
-    #topBtns button { background:transparent; border:none; color:#fff; font-size:1.5rem; cursor:pointer;}
-    #quizContent { flex:1; display:flex; flex-direction:column; gap:1rem; overflow-y:auto; }
-    .question { display:flex; align-items:center; gap:0.5rem; }
-    #qNum { background:#668cff; padding:0.3rem 0.8rem; border-radius:0.3rem; font-weight:bold;}
-    #qText { flex:1; display:flex; justify-content:center; align-items:center; min-height:3.4rem; font-size:2.6rem; font-weight:bold; text-align:center; letter-spacing:1px; transition:.2s; position:relative;}
-    .flash-center { display:flex; align-items:center; justify-content:center; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:100%; text-align:center; z-index:2; font-size:2.8rem; font-weight:bold; color:#fff; letter-spacing:0.08em; min-width:1em;}
-    .flash-center .qmark { color:#e53; font-size:1em; font-weight:bold; margin-left:0.18em; vertical-align:middle; }
-    .flash-center .diff-num { color:#ffd700; }
-    .flash-center .diff-op { color:#ff5757; }
-    .full-question-text { font-size:2rem; color:#fff; font-weight:bold; letter-spacing:0.06em; text-align:center; width:100%; opacity:1;}
-    .input-label { font-weight:bold; }
-    .inputArea { display:flex; gap:0.5rem; align-items:center; }
-    #answerDisplay { flex:1; background:#fff; color:#333; text-align:right; padding:0.5rem; border:2px solid #b993d6; border-radius:0.4rem; font-size:1.2rem; user-select:none;}
-    #sendBtn { background:#668cff; border:none; color:#fff; padding:0.5rem 1rem; border-radius:0.4rem; font-size:1rem; cursor:pointer;}
-    #sendBtn:disabled { opacity:0.6; cursor:default;}
-    #numpad { display:grid; grid-template-columns:repeat(4, 1fr); gap:0.5rem;}
-    #numpad button { background:#668cff; border:none; color:#fff; padding:0.6rem; border-radius:0.4rem; font-size:1.2rem; cursor:pointer;}
-    #quizTimer { width:100%; text-align:center; font-weight:bold; margin:16px 0 0; align-self:center; }
-    /* Settings, Results, Time Up Panels */
-    #settingsPanel, #resultsPanel, #timeUpPanel, #startPanel { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:100; }
-    .settings-card { background:#fff; border-radius:0.8rem; width:80vw; max-width:380px; padding:1rem; display:flex; flex-direction:column; gap:1rem; }
-    .settings-card label { display:flex; justify-content:space-between; align-items:center; }
-    .settings-card input, .settings-card select { width:5rem; padding:0.3rem; }
-    .settings-actions { display:flex; justify-content:flex-end; gap:0.5rem; }
-    .settings-actions button { padding:0.5rem 1rem; border:none; border-radius:0.4rem; cursor:pointer; }
-    .results-card { background:#fff; border-radius:0.8rem; width:90vw; max-width:800px; padding:1rem; display:flex; flex-direction:column; align-items:center; gap:1rem; max-height:90vh; overflow-y:auto; }
-    .results-row { display:flex; flex-wrap:wrap; justify-content:space-between; width:100%; }
-    .result-item { flex:0 0 19%; background:rgba(200,200,200,0.3); border-radius:0.5rem; padding:0.5rem; }
-    .question-text { font-weight:bold; font-size:1rem; }
-    .your-answer { margin-top:0.3rem; display:flex; align-items:center; } .mark { margin-right:0.3rem; }
-    .correct-answer { font-size:0.9rem; color:#444; margin-top:0.2rem; }
-    #resultScore { font-size:1.3rem; font-weight:bold; }
-    .results-footer { display:flex; justify-content:center; gap:1rem; width:100%; flex-wrap:wrap; }
-    .results-footer button { background:#668cff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:0.4rem; cursor:pointer; }
-    .timeup-card { background:#fff; padding:2rem; border-radius:1rem; text-align:center; max-height:80vh; overflow-y:auto; }
-    .timeup-card h2 { margin:0 0 1rem; } .timeup-card .results-footer { margin-top:1rem; flex-wrap:wrap; justify-content:center; }
-    /* Start panel styles */
-    #startPanel .start-card {
-      background: #fff;
-      border-radius: 1.2rem;
-      width: 85vw;
-      max-width: 390px;
-      padding: 2rem 1.2rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.8rem;
-      box-shadow: 0 8px 32px rgba(80,110,190,0.12);
-      animation: popin .6s cubic-bezier(.51,1.77,.62,.91);
+    html, body {
+      margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
+      font-family: 'Nunito', Arial, sans-serif;
+      background: linear-gradient(135deg, #f9fbff 60%, #e1eeff 100%);
+      min-height: 100vh; min-width: 100vw;
+    }
+    #abacusRoot {
+      position: absolute; top: 0; right: 0; width: 100vw; height: 100vh;
+      display: flex; justify-content: flex-end; align-items: center;
+      background: none;
+      overflow: hidden; z-index: 1;
+      transition: box-shadow .3s cubic-bezier(.51,1.77,.62,.91);
+    }
+    .soroban {
+      display: flex; justify-content: center; align-items: center;
+      padding: 5px; width: 160%; height: 100%;
+      background: none !important;
+    }
+    .rod {
+      position: relative; width: 95px; height: 390px;
+      background: rgba(255,255,255,0.58);
+      border-radius: 24px; box-shadow: 0 3px 30px #b993d633, 0 0 0 0 #fff0;
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    }
+    .rod-line { position: absolute; top: 0; bottom: 0; width: 3px; background: #b4d7ff; z-index: 0;}
+    .heaven, .earth, .gap-space, .bar { z-index: 1; }
+    .heaven { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 14%; gap: 2px;}
+    .gap-space { height: 2%; }
+    .earth { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; height: 53%; margin-top: 3px; gap: 3px;}
+    .bar { position: absolute; top: 27%; width: 100%; height: 3px; background: #b4d7ff;}
+    /* Soroban beads - do NOT change logic! Only color/appearance: */
+    .bead {
+      width: 90px; height: 50px; margin: 0;
+      background: linear-gradient(to bottom, #b4d7ff 80%, #e1eeff 100%);
+      border-radius: 18px;
+      clip-path: polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);
+      box-shadow: 0 5px 15px #b4d7ff55, inset 0 2px 7px #e1eeffcc;
+      transition: background .16s, box-shadow .18s, transform .17s, filter .13s;
+      z-index: 3;
+      opacity: 1;
+    }
+    .bead:active, .bead.dragged {
+      background: #fff !important;
+      filter: brightness(1.07) drop-shadow(0 0 9px #b4d7ff33);
+      transition: background .16s, filter .18s;
+    }
+    .bead.active {
+      background: radial-gradient(circle at 40% 38%, #ffd700 65%, #ffef8b 100%);
+      box-shadow: 0 2px 32px #ffd9ff66, 0 0 0 0 #fff0;
+      filter: drop-shadow(0 0 10px #ffe066aa);
+    }
+    .bead.heaven.active { transform: translateY(100%) scale(1.07);}
+    .bead.earth.active { transform: translateY(-150%) scale(1.07);}
+    /* Main Panel */
+    #quizPanel {
+      position: absolute; top: 0; left: 0;
+      width: clamp(260px,22vw,380px); height: 100vh;
+      background: rgba(255,255,255,0.97);
+      color: #444; z-index: 2; display: flex; flex-direction: column; padding: 1rem;
+      border-radius: 2.1rem 0 0 2.1rem;
+      box-shadow: 0 10px 48px #b993d628;
+      transition: box-shadow .25s;
+      border: 2.5px solid #b4d7ff;
+    }
+    #topBtns { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.6rem; gap: 0.5rem; }
+    #topBtns button, .results-footer button, #sendBtn, .start-btn, .start-settings-btn, #fullscreenBtn, #fullscreenBtnResults, #fullscreenBtnTimeUp, #tryAgainBtn, #tryAgainTimeUpBtn, #resetBtn, #settingsBtn, .settings-actions button {
+      background: #b4d7ff; color: #3e366b;
+      border: none; font-size: 1.37rem; cursor: pointer;
+      border-radius: 1.35rem; box-shadow: 0 4px 14px #bdd6ff18;
+      padding: 0.38rem 1.15rem;
+      font-family: 'Nunito',Arial,sans-serif; font-weight: 700;
+      transition: background .15s, color .16s, transform .15s cubic-bezier(.51,1.77,.62,.91);
+      outline: none;
+      margin-top: 0.18rem; margin-bottom: 0.12rem;
+    }
+    #topBtns button:active,
+    .results-footer button:active,
+    #sendBtn:active, .start-btn:active, .start-settings-btn:active, #fullscreenBtn:active, #resetBtn:active, #settingsBtn:active,
+    #tryAgainBtn:active, #tryAgainTimeUpBtn:active, #fullscreenBtnResults:active, #fullscreenBtnTimeUp:active,
+    .settings-actions button:active {
+      background: #fd90d7 !important; color: #fff !important;
+      transform: scale(1.08);
+      box-shadow: 0 3px 24px #ffb9ef29;
+    }
+    /* Numpad */
+    #numpad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: .4rem;}
+    #numpad button {
+      background: #b4d7ff; color: #3e366b; font-size: 1.38rem; border-radius: 1.15rem;
+      box-shadow: 0 3px 14px #bdd6ff12;
+      font-weight: 700; transition: background .13s, color .13s, transform .13s cubic-bezier(.81,1.28,.61,.95);
+      outline: none; border: none; padding: 0.67rem 0;
+    }
+    #numpad button:active { background: #fd90d7 !important; color: #fff; transform: scale(1.13);}
+    /* Quiz area */
+    #qNum {
+      background: #668cff;
+      padding: 0.27rem 0.85rem;
+      border-radius: 0.85rem;
+      font-weight: bold; color: #fff; font-size: 1.1rem;
+      margin-right: 0.21rem;
+      box-shadow: 0 2px 8px #b993d622;
+      letter-spacing: .03em;
+      min-width: 3.1rem;
+      display: inline-block;
+      text-align: center;
+    }
+    #qText {
+      flex: 1; display: flex; justify-content: center; align-items: center;
+      min-height: 3.3rem; font-size: 2.25rem; font-weight: 700;
+      text-align: center; letter-spacing: 0.03em; transition: .21s;
+      position: relative; color: #ff65b3;
+    }
+    .flash-center { display: flex; align-items: center; justify-content: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: 100%; text-align: center; z-index: 2; font-size: 2.5rem; font-weight: bold;
+      color: #4d79ff; letter-spacing: 0.08em; min-width: 1em;
+      font-family: 'Nunito', Arial, sans-serif;
+      filter: drop-shadow(0 1px 3px #b993d6b2);
+      animation: fadein .4s cubic-bezier(.71,1.31,.54,.96);
+    }
+    .flash-center .qmark { color: #fd90d7; font-size: 1em; font-weight: bold; margin-left: 0.16em; vertical-align: middle;}
+    .flash-center .diff-num { color: #ffd700; }
+    .flash-center .diff-op { color: #fd90d7; }
+    .full-question-text { font-size: 2rem; color: #4d79ff; font-weight: bold; letter-spacing: 0.06em; text-align: center; width: 100%; opacity: 1; filter: drop-shadow(0 1px 2px #b993d6b1);}
+    /* Answer area */
+    .input-label { font-weight: bold; font-size: 1.1rem; color: #9066ff;}
+    .inputArea { display: flex; gap: 0.5rem; align-items: center; }
+    #answerDisplay {
+      flex: 1;
+      background: #fff; color: #4d79ff;
+      text-align: right; padding: 0.67rem 1rem;
+      border: 2.2px solid #fd90d7;
+      border-radius: 0.95rem;
+      font-size: 1.62rem; font-weight: 700;
+      user-select: none;
+      margin-top: 0.13rem; margin-bottom: 0.03rem;
+      box-shadow: 0 4px 16px #b993d63c;
+      transition: transform .10s cubic-bezier(.61,1.22,.49,.88), box-shadow .12s;
+      outline: none;
+      min-width: 2.1rem;
+      max-width: 99%;
+      animation: fadein .22s;
+    }
+    #answerDisplay.pop { animation: pop .19s cubic-bezier(.51,1.77,.62,.91);}
+    @keyframes pop {
+      0% { transform: scale(.92);}
+      80% { transform: scale(1.1);}
+      100% { transform: scale(1);}
+    }
+    /* Timer */
+    #quizTimer {
+      width: 100%;
+      text-align: center;
+      font-weight: bold;
+      margin: 18px 0 0;
+      align-self: center;
+      background: #b4d7ff;
+      color: #fff;
+      border-radius: 1.1rem;
+      padding: 0.4rem 0;
+      font-size: 1.27rem;
+      box-shadow: 0 4px 14px #b993d66c;
+      letter-spacing: .04em;
+      min-height: 2.6rem;
+      transition: background .12s;
+      animation: fadein .2s;
+    }
+    /* Settings, Results, Time Up, Start Panels */
+    #settingsPanel, #resultsPanel, #timeUpPanel, #startPanel {
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.18);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+      border-radius: 0;
+      animation: fadein .32s cubic-bezier(.51,1.77,.62,.91);
+    }
+    .settings-card {
+      background: #fff; border-radius: 1.5rem; width: 82vw; max-width: 370px; padding: 1.45rem;
+      display: flex; flex-direction: column; gap: 1.09rem;
+      box-shadow: 0 6px 32px #b993d6a1;
+      border: 2.2px solid #b4d7ff;
+      animation: popin .39s cubic-bezier(.51,1.77,.62,.91);
+    }
+    .settings-card label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 1.07rem; margin-bottom: .02rem;
+    }
+    .settings-card input, .settings-card select {
+      width: 4.2rem; padding: 0.31rem; border-radius: .8rem; font-family: 'Nunito'; font-size: 1rem;
+      border: 1.4px solid #b4d7ff;
+    }
+    /* Mute on new row, label left, toggle right */
+    .mute-wrap {
+      display: flex; width: 100%; justify-content: space-between; align-items: center;
+      margin-top: .45rem;
+    }
+    .settings-actions { display: flex; justify-content: flex-end; gap: 0.9rem; margin-top: 0.41rem;}
+    /* Results card */
+    .results-card {
+      background: #fff; border-radius: 1.9rem; width: 95vw; max-width: 825px; padding: 1.8rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1.25rem; max-height: 94vh; overflow-y: auto;
+      box-shadow: 0 6px 32px #b993d6a2;
+      border: 2.2px solid #b4d7ff;
       position: relative;
+      animation: popin .42s cubic-bezier(.51,1.77,.62,.91);
     }
-    @keyframes popin {
-      0% { transform: scale(.75); opacity:0; }
-      80% { transform: scale(1.05); opacity:1;}
-      100% { transform: scale(1); }
+    .results-row { display: flex; flex-wrap: wrap; justify-content: space-between; width: 100%; }
+    .result-item { flex: 0 0 19%; background: #f5faff; border-radius: 1.23rem; padding: 0.77rem; margin: 0.16rem; box-shadow: 0 2px 10px #b993d616;}
+    .question-text { font-weight: bold; font-size: 1.06rem; color: #9066ff;}
+    .your-answer { margin-top: 0.23rem; display: flex; align-items: center; font-size: 1.13rem;}
+    .mark { margin-right: 0.2rem; font-size: 1.13rem;}
+    .correct-answer { font-size: 0.91rem; color: #444; margin-top: 0.12rem;}
+    #resultScore { font-size: 1.26rem; font-weight: bold; color: #fd90d7; animation: fadein .41s;}
+    .results-footer { display: flex; justify-content: center; gap: 1.1rem; width: 100%; flex-wrap: wrap; margin-top: 0.4rem;}
+    .emoji-pop {
+      position: absolute; left: 50%; top: 8%; transform: translate(-50%,0);
+      font-size: 3.1rem; animation: pop .7s cubic-bezier(.51,1.77,.62,.91);
+      filter: drop-shadow(0 4px 12px #b993d6a1);
+      pointer-events: none; z-index: 1000;
     }
-    .abacus-mascot {
-      width: 115px; height: 135px; margin-bottom: 0.2rem; position:relative;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    .sparkle-text {
+      color: #fd90d7; font-size: 2.14rem; font-family: 'Nunito',Arial,sans-serif;
+      text-shadow: 0 4px 24px #ffd7efbb, 0 0 1px #ffcae3;
+      filter: drop-shadow(0 1px 3px #b993d6a1); animation: sparkle .7s ease;
+      margin-bottom: .1em;
     }
-    .abacus-face {
-      position: absolute; left: 48px; top: 64px; width: 20px; height: 15px;
-      background: #ffe680; border-radius: 50% 50% 60% 60%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 8px #fff8, 0 0 0 3px #fff4;
+    @keyframes sparkle { 0% { text-shadow: 0 2px 32px #fffc; } 100% { text-shadow: 0 4px 24px #ffd7efbb; } }
+    /* Start Panel with mascot */
+    #startPanel .start-card {
+      background: #fff; border-radius: 2.2rem;
+      width: 91vw; max-width: 400px; padding: 2.2rem 1.2rem 2.4rem 1.2rem;
+      display: flex; flex-direction: column; align-items: center; gap: 1.7rem;
+      box-shadow: 0 8px 38px #b993d6a2; animation: popin .62s cubic-bezier(.51,1.77,.62,.91); position: relative; border: 2.5px solid #b4d7ff;
     }
-    .abacus-face:before {
-      content: '';
-      display: block;
-      width: 4px; height: 4px;
-      background: #222;
-      border-radius: 50%;
-      margin-right: 3px;
-      margin-left: 2px;
-      box-shadow: 9px 0 0 0 #222;
-    }
-    .abacus-body {
-      width: 100%; height: 90px; position:relative;
-      background: #4d79ff;
-      border-radius: 22px;
-      border: 3px solid #4761b8;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 2px 10px #7db1ff44;
-    }
-    .abacus-rod {
-      width: 88px; height: 7px; background: #fff; border-radius: 6px; margin: 13px auto 0 auto;
-      position:relative; box-shadow: 0 1px 4px #fff5;
-    }
-    .abacus-beads {
-      display: flex; flex-direction: row; gap: 12px; margin-top: -10px; margin-bottom: -5px;
-      justify-content: center;
-    }
-    .abacus-bead {
-      width: 20px; height: 20px; background: #ffd700; border-radius: 50%;
-      border: 2px solid #ffe05b;
-      margin-top: 4px; margin-bottom: 2px;
-      box-shadow: 0 2px 6px #fff8, 0 0 0 2px #fff8;
-      animation: beadbounce 1s infinite alternate cubic-bezier(.71,1.64,.51,.88);
-    }
+    @keyframes popin { 0% { transform: scale(.75); opacity:0; } 80% { transform: scale(1.13); opacity:1;} 100% { transform: scale(1);} }
+    .mascot-bounce-in { animation: mascotpop .71s cubic-bezier(.51,1.77,.62,.91) 1;}
+    @keyframes mascotpop { 0% { transform: translateY(-60px) scale(0.78);} 60% { transform: translateY(16px) scale(1.09);} 85% { transform: translateY(-8px) scale(.93);} 100% { transform: translateY(0) scale(1);} }
+    .abacus-mascot { width: 125px; height: 150px; margin-bottom: 0.2rem; position:relative; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 12; filter: drop-shadow(0 2px 12px #b993d6a1); background: none;}
+    .mascot-face { position: absolute; left: 50%; top: 52%; transform: translate(-50%,0); width: 45px; height: 38px; background: #ffe680; border-radius: 50% 50% 58% 60%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 18px #fff8, 0 0 0 3px #fff3; border: 2.2px solid #ffd70088;}
+    .mascot-face .eyes { display: flex; flex-direction: row; align-items: center; margin-top: 13px; margin-left: 6px;}
+    .mascot-face .eye { width: 7px; height: 7px; background: #333; border-radius: 50%; margin-right: 6px; margin-left: 3px; box-shadow: 9px 0 0 0 #333;}
+    .mascot-face .smile { position: absolute; left: 49%; top: 68%; transform: translate(-50%,-50%); width: 23px; height: 11px; border-bottom: 3.3px solid #ff7e7e; border-radius: 0 0 19px 19px; background: none; z-index: 1;}
+    .mascot-face .cheek { position: absolute; width: 8px; height: 4px; border-radius: 50%; background: #fd90d7bb; top: 80%; left: 18%; }
+    .mascot-face .cheek.right { left: 66%;}
+    .abacus-body { width: 100%; height: 90px; position:relative; background: #b4d7ff; border-radius: 30px; border: 3px solid #4761b8; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 10px #b993d644;}
+    .abacus-rod { width: 90px; height: 7px; background: #fff; border-radius: 6px; margin: 13px auto 0 auto; position:relative; box-shadow: 0 1px 4px #fff5;}
+    .abacus-beads { display: flex; flex-direction: row; gap: 13px; margin-top: -12px; margin-bottom: -5px; justify-content: center;}
+    .abacus-bead { width: 21px; height: 21px; background: #ffd700; border-radius: 50%; border: 2px solid #ffe05b; margin-top: 5px; margin-bottom: 2px; box-shadow: 0 2px 8px #fff8, 0 0 0 2px #fff8; animation: beadbounce 1s infinite alternate cubic-bezier(.71,1.64,.51,.88);}
     .abacus-bead:nth-child(2) { animation-delay: .17s;}
     .abacus-bead:nth-child(3) { animation-delay: .31s;}
     .abacus-bead:nth-child(4) { animation-delay: .46s;}
-    @keyframes beadbounce {
-      from { transform: translateY(0);}
-      to { transform: translateY(-9px);}
-    }
-    .start-title {
-      font-size: 2.4rem; font-weight: 700; color: #4d79ff; text-shadow: 0 2px 0 #fff6, 0 0 12px #fff8;
-      letter-spacing: 0.07em; text-align:center; margin:0;
-    }
-    .start-btn {
-      font-size: 1.4rem; font-weight: 700;
-      padding: 1rem 2.2rem;
-      background: linear-gradient(90deg, #668cff 0%, #b993d6 100%);
-      color: #fff; border: none; border-radius: 0.8rem; cursor: pointer;
-      box-shadow: 0 3px 16px #a3c6f966, 0 0 0 #fff0;
-      transition: background .17s, transform .14s;
-      animation: btnpulse 1.2s infinite alternate cubic-bezier(.82,.13,.65,1.31);
-      outline: none;
-    }
-    @keyframes btnpulse {
-      from { box-shadow: 0 3px 16px #a3c6f966, 0 0 0 #fff0;}
-      to { box-shadow: 0 8px 40px #b993d6cc, 0 0 12px #668cff33; transform: scale(1.035);}
-    }
-    .start-settings-btn {
-      margin-top: 0.4rem; font-size: 1.1rem; color: #4d79ff; background: none; border: none; cursor: pointer; text-decoration: underline; font-weight: 500;
-      opacity: 0.85;
-      transition: opacity .14s;
-    }
-    .start-settings-btn:hover { opacity: 1; }
-    .confetti {
-      pointer-events:none;
-      position:absolute; left:0; top:0; width:100%; height:100%;
-      z-index:10; overflow:visible;
-    }
-    .confetti span {
-      position:absolute; width:12px; height:12px; border-radius:50%; opacity:0.78;
-      animation: confetti-fall 1.4s linear forwards;
-    }
-    @keyframes confetti-fall {
-      from { transform:translateY(-40px);}
-      to { transform:translateY(340px);}
-    }
+    @keyframes beadbounce { from { transform: translateY(0);} to { transform: translateY(-10px);} }
+    .start-title { font-size: 2.5rem; font-weight: 700; color: #4d79ff; text-shadow: 0 2px 0 #fff6, 0 0 12px #fff8; letter-spacing: 0.09em; text-align: center; margin:0; font-family: 'Nunito', Arial, sans-serif;}
+    .confetti { pointer-events:none; position:absolute; left:0; top:0; width:100%; height:100%; z-index:12; overflow:visible;}
+    .confetti span { position:absolute; width:13px; height:13px; border-radius:50%; opacity:0.76; animation: confetti-fall 1.4s linear forwards; will-change: transform;}
+    @keyframes confetti-fall { from { transform:translateY(-40px);} to { transform:translateY(370px);} }
+    .sparkle-emoji { animation: pop .38s cubic-bezier(.41,1.67,.62,.91) alternate; font-size: 2.3rem; filter: drop-shadow(0 1px 2px #ffd7efbb); margin: 0 .17em;}
     @media (max-width: 600px) {
-      #quizPanel { width: 100vw; max-width: 100vw; min-width: 0; padding: .7rem; }
-      #qText, .full-question-text, .flash-center { font-size: 2.1rem!important; }
-      .results-card { width: 97vw; }
+      #quizPanel { width: 100vw; max-width: 100vw; min-width: 0; padding: .7rem; border-radius: 0;}
+      #qText, .full-question-text, .flash-center { font-size: 1.5rem!important; }
+      .results-card { width: 99vw; }
       #startPanel .start-card { width: 99vw; }
+      .soroban { width: 100vw;}
+      .rod { width: 38vw; min-width: 60px;}
     }
+    @media (max-width: 380px) {
+      #quizPanel { padding: .3rem;}
+      .settings-card, .results-card { padding: .8rem;}
+    }
+    .shake { animation: shake 0.42s cubic-bezier(.62,1.75,.52,.91);}
+    @keyframes shake { 0%,100%{transform:translateX(0);} 10%,30%,50%,70%,90%{transform:translateX(-13px);} 20%,40%,60%,80%{transform:translateX(13px);} }
+    @keyframes fadein { from { opacity: 0;} to { opacity: 1;} }
   </style>
 </head>
 <body>
   <!-- Start Panel -->
   <div id="startPanel">
     <div class="start-card">
-      <div class="abacus-mascot">
+      <div class="abacus-mascot mascot-bounce-in" id="mainMascot">
         <div class="abacus-body">
           <div class="abacus-rod"></div>
           <div class="abacus-beads">
@@ -187,7 +293,12 @@
           </div>
           <div class="abacus-rod"></div>
         </div>
-        <div class="abacus-face"></div>
+        <div class="mascot-face">
+          <div class="eyes"><div class="eye"></div></div>
+          <div class="smile"></div>
+          <div class="cheek"></div>
+          <div class="cheek right"></div>
+        </div>
       </div>
       <div class="start-title">Soroban Quiz!</div>
       <button class="start-btn" id="startQuizBtn">Start Quiz!</button>
@@ -195,43 +306,89 @@
       <div class="confetti" id="confettiBox"></div>
     </div>
   </div>
-  <!-- Abacus and Quiz Panel as before -->
   <div id="abacusRoot"><div class="soroban" id="sorobanBoard"></div></div>
   <div id="quizPanel" style="display:none;">
     <div id="topBtns"><button id="settingsBtn">⚙️</button><button id="resetBtn">↻</button><button id="fullscreenBtn">⛶</button></div>
     <div id="quizContent">
       <div class="question"><div id="qNum">Q1</div><div id="qText"></div></div>
-      <div><div class="input-label">Your Answer</div><div class="inputArea"><div id="answerDisplay">0</div><button id="sendBtn" disabled>Send</button></div></div>
+      <div>
+        <div class="input-label">Your Answer</div>
+        <div class="inputArea">
+          <div id="answerDisplay">0</div>
+          <button id="sendBtn" disabled>Send</button>
+        </div>
+      </div>
       <div id="numpad"></div>
       <div id="quizTimer">Time Left: 10:00</div>
     </div>
   </div>
-  <div id="settingsPanel"><div class="settings-card">
-      <label>Questions per set: <input type="number" id="numQuestions" min="1" max="50" value="10"></label>
-      <label>Numbers per problem: <input type="number" id="numNumbers" min="2" max="50" value="4"></label>
-      <label>Flash speed (sec): <select id="flashSpeedSec">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-      </select></label>
-      <label>Flash tokens: <input type="checkbox" id="flashToggle" checked></label>
-      <label>Timer (min): <select id="timerSelect"></select></label>
-      <label><input type="checkbox" id="muteSound"> Mute</label>
-      <div class="settings-actions"><button id="cancelSettings">Cancel</button><button id="saveSettings">Save</button></div>
-    </div></div>
-  <div id="resultsPanel"><div class="results-card"><h2>Results</h2><div class="results-row" id="resultsList"></div><div id="resultScore"></div><div class="results-footer"><button id="tryAgainBtn">↺ Try Again</button><button id="fullscreenBtnResults">⛶</button></div></div></div>
+  <div id="settingsPanel">
+    <div class="settings-card">
+      <label>Questions per set:
+        <input type="number" id="numQuestions" min="1" max="50" value="10">
+      </label>
+      <label>Flash speed (sec):
+        <select id="flashSpeedSec">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+      </label>
+      <label>Flash tokens:
+        <input type="checkbox" id="flashToggle" checked>
+      </label>
+      <label>Timer (min):
+        <select id="timerSelect"></select>
+      </label>
+      <div class="mute-wrap">
+        <span>Mute</span>
+        <input type="checkbox" id="muteSound">
+      </div>
+      <div class="settings-actions">
+        <button id="cancelSettings">Cancel</button>
+        <button id="saveSettings">Save</button>
+      </div>
+    </div>
+  </div>
+  <div id="resultsPanel"><div class="results-card">
+    <div class="abacus-mascot" id="resultMascot" style="display:none;">
+      <div class="abacus-body">
+        <div class="abacus-rod"></div>
+        <div class="abacus-beads">
+          <div class="abacus-bead"></div>
+          <div class="abacus-bead"></div>
+          <div class="abacus-bead"></div>
+          <div class="abacus-bead"></div>
+        </div>
+        <div class="abacus-rod"></div>
+      </div>
+      <div class="mascot-face">
+        <div class="eyes"><div class="eye"></div></div>
+        <div class="smile"></div>
+        <div class="cheek"></div>
+        <div class="cheek right"></div>
+      </div>
+    </div>
+    <h2 id="resultsTitle">Results</h2>
+    <div class="results-row" id="resultsList"></div>
+    <div id="resultScore"></div>
+    <div class="results-footer"><button id="tryAgainBtn">↺ Try Again</button><button id="fullscreenBtnResults">⛶</button></div>
+    <div id="resultsConfetti"></div>
+  </div></div>
   <div id="timeUpPanel"><div class="timeup-card"><h2>Time's Up!</h2><div class="results-footer"><button id="tryAgainTimeUpBtn">↺ Try Again</button><button id="fullscreenBtnTimeUp">⛶</button></div></div></div>
   <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
   <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
   <audio id="tickSound" src="tick.wav"></audio>
   <script>
-    // Confetti animation for "Start Quiz!" click
-    function launchConfetti() {
-      const confetti = document.getElementById('confettiBox');
-      confetti.innerHTML = '';
-      const colors = ['#ffd700','#b993d6','#4d79ff','#66e6ff','#ffb3e6','#ff7878','#c8ffb0'];
+    // Utility selectors
+    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+    // Confetti fun
+    function launchConfetti(node) {
+      node = node || $('#confettiBox');
+      node.innerHTML = '';
+      const colors = ['#ffd700','#b993d6','#4d79ff','#66e6ff','#ffb3e6','#fd90d7','#c8ffb0'];
       for(let i=0;i<36;i++) {
         const el = document.createElement('span');
         el.style.left = (Math.random()*96+2)+'%';
@@ -239,68 +396,111 @@
         el.style.animationDuration = (1.1+Math.random()*0.5)+'s';
         el.style.opacity = 0.82 + Math.random()*0.18;
         el.style.transform = `rotate(${Math.random()*360}deg)`;
-        confetti.appendChild(el);
+        node.appendChild(el);
       }
-      setTimeout(()=>{ confetti.innerHTML=''; }, 1600);
+      setTimeout(()=>{ node.innerHTML=''; }, 1600);
     }
-    // Soroban abacus logic unchanged...
-    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+    // Soroban abacus logic (unchanged, only color via CSS)
     const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12; let mute=false;
-    const board=$('#sorobanBoard'); function createRod(){const r=document.createElement('div');r.className='rod';r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class=\"bead earth\"></div>'.repeat(4)+"</div><div class='bar'></div>";return r;}for(let i=0;i<8;i++)board.appendChild(createRod());
-    function clearBoard(){ $$('.bead.active').forEach(b=>b.classList.remove('active')); }$('#resetBtn').onclick=clearBoard;
-    function setBead(b,active){const hv=b.classList.contains('heaven'),was=b.classList.contains('active');if(hv)b.classList.toggle('active',active);else{const cs=[...b.parentElement.children],idx=cs.indexOf(b);cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));}if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);if(!mute){if(active&&!was)$('#soundOn').play();if(!active&&was)$('#soundOff').play();}}
-    $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
-    if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
-    // Quiz logic
-    function randomChapter1(numQuestions = 10, numNumbers = 4) {
-  const out = [];
-
-  while (out.length < numQuestions) {
-    const A = r15(), B = r15(), C = r15(), op1 = rOp();
-
-    if (A === 5 && op1 === '-' && B !== 5) continue;     // 5 − B rule
-    if (A === 5 && op1 === '+' && B === 5) continue;     // forbid 5 + 5
-    if (A === 4 && op1 === '-' && !(B >= 1 && B <= 4)) continue;
-    if (A === 4 && op1 === '+' && B !== 5) continue;
-    if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
-
-    const AB = evalOp(A, op1, B);        // first stage
-
-    /* NEW guard: first-stage must be 0–9 */
-    if (AB < 0 || AB > 9) continue;
-
-    if (AB === 5) continue;              // no stage total may be 5
-
-    let op2 = (AB === 0) ? '+' : rOp();  // 0 → force '+'
-
-    if (AB === 4 && C !== 5) continue;
-    if (A === 5 && op2 === '+' && !(AB + C >= 5 && AB + C <= 9)) continue;
-    if (A === 5 && op2 === '-' && !(B > C)) continue;
-
-    const D = evalOp(AB, op2, C);        // final result
-
-    if (D < 0 || D > 9 || D === 5) continue;
-    if (AB < 4 && !(D < 4 || C === 5)) continue;
-    if (A + B === 5 || A + C === 5 || B + C === 5) continue;
-
-    out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
-  }
-  return out;
-
-  function r15()  { return Math.floor(Math.random() * 5) + 1; }
-  function rOp()  { return Math.random() < 0.5 ? '+' : '-'; }
-  function evalOp(x,o,y){ return o === '+' ? x + y : x - y; }
-}
-
+    const board=$('#sorobanBoard');
+    function createRod(){
+      const r=document.createElement('div');
+      r.className='rod';
+      r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class=\"bead earth\"></div>'.repeat(4)+"</div><div class='bar'></div>";
+      return r;
+    }
+    for(let i=0;i<8;i++) board.appendChild(createRod());
+    function clearBoard(){
+      $$('.bead.active').forEach(b=>b.classList.remove('active'));
+    }
+    $('#resetBtn').onclick=()=>{
+      clearBoard();
+      shakeEffect();
+    };
+    function setBead(b,active){
+      const hv=b.classList.contains('heaven'),was=b.classList.contains('active');
+      if(hv) b.classList.toggle('active',active);
+      else{
+        const cs=[...b.parentElement.children],idx=cs.indexOf(b);
+        cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));
+      }
+      if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);
+      if(!mute){
+        if(active&&!was) $('#soundOn').play();
+        if(!active&&was) $('#soundOff').play();
+      }
+    }
+    $$('.bead').forEach(b=>{
+      b.addEventListener('pointerdown',e=>{
+        b.classList.add('dragged');
+        const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;
+        b.setPointerCapture(e.pointerId);
+        b.onpointermove=ev=>{
+          let dy=ev.clientY-sy;
+          if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}
+        };
+        b.onpointerup=b.onpointercancel=()=>{
+          b.onpointermove=null;
+          b.classList.remove('dragged');
+          b.releasePointerCapture(e.pointerId);
+        }
+      });
+    });
+    // Shake to reset soroban + app shake effect
+    function shakeEffect(){
+      const abacusRoot=$('#abacusRoot');
+      abacusRoot.classList.remove('shake');
+      void abacusRoot.offsetWidth;
+      abacusRoot.classList.add('shake');
+      setTimeout(()=>abacusRoot.classList.remove('shake'),600);
+    }
+    if(window.DeviceMotionEvent){
+      let last=0;
+      window.addEventListener('devicemotion',e=>{
+        const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();
+        if(mag>SHAKE_G&&now-last>750){
+          clearBoard(); shakeEffect();
+          last=now;
+        }
+      });
+    }
+    // Quiz logic (removed numNumbers)
+    function randomChapter1(numQuestions = 10) {
+      const out = [];
+      while (out.length < numQuestions) {
+        const A = r15(), B = r15(), C = r15(), op1 = rOp();
+        if (A === 5 && op1 === '-' && B !== 5) continue;
+        if (A === 5 && op1 === '+' && B === 5) continue;
+        if (A === 4 && op1 === '-' && !(B >= 1 && B <= 4)) continue;
+        if (A === 4 && op1 === '+' && B !== 5) continue;
+        if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
+        const AB = evalOp(A, op1, B);
+        if (AB < 0 || AB > 9) continue;
+        if (AB === 5) continue;
+        let op2 = (AB === 0) ? '+' : rOp();
+        if (AB === 4 && C !== 5) continue;
+        if (A === 5 && op2 === '+' && !(AB + C >= 5 && AB + C <= 9)) continue;
+        if (A === 5 && op2 === '-' && !(B > C)) continue;
+        const D = evalOp(AB, op2, C);
+        if (D < 0 || D > 9 || D === 5) continue;
+        if (AB < 4 && !(D < 4 || C === 5)) continue;
+        if (A + B === 5 || A + C === 5 || B + C === 5) continue;
+        out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+      }
+      return out;
+      function r15()  { return Math.floor(Math.random() * 5) + 1; }
+      function rOp()  { return Math.random() < 0.5 ? '+' : '-'; }
+      function evalOp(x,o,y){ return o === '+' ? x + y : x - y; }
+    }
     // Settings & state
-    let numQuestions = 10, numNumbers = 4, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
+    let numQuestions = 10, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
     let QUESTIONS = [], currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
     let flashTokenTimer = null;
     const qNumEl = $('#qNum'), qTextEl = $('#qText'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
     const timerEl = $('#quizTimer'), padContainer = $('#numpad');
     const settingsBtn = $('#settingsBtn'), settingsPanel = $('#settingsPanel');
     const flashSpeedSec = $('#flashSpeedSec'), flashToggle = $('#flashToggle');
-    const numQuestionsInput = $('#numQuestions'), numNumbersInput = $('#numNumbers');
+    const numQuestionsInput = $('#numQuestions');
     const timerSelect = $('#timerSelect'), muteSoundInput = $('#muteSound');
     for(let i=1;i<=10;i++) {
       let opt = document.createElement('option');
@@ -321,22 +521,22 @@
       $('#quizPanel').style.display='none';
       $('#resultsPanel').style.display='none';
       $('#timeUpPanel').style.display='none';
+      $('#mainMascot').classList.add('mascot-bounce-in');
     }
     function hideStartPanel() {
       $('#startPanel').style.display='none';
+      $('#mainMascot').classList.remove('mascot-bounce-in');
     }
     $('#startQuizBtn').onclick = () => {
       hideStartPanel();
-      setTimeout(() => launchConfetti(), 100);
+      setTimeout(() => launchConfetti($('#confettiBox')), 130);
       startQuiz();
     };
-    $('#startSettingsBtn').onclick = () => {
-      settingsPanel.style.display='flex';
-    };
+    $('#startSettingsBtn').onclick = () => { settingsPanel.style.display='flex'; };
     // Settings panel setup
-    settingsBtn.onclick=()=>{settingsPanel.style.display='flex';
+    settingsBtn.onclick=()=>{
+      settingsPanel.style.display='flex';
       numQuestionsInput.value=numQuestions;
-      numNumbersInput.value=numNumbers;
       flashSpeedSec.value=flashSpeed;
       flashToggle.checked=flashEnabled;
       timerSelect.value=timerMinutes;
@@ -345,7 +545,6 @@
     $('#cancelSettings').onclick=()=>settingsPanel.style.display='none';
     $('#saveSettings').onclick=()=>{
       numQuestions = Math.max(1, Math.min(50, Number(numQuestionsInput.value)));
-      numNumbers = Math.max(2, Math.min(50, Number(numNumbersInput.value)));
       flashSpeed = Math.max(1, Math.min(5, Number(flashSpeedSec.value)));
       flashEnabled = !!flashToggle.checked;
       timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
@@ -378,18 +577,7 @@
           if(tokens[idx].type === 'first') {
             html = tokens[idx].val;
           } else {
-            // Check previous op/num for consecutive duplicates
-            let highlight = false;
-            if (idx > 1) {
-              let prev = tokens[idx-1];
-              if (prev.type === 'op' &&
-                  prev.op === tokens[idx].op &&
-                  prev.val === tokens[idx].val) {
-                highlight = true;
-              }
-            }
-            let opClass = highlight ? 'diff-op' : '';
-            let numClass = highlight ? 'diff-num' : '';
+            let opClass = '', numClass = '';
             html = `<span class="${opClass}">${tokens[idx].op}</span> <span class="${numClass}">${tokens[idx].val}</span>`;
             if(idx === tokens.length-1) {
               html += `<span class="qmark">?</span>`;
@@ -399,7 +587,6 @@
           if(!mute){ $('#tickSound').currentTime=0; $('#tickSound').play();}
           if(idx === tokens.length-1) {
             flashTokenTimer = setTimeout(()=>{
-              // Show the full question at the end
               qTextEl.innerHTML = `<span class="full-question-text">${questionString.replace(/\s*$/, '')} <span class="qmark">?</span></span>`;
               inputLocked=false; sendBtnEl.disabled=(currentInput==='');
               cb&&cb();
@@ -422,6 +609,8 @@
       else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
       else currentInput += d;
       answerEl.textContent = currentInput || '0';
+      answerEl.classList.add('pop');
+      setTimeout(()=>answerEl.classList.remove('pop'),160);
       sendBtnEl.disabled = (currentInput.length === 0);
     }
     function loadQuestion() {
@@ -453,7 +642,7 @@
       if(currentIndex < QUESTIONS.length - 1) {
         setTimeout(()=>{
           currentIndex++; loadQuestion();
-        }, 350);
+        }, 370);
       } else {
         showResults();
       }
@@ -465,7 +654,8 @@
       $('#quizPanel').style.display='flex';
       $('#resultsPanel').style.display='none';
       $('#timeUpPanel').style.display='none';
-      QUESTIONS = randomChapter1(numQuestions, numNumbers);
+      $('#resultMascot').style.display='none';
+      QUESTIONS = randomChapter1(numQuestions);
       loadQuestion();
       updateTimer();
       if(timerInterval) clearInterval(timerInterval);
@@ -486,8 +676,7 @@
       $('#timeUpPanel').style.display='none';
       clearInterval(timerInterval);
       const rl = $('#resultsList'), rs = $('#resultScore');
-      rl.innerHTML='';
-      let sc=0;
+      rl.innerHTML=''; let sc=0;
       answers.forEach((a,i)=>{
         let cor = a.user===a.correct;
         if (cor) sc++;
@@ -497,6 +686,33 @@
         rl.appendChild(di);
       });
       rs.textContent=`You scored ${sc}/${answers.length}`;
+      // Fun emoji/confetti
+      let resultsConfetti = $('#resultsConfetti');
+      resultsConfetti.innerHTML = '';
+      if (sc === answers.length) {
+        // Sparkle and mascot pop
+        $('#resultMascot').style.display = '';
+        $('#resultsTitle').innerHTML = `Results <span class="sparkle-emoji">✨</span>`;
+        let spark = document.createElement('div');
+        spark.className = 'sparkle-text';
+        spark.innerHTML = `Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
+        resultsConfetti.appendChild(spark);
+        launchConfetti(resultsConfetti);
+        // Add more animation (shine)
+        spark.animate([
+          { textShadow: "0 0 10px #ffd7efbb, 0 0 30px #ffd700", color: "#ffd700" },
+          { textShadow: "0 0 20px #ffd7efbb, 0 0 60px #fd90d7", color: "#fd90d7" }
+        ], { duration: 960, iterations: 2 });
+      } else {
+        $('#resultsTitle').innerText = "Results";
+        // Random happy emoji
+        let happyEmojis = ['🎊','👏','😺','🦄','🌸','🦉','🍉','🍀','💎','🎈','🍭','😸'];
+        let em = document.createElement('div');
+        em.className = 'emoji-pop';
+        em.innerText = happyEmojis[Math.floor(Math.random()*happyEmojis.length)];
+        resultsConfetti.appendChild(em);
+        launchConfetti(resultsConfetti);
+      }
     }
     $('#tryAgainBtn').onclick = startQuiz;
     $('#fullscreenBtnResults').onclick = () => {
