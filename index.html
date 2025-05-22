@@ -252,108 +252,44 @@
     $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
     if(window.DeviceMotionEvent){let last=0;window.addEventListener('devicemotion',e=>{const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();if(mag>SHAKE_G&&now-last>750){clearBoard();last=now;}});}
     // Quiz logic
-    function randomChapter1(numQuestions = 10) {
-  const arr = [];
-  const tryLimit = 5000;
-  let tries = 0;
+    function randomChapter1(numQuestions = 10, numNumbers = 4) {
+  const out = [];
 
-  while (arr.length < numQuestions && tries < tryLimit) {
-    tries++;
-    // Step 1: A is 1–5
-    let A = Math.floor(Math.random() * 5) + 1;
+  while (out.length < numQuestions) {
+    const A = r15(), B = r15(), C = r15(), op1 = rOp();
 
-    // Step 2: First operator
-    let op1 = Math.random() < 0.5 ? '+' : '-';
+    if (A === 5 && op1 === '-' && B !== 5) continue;     // 5 − B rule
+    if (A === 5 && op1 === '+' && B === 5) continue;     // forbid 5 + 5
+    if (A === 4 && op1 === '-' && !(B >= 1 && B <= 4)) continue;
+    if (A === 4 && op1 === '+' && B !== 5) continue;
+    if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
 
-    // Step 3: B depends on A and op1
-    let B;
-    if (A === 5) {
-      if (op1 === '-') {
-        B = 5;
-      } else {
-        B = Math.floor(Math.random() * 4) + 1; // 1–4
-      }
-    } else if (A === 4 && op1 === '+') {
-      B = 5;
-    } else if (A === 4 && op1 === '-') {
-      B = Math.floor(Math.random() * 4) + 1; // 1–4
-    } else {
-      // For A 1–4, need A±B ≤ 4
-      if (op1 === '+') {
-        let maxB = 4 - A;
-        if (maxB < 1) continue;
-        B = Math.floor(Math.random() * maxB) + 1;
-      } else { // '-'
-        let maxB = A;
-        if (maxB < 1) continue;
-        B = Math.floor(Math.random() * maxB) + 1;
-      }
-    }
+    const AB = evalOp(A, op1, B);        // first stage
 
-    // Calculate S1 = A op1 B
-    let S1 = op1 === '+' ? A + B : A - B;
+    /* NEW guard: first-stage must be 0–9 */
+    if (AB < 0 || AB > 9) continue;
 
-    // Rules for S1:
-    // If S1 < 4, then D < 4 or C = 5.
-    // If S1 == 0, op2 must be '+'
-    // If S1 == 4, C must be 5.
+    if (AB === 5) continue;              // no stage total may be 5
 
-    // Step 4: Second operator
-    let op2;
-    if (S1 === 0) {
-      op2 = '+';
-    } else {
-      op2 = Math.random() < 0.5 ? '+' : '-';
-    }
+    let op2 = (AB === 0) ? '+' : rOp();  // 0 → force '+'
 
-    // Step 5: C
-    let C;
-    if (S1 === 4) {
-      C = 5;
-    } else if (A === 5 && op2 === '+') {
-      // B±C not more than 4
-      let sign = Math.random() < 0.5 ? '+' : '-';
-      if (sign === '+') {
-        let maxC = 4 - B;
-        if (maxC < 1) continue;
-        C = Math.floor(Math.random() * maxC) + 1;
-        op2 = '+';
-      } else {
-        let maxC = B;
-        if (maxC < 1) continue;
-        C = Math.floor(Math.random() * maxC) + 1;
-        op2 = '-';
-      }
-    } else if (A === 5 && op2 === '-') {
-      // B must be more than C
-      let maxC = B - 1;
-      if (maxC < 1) continue;
-      C = Math.floor(Math.random() * maxC) + 1;
-    } else if (S1 < 4) {
-      // D < 4 or C = 5
-      if (Math.random() < 0.5) {
-        C = 5;
-      } else {
-        C = Math.floor(Math.random() * 4) + 1; // 1–4
-      }
-    } else {
-      C = Math.floor(Math.random() * 5) + 1; // 1–5
-    }
+    if (AB === 4 && C !== 5) continue;
+    if (A === 5 && op2 === '+' && !(AB + C >= 5 && AB + C <= 9)) continue;
+    if (A === 5 && op2 === '-' && !(B > C)) continue;
 
-    // Step 6: D = S1 op2 C
-    let D;
-    if (op2 === '+') D = S1 + C;
-    else D = S1 - C;
+    const D = evalOp(AB, op2, C);        // final result
 
-    // Step 7: D always 0–9
-    if (D < 0 || D > 9) continue;
-    if (S1 < 4 && D >= 4 && C !== 5) continue; // If S1 < 4, then D < 4 or C = 5
+    if (D < 0 || D > 9 || D === 5) continue;
+    if (AB < 4 && !(D < 4 || C === 5)) continue;
+    if (A + B === 5 || A + C === 5 || B + C === 5) continue;
 
-    // Compose the question string
-    let qStr = `${A} ${op1} ${B} ${op2} ${C}`;
-    arr.push({ q: qStr, a: D.toString() });
+    out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
   }
-  return arr;
+  return out;
+
+  function r15()  { return Math.floor(Math.random() * 5) + 1; }
+  function rOp()  { return Math.random() < 0.5 ? '+' : '-'; }
+  function evalOp(x,o,y){ return o === '+' ? x + y : x - y; }
 }
 
     // Settings & state
