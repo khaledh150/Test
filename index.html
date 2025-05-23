@@ -843,15 +843,21 @@
       $('#rainSparkle').style.display='none';
       let pct = sc / answers.length;
       if (sc === answers.length || pct >= 0.7) {
+        // CELEBRATION: 70%+ correct or all correct
         $('#resultMascot').style.display = '';
         $('#resultsTitle').innerHTML = `Results <span class="sparkle-emoji">✨</span>`;
         let spark = document.createElement('div');
         spark.className = 'sparkle-text';
-        spark.innerHTML = `Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
+        if (sc === answers.length) {
+          spark.innerHTML = `Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
+        } else {
+          spark.innerHTML = `Great job! <span class="sparkle-emoji">🌟🎉</span>`;
+        }
         resultsConfetti.appendChild(spark);
         rainSparkleBurst("happy");
         if(!mute){ $('#applauseSound').currentTime=0; $('#applauseSound').play(); }
-      } else if (pct < 0.5) {
+      } else if (pct <= 0.5) {
+        // SAD EFFECT: half or more wrong
         $('#resultsTitle').innerHTML = `<span class="sad-emoji">😢</span> <span style="color:#fd90d7">Results</span>`;
         let sad = document.createElement('div');
         sad.className = 'sad-text';
@@ -864,6 +870,7 @@
         rainSparkleBurst("sad");
         if(!mute){ $('#losingHorn').currentTime=0; $('#losingHorn').play(); }
       } else {
+        // MIDDLE: just show something cheerful
         $('#resultsTitle').innerText = "Results";
         let happyEmojis = ['🎊','👏','😺','🦄','🌸','🦉','🍉','🍀','💎','🎈','🍭','😸'];
         let em = document.createElement('div');
@@ -873,30 +880,21 @@
         rainSparkleBurst("happy");
       }
     }
-    $('#tryAgainBtn').onclick = ()=>startQuiz(true);
+   ('#tryAgainBtn').onclick = ()=>startQuiz(true);
     $('#fullscreenBtnResults').onclick = () => {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     };
-    // --- Time Up panel
-    function showTimeUp() {
-      $('#quizPanel').style.display='none';
-      $('#resultsPanel').style.display='none';
-      $('#timeUpPanel').style.display='flex';
-    }
     $('#tryAgainTimeUpBtn').onclick = ()=>startQuiz(true);
     $('#fullscreenBtnTimeUp').onclick = () => {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     };
-    // --- Fullscreen button
     $('#fullscreenBtn').onclick = () => {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     };
-    // --- Mute
     muteSoundInput.onchange = () => { mute = muteSoundInput.checked; };
-    // --- Init: show start panel
     showStartPanel();
   </script>
 </body>
