@@ -880,7 +880,9 @@
         rainSparkleBurst("happy");
       }
     }
-   ('#tryAgainBtn').onclick = ()=>startQuiz(true);
+    // ... [rest of JS unchanged]
+    // Try Again and fullscreen etc (unchanged)
+    $('#tryAgainBtn').onclick = ()=>startQuiz(true);
     $('#fullscreenBtnResults').onclick = () => {
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
