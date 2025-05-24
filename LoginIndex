@@ -9,15 +9,13 @@
     html, body {
       margin: 0;
       font-family: 'Nunito', Arial, sans-serif;
-      background: linear-gradient(135deg, #c5e0ff 0%, #e5d0f7 100%);
+      background: linear-gradient(135deg, #d8e9fa 0%, #e8f2ff 70%, #e5f0ff 100%);
       min-height: 100vh;
       min-width: 100vw;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-    }
-    body {
       transition: background .35s;
     }
     .container {
@@ -156,13 +154,14 @@
       padding: 0 2px;
     }
     .remember-label {
-      display: flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer;
-      user-select: none; font-weight: 600; color: #6d82a5;
+      display: flex; align-items: center; gap: 8px;
+      white-space: nowrap; cursor: pointer; user-select: none; font-weight: 600; color: #6d82a5;
       font-size: 0.97em;
+      flex-direction: row;
     }
     .remember-label input[type="checkbox"] {
       accent-color: #67aaff;
-      width: 20px; height: 20px; vertical-align: middle; margin-top: 2px;
+      width: 20px; height: 20px; vertical-align: middle; margin-top: 0;
       border-radius: 7px; border: 1.3px solid #67aaff;
     }
     .forgot-link {
@@ -189,17 +188,16 @@
       font-size: 1em;
     }
     .toggle a:hover { text-decoration: underline; }
-    /* Mascot BELOW card */
+    /* Mascot BELOW card (quiz style) */
     .mascot-holder {
-      position: static;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       width: 100%;
       margin: 0 auto;
-      margin-top: 20px;
+      margin-top: 18px;
       pointer-events: none;
-      height: 120px;
+      height: 150px;
       z-index: 2;
       animation: mascotBounce 2.2s infinite alternate cubic-bezier(.71,1.54,.55,.97);
     }
@@ -208,60 +206,21 @@
       to   { transform: translateY(15px);}
     }
     .abacus-mascot {
-      width: 110px; height: 115px; position:relative;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .abacus-body {
-      width: 100%; height: 77px; position:relative;
-      background: #e5ecff;
-      border-radius: 28px;
-      border: 3px solid #a0c8ff;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 2px 10px #c3a2ff44;
-    }
-    .abacus-rod {
-      width: 80px; height: 7px; background: #fff; border-radius: 6px; margin: 11px auto 0 auto;
-      position:relative; box-shadow: 0 1px 4px #fff5;
-    }
-    .abacus-beads {
-      display: flex; flex-direction: row; gap: 10px; margin-top: -10px; margin-bottom: -2px;
-      justify-content: center;
-    }
-    .abacus-bead {
-      width: 18px; height: 18px; background: #5aaaff; border-radius: 50%;
-      border: 2px solid #d1e4ff;
-      margin-top: 4px; margin-bottom: 2px;
-      box-shadow: 0 2px 6px #fff8, 0 0 0 2px #b1e3fa;
-      animation: beadUp 1.15s infinite alternate cubic-bezier(.8,1.44,.51,.88);
-    }
-    .abacus-bead:nth-child(2) { animation-delay: .19s;}
-    .abacus-bead:nth-child(3) { animation-delay: .33s;}
-    .abacus-bead:nth-child(4) { animation-delay: .5s;}
-    @keyframes beadUp {
-      from { transform: translateY(0);}
-      to { transform: translateY(-9px);}
-    }
-    .mascot-face {
-      position: absolute; left: 42px; top: 52px; width: 18px; height: 14px;
-      background: #ffe680; border-radius: 44% 56% 65% 64%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 8px #fff8, 0 0 0 3px #fff3;
-      animation: faceWiggle 1.6s infinite alternate cubic-bezier(.72,1.41,.64,.93);
-    }
-    @keyframes faceWiggle {
-      0% { transform: rotate(-6deg);}
-      100% { transform: rotate(6deg);}
-    }
-    .mascot-face:before {
-      content: '';
-      display: block;
-      width: 3.4px; height: 3.4px;
-      background: #222;
-      border-radius: 50%;
-      margin-right: 3px;
-      margin-left: 2px;
-      box-shadow: 8px 0 0 0 #222;
-    }
+      width: 125px; height: 150px; margin-bottom: 0.2rem; position:relative; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 12; filter: drop-shadow(0 2px 12px #b993d6a1); background: none;}
+    .mascot-face { position: absolute; left: 50%; top: 52%; transform: translate(-50%,0); width: 45px; height: 38px; background: #ffe680; border-radius: 50% 50% 58% 60%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 18px #fff8, 0 0 0 3px #fff3; border: 2.2px solid #ffd70088;}
+    .mascot-face .eyes { display: flex; flex-direction: row; align-items: center; margin-top: 13px; margin-left: 6px;}
+    .mascot-face .eye { width: 7px; height: 7px; background: #333; border-radius: 50%; margin-right: 6px; margin-left: 3px; box-shadow: 9px 0 0 0 #333;}
+    .mascot-face .smile { position: absolute; left: 49%; top: 68%; transform: translate(-50%,-50%); width: 23px; height: 11px; border-bottom: 3.3px solid #ff7e7e; border-radius: 0 0 19px 19px; background: none; z-index: 1;}
+    .mascot-face .cheek { position: absolute; width: 8px; height: 4px; border-radius: 50%; background: #fd90d7bb; top: 80%; left: 18%; }
+    .mascot-face .cheek.right { left: 66%;}
+    .abacus-body { width: 100%; height: 90px; position:relative; background: #b4d7ff; border-radius: 30px; border: 3px solid #4761b8; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 10px #b993d644;}
+    .abacus-rod { width: 90px; height: 7px; background: #fff; border-radius: 6px; margin: 13px auto 0 auto; position:relative; box-shadow: 0 1px 4px #fff5;}
+    .abacus-beads { display: flex; flex-direction: row; gap: 13px; margin-top: -12px; margin-bottom: -5px; justify-content: center;}
+    .abacus-bead { width: 21px; height: 21px; background: #ffd700; border-radius: 50%; border: 2px solid #ffe05b; margin-top: 5px; margin-bottom: 2px; box-shadow: 0 2px 8px #fff8, 0 0 0 2px #fff8; animation: beadbounce 1s infinite alternate cubic-bezier(.71,1.64,.51,.88);}
+    .abacus-bead:nth-child(2) { animation-delay: .17s;}
+    .abacus-bead:nth-child(3) { animation-delay: .31s;}
+    .abacus-bead:nth-child(4) { animation-delay: .46s;}
+    @keyframes beadbounce { from { transform: translateY(0);} to { transform: translateY(-10px);} }
     @media (max-width: 600px) {
       .container { max-width: 98vw; padding: 2rem 1rem 2rem 1rem; }
       h2 { font-size: 1.15em;}
@@ -284,9 +243,9 @@
       </button>
     </div>
     <div class="remember-forgot">
-      <label class="remember-label">
+      <label class="remember-label" for="remember">
         <input type="checkbox" id="remember">
-        <span>Remember me</span>
+        Remember me
       </label>
       <a class="forgot-link" tabindex="0">Forgot password?</a>
     </div>
@@ -298,7 +257,7 @@
       New here? <a onclick="toggleMode()">Create an Account</a>
     </div>
   </div>
-  <!-- Mascot BELOW card -->
+  <!-- Mascot BELOW card (exact quiz style) -->
   <div class="mascot-holder">
     <div class="abacus-mascot">
       <div class="abacus-body">
@@ -311,7 +270,12 @@
         </div>
         <div class="abacus-rod"></div>
       </div>
-      <div class="mascot-face"></div>
+      <div class="mascot-face">
+        <div class="eyes"><div class="eye"></div></div>
+        <div class="smile"></div>
+        <div class="cheek"></div>
+        <div class="cheek right"></div>
+      </div>
     </div>
   </div>
   <script>
