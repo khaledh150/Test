@@ -545,7 +545,7 @@
       setTimeout(()=>{ rain.style.display='none'; }, 2300);
     }
     // Soroban abacus logic (unchanged, only color via CSS)
-    const DEAD_ZONE=10, SHAKE_G=16, HAPTIC_MS=12; let mute=false;
+    const DEAD_ZONE=2, SHAKE_G=20, HAPTIC_MS=12; let mute=false;
     const board=$('#sorobanBoard');
     function createRod(){
       const r=document.createElement('div');
