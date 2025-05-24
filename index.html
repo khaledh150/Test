@@ -46,9 +46,10 @@
       transition: background .13s, box-shadow .13s, transform .15s, filter .15s;
       z-index: 3; opacity: 1;
     }
-    .bead:active, .bead.dragged {
-      background: linear-gradient(to bottom, #fff8c7 70%, #ffe99a 100%) !important;
-      filter: brightness(1.06) drop-shadow(0 0 11px #fff7aa77);
+    .bead.dragged {
+  background: linear-gradient(to bottom, #fff8c7 70%, #ffe99a 100%) !important;
+  filter: brightness(1.06) drop-shadow(0 0 11px #fff7aa77);
+}
     }
     .bead.active {
       background: radial-gradient(circle at 40% 38%, #ffd700 67%, #ffef8b 100%);
