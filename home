@@ -1,1 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Wonder Kids Soroban Home</title>
+  <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue: #b4d7ff;
+      --pink: #fd90d7;
+      --purple: #b993d6;
+      --sidebar-bg: linear-gradient(140deg, #ffe6f7 0%, #f7e8fd 80%, #f0eaff 100%);
+      --sidebar-border: #fd90d7;
+    }
+    html, body {
+      height: 100vh;
+      margin: 0;
+      font-family: 'Nunito', Arial, sans-serif;
+      background: linear-gradient(135deg, #d8e9fa 0%, #e8f2ff 70%, #e5f0ff 100%);
+      color: #333;
+      overflow: hidden;
+    }
+    body { min-height: 100vh; }
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0;
+      width: 260px; min-width: 190px; max-width: 99vw;
+      background: var(--sidebar-bg);
+      border-right: 4px solid var(--sidebar-border);
+      display: flex; flex-direction: column;
+      box-shadow: 4px 0 24px #b993d633;
+      z-index: 30;
+      padding-top: 0; transition: background .22s;
+      overflow: hidden;
+    }
+    .sidebar-header {
+      font-size: 2.15rem;
+      font-weight: 900;
+      color: var(--blue);
+      padding: 27px 0 10px 25px;
+      letter-spacing: 0.05em;
+      text-shadow: 0 2px 10px #fff7;
+      margin-bottom: 5px;
+    }
+    .sidebar-mascot-wrap {
+      display: flex; justify-content: center; align-items: center;
+      margin-bottom: 0.7em; margin-top: -0.7em;
+    }
+    .abacus-mascot {
+      width: 95px; height: 110px; margin: 0;
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      filter: drop-shadow(0 2px 11px #b993d6a1);
+      background: none;
+      animation: mascotpop 1.2s cubic-bezier(.51,1.77,.62,.91) 1;
+    }
+    .abacus-body { width: 100%; height: 59px; background: var(--blue); border-radius: 28px; border: 2.5px solid #4761b8; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 2px 10px #b993d644; }
+    .abacus-rod { width: 75px; height: 7px; background: #fff; border-radius: 5px; margin: 9px auto 0 auto; box-shadow: 0 1px 4px #fff5; }
+    .abacus-beads { display: flex; flex-direction: row; gap: 9px; margin-top: -9px; margin-bottom: -2px; justify-content: center;}
+    .abacus-bead { width: 14px; height: 14px; background: #ffd700; border-radius: 50%; border: 1.5px solid #ffe05b; box-shadow: 0 2px 6px #fff8, 0 0 0 2px #fff8; animation: beadbounce 1s infinite alternate cubic-bezier(.71,1.64,.51,.88);}
+    .abacus-bead:nth-child(2) { animation-delay: .15s;}
+    .abacus-bead:nth-child(3) { animation-delay: .3s;}
+    .abacus-bead:nth-child(4) { animation-delay: .45s;}
+    @keyframes beadbounce { from { transform: translateY(0);} to { transform: translateY(-8px);} }
+    .mascot-face { position: absolute; left: 50%; top: 52%; transform: translate(-50%,0); width: 35px; height: 29px; background: #ffe680; border-radius: 53% 50% 60% 61%; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 12px #fff8, 0 0 0 2px #fff3; border: 1.4px solid #ffd70088;}
+    .mascot-face .eyes { display: flex; flex-direction: row; align-items: center; margin-top: 9px; margin-left: 2px;}
+    .mascot-face .eye { width: 5px; height: 5px; background: #333; border-radius: 50%; margin-right: 3px; margin-left: 2px; box-shadow: 6px 0 0 0 #333;}
+    .mascot-face .smile { position: absolute; left: 49%; top: 72%; transform: translate(-50%,-50%); width: 15px; height: 7px; border-bottom: 2.2px solid #ff7e7e; border-radius: 0 0 14px 19px; }
+    .mascot-face .cheek { position: absolute; width: 6px; height: 3px; border-radius: 50%; background: #fd90d7bb; top: 84%; left: 14%; }
+    .mascot-face .cheek.right { left: 62%;}
+    .mascot-bubble {
+      min-width: 95px;
+      padding: 9px 11px;
+      border-radius: 16px;
+      background: #fff;
+      color: #b993d6;
+      font-weight: 700;
+      font-size: 1rem;
+      position: absolute;
+      left: 105%;
+      top: 35%;
+      box-shadow: 0 2px 8px #b993d63c;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+      z-index: 15;
+    }
+    .mascot-bubble.show { opacity: 1; animation: mascotbubblein .6s cubic-bezier(.51,1.77,.62,.91);}
+    @keyframes mascotpop { 0% { transform: translateY(-60px) scale(0.78);} 60% { transform: translateY(16px) scale(1.09);} 85% { transform: translateY(-8px) scale(.93);} 100% { transform: translateY(0) scale(1);} }
+    @keyframes mascotbubblein { from{transform:scale(0.85);} to{transform:scale(1);} }
+    /* Sidebar Menu & List */
+    .sidebar-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 5vw; padding-top: 0; }
+    #menuList { margin: 0; padding: 0; list-style: none;}
+    #menuList li { margin-bottom: 3px;}
+    .level-header {
+      font-size: 1.17rem;
+      font-weight: 700;
+      color: #5b3cc4;
+      background: none;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 16px 12px 17px; border-radius: 1.8em 1.8em 0 0;
+      cursor: pointer;
+      transition: background .17s;
+      box-shadow: 0 2px 8px #fff7;
+      border-bottom: 2px solid #fd90d7;
+      position: relative;
+    }
+    .level-header.open, .level-header:hover { background: #f8eafd; color: var(--pink);}
+    .progress-bar {
+      display: inline-block;
+      height: 9px;
+      width: 59px;
+      background: #e3eaff;
+      border-radius: 13px;
+      margin-left: 5px; margin-right: 5px;
+      vertical-align: middle;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-inner {
+      height: 100%;
+      border-radius: 11px;
+      background: linear-gradient(90deg, #b4d7ff, #fd90d7 99%);
+      transition: width .45s cubic-bezier(.31,1.41,.51,.87);
+      min-width: 0;
+      max-width: 100%;
+    }
+    .submenu {
+      display: none;
+      padding: 0 5px 0 15px;
+      background: none;
+    }
+    .submenu.open { display: block; }
+    .chapter-link {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 1rem; font-weight: 700; color: #7466a1;
+      background: #fff4fd;
+      border-radius: 1.6em;
+      margin: 5px 0; padding: 8px 19px;
+      text-decoration: none;
+      transition: background .14s, color .12s, transform .15s;
+      box-shadow: 0 2px 6px #f8eafd15;
+      position: relative;
+      gap: 7px;
+      cursor: pointer;
+      border: 2px solid #ffe6f5;
+      user-select: none;
+    }
+    .chapter-link.unlocked:hover, .chapter-link.active {
+      background: var(--blue); color: #fff;
+      transform: scale(1.04);
+      border: 2px solid var(--blue);
+    }
+    .chapter-link.locked {
+      background: #f6e3f7;
+      color: #b6b6b6;
+      cursor: not-allowed;
+      opacity: 0.77;
+    }
+    .chapter-link .lock-ico {
+      margin-left: 11px; display: flex; align-items: center; width: 22px;
+    }
+    .chapter-link .lock-ico svg { display: block; }
+    /* Sidebar Bottom */
+    .sidebar-bottom {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      padding: 17px 6px 11px 6px;
+      border-top: 2px solid #fde9f7;
+      background: none;
+    }
+    .sidebar-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 2.2em;
+      font-weight: 700;
+      font-size: 1.07rem;
+      display: flex; align-items: center; gap: 7px;
+      padding: 9px 18px;
+      margin: 0 4px;
+      box-shadow: 0 2px 8px #bdd6ff16;
+      cursor: pointer;
+      transition: background .13s, color .13s, transform .13s;
+    }
+    .sidebar-btn svg { width: 20px; height: 20px; }
+    .sidebar-btn:active, .sidebar-btn:focus { background: var(--pink); color: #fff; transform: scale(1.07);}
+    /* Main Content */
+    .main {
+      margin-left: 260px; width: calc(100vw - 260px);
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      background: none;
+      transition: margin-left .3s;
+      overflow: hidden;
+      position: relative;
+    }
+    #slideCard {
+      width: min(980px, 94vw); min-width: 240px;
+      margin-top: 45px; margin-bottom: 30px;
+      background: linear-gradient(135deg, #fff8fb 60%, #f8eafd 100%);
+      border-radius: 2.8em;
+      box-shadow: 0 10px 52px #b993d633;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 42px 17px 29px 17px;
+      animation: fadein .8s cubic-bezier(.61,1.47,.72,.91);
+      position: relative;
+    }
+    #welcomeTitle {
+      font-size: 2.9rem;
+      font-weight: 800;
+      color: var(--pink);
+      margin-bottom: 22px;
+      text-shadow: 0 2px 18px #b993d6a7;
+      z-index: 2;
+      position: relative;
+    }
+    .slide-img-area {
+      width: 100%;
+      display: flex; justify-content: center; align-items: center;
+      margin-bottom: 21px;
+    }
+    #slideImg {
+      width: min(760px, 90vw);
+      height: min(350px, 40vw);
+      border-radius: 2.2em;
+      background: #f8eafd;
+      border: 5px solid var(--blue);
+      margin-bottom: 9px;
+      box-shadow: 0 6px 24px #b993d633;
+      display: block;
+      object-fit: cover;
+    }
+    #slideCaption {
+      font-size: 1.8rem; color: var(--purple); font-weight: 700; margin-bottom: 11px;
+      text-align: center; letter-spacing: 0.03em; background: #fff5; padding: 7px 16px; border-radius: 15px;
+      box-shadow: 0 2px 12px #fff6;
+    }
+    #slideDots { display: flex; gap: 7px; margin-top: 7px;}
+    .slide-dot {
+      width: 19px; height: 19px; background: var(--blue); border-radius: 50%; opacity: 0.7;
+      cursor: pointer; border: 2px solid #f9d4f8;
+      transition: background .15s, transform .13s;
+      box-shadow: 0 2px 10px #f6eafd70;
+    }
+    .slide-dot.active, .slide-dot:active { background: var(--pink); opacity: 1; transform: scale(1.09);}
+    #chapterMain {
+      display: none; flex-direction: column; align-items: center;
+      width: 100%; max-width: 100vw;
+      margin-top: 50px; margin-bottom: 30px;
+      animation: fadein .7s cubic-bezier(.61,1.47,.72,.91);
+      position: relative;
+    }
+    #chapterTitle {
+      font-size: 2.35rem; font-weight: 900; color: var(--pink);
+      margin-bottom: 20px; letter-spacing: 0.04em;
+    }
+    .video-section { margin-bottom: 24px; width: 100%; display: flex; flex-direction: column; align-items: center;}
+    .video-label {
+      font-size: 1.45rem;
+      color: var(--purple);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 15px;
+    }
+    .responsive-iframe {
+      width: min(660px, 93vw);
+      height: min(350px, 42vw);
+      border-radius: 2.2em;
+      background: #f8eafd;
+      border: 5px solid var(--blue);
+      margin-bottom: 25px;
+      box-shadow: 0 6px 24px #b993d633;
+      display: block;
+    }
+    .btn-group {
+      display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin-bottom: 30px;
+    }
+    .main-btn {
+      background: var(--blue); color: #fff;
+      border-radius: 1.6em;
+      font-size: 2.2rem;
+      font-weight: 900;
+      box-shadow: 0 2px 13px #bdd6ff23;
+      border: none;
+      min-width: 148px; min-height: 82px;
+      padding: 17px 36px;
+      cursor: pointer;
+      transition: background .13s, color .13s, transform .11s;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      letter-spacing: 0.04em;
+    }
+    .main-btn:active, .main-btn:focus { background: var(--pink); color: #fff; transform: scale(1.09);}
+    .main-btn svg { width: 38px; height: 38px; }
+    /* ---- Confetti ---- */
+    #confettiBox {
+      pointer-events: none; position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh; z-index: 1000;
+      overflow: hidden; display: none;
+    }
+    #confettiBox span {
+      position: absolute; pointer-events: none;
+      font-size: 2.2rem;
+      opacity: 0.77;
+      animation: sparkle-rain 1.6s cubic-bezier(.61,1.47,.72,.91) forwards;
+      filter: drop-shadow(0 1px 12px #ffd7ef77);
+      user-select: none;
+      will-change: transform, opacity;
+    }
+    @keyframes sparkle-rain {
+      0% { opacity: 0.3; transform: translateY(-40px) scale(.95) rotate(-6deg);}
+      75% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(94vh) scale(1.2) rotate(12deg);}
+    }
+    @keyframes fadein { from { opacity: 0;} to { opacity: 1;} }
+    /* Cute Scrollbar */
+    .sidebar-content::-webkit-scrollbar {
+      width: 11px; background: #e3eaff; border-radius: 9px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--blue); border-radius: 9px;
+      transition: background .13s;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb:active {
+      background: var(--pink);
+    }
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .main { margin-left: 210px; width: calc(100vw - 210px);}
+      .sidebar { width: 210px; min-width: 140px;}
+      #slideCard { padding: 25px 7px 21px 7px;}
+    }
+    @media (max-width: 700px) {
+      .main { margin-left: 0; width: 100vw;}
+      .sidebar { position: fixed; left: 0; width: 100vw; max-width: 100vw; min-width: 0; z-index: 1001; height: auto; bottom: auto; }
+      .sidebar-content { max-height: 63vh;}
+    }
+    @media (max-width: 480px) {
+      .main-btn { min-width: 80px; min-height: 54px; font-size: 1.1rem; padding: 10px 16px;}
+      #slideCard { padding: 8vw 1vw 7vw 1vw;}
+      .responsive-iframe, #slideImg { border-radius: 1.2em;}
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">Menu</div>
+    <div class="sidebar-mascot-wrap">
+      <div class="abacus-mascot" id="sidebarMascot">
+        <div class="abacus-body">
+          <div class="abacus-rod"></div>
+          <div class="abacus-beads">
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+            <div class="abacus-bead"></div>
+          </div>
+          <div class="abacus-rod"></div>
+        </div>
+        <div class="mascot-face" id="mascotFace">
+          <div class="eyes"><div class="eye"></div></div>
+          <div class="smile"></div>
+          <div class="cheek"></div>
+          <div class="cheek right"></div>
+        </div>
+        <div class="mascot-bubble" id="mascotBubble"></div>
+      </div>
+    </div>
+    <div class="sidebar-content">
+      <ul id="menuList"></ul>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="sidebar-btn" id="settingsBtn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0-8V7m8.485 7.485A9.969 9.969 0 0122 12c0-5.523-4.477-10-10-10S2 6.477 2 12a9.969 9.969 0 011.515 3.515"></path></svg>
+        Settings
+      </button>
+      <button class="sidebar-btn" id="logoutBtn">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1"></path></svg>
+        Logout
+      </button>
+    </div>
+  </div>
 
+  <div class="main" id="mainArea">
+    <!-- HOME SLIDESHOW PAGE -->
+    <div id="slideCard">
+      <div id="welcomeTitle">Welcome to Wonder Kids!</div>
+      <div class="slide-img-area">
+        <img id="slideImg" src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?fit=crop&w=900&q=80" alt="Welcome Slide"/>
+      </div>
+      <div id="slideCaption">Our students having fun in class!</div>
+      <div id="slideDots"></div>
+    </div>
+    <!-- CHAPTER CONTENT PAGE -->
+    <div id="chapterMain">
+      <div id="chapterTitle">Level 1 - Chapter 1</div>
+      <div class="video-section">
+        <div class="video-label" id="videoLabel">Chapter 1: Introduction</div>
+        <iframe id="chapterVideo" class="responsive-iframe" src="" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="btn-group">
+        <button class="main-btn" id="exerciseBtn">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path></svg>
+          EXERCISE
+        </button>
+      </div>
+    </div>
+    <!-- Confetti for celebration -->
+    <div id="confettiBox"></div>
+  </div>
+
+  <!-- SOUNDS -->
+  <audio id="soundClick" src="click.wav"></audio>
+  <audio id="soundConfetti" src="applause.mp3"></audio>
+
+  <script>
+    // ---------- DATA/SETUP -----------
+    const CHAPTERS = 20;
+    const LEVELS = 10;
+    const adminAccounts = [{username:"khaledhammad993@gmail.com",password:"2223332"}];
+    let user = JSON.parse(localStorage.getItem("loggedInUser")||"{}");
+    // ------------- MASCOT -----------
+    const mascotBubble = document.getElementById('mascotBubble');
+    function showMascotMessage(msg) {
+      mascotBubble.innerText = msg;
+      mascotBubble.classList.add('show');
+      setTimeout(() => mascotBubble.classList.remove('show'), 2200);
+    }
+    // Mascot random blinking
+    setInterval(()=>{
+      const face = document.getElementById('mascotFace');
+      if (Math.random() > 0.84) face.style.filter = 'brightness(1.08) drop-shadow(0 0 16px #ffe066aa)';
+      else face.style.filter = '';
+    }, 1200);
+    // ------------- MENU BUILD ---------
+    function isAdmin() {
+      return adminAccounts.some(acc => acc.username === user.username && acc.password === user.password);
+    }
+    // Progress & unlock
+    let completed = JSON.parse(localStorage.getItem("progress") || "{}");
+    let unlocked = JSON.parse(localStorage.getItem("unlocked") || "{}");
+    // Initial unlock for all admin, only Level 1 Chapter 1 for others
+    if (!user.username) window.location.href = "index.html";
+    if (!completed[user.username]) completed[user.username] = {};
+    if (!unlocked[user.username]) unlocked[user.username] = {1:[1]};
+    if (isAdmin()) { // admin unlocks all
+      unlocked[user.username] = {};
+      for(let l=1;l<=LEVELS;l++) unlocked[user.username][l]=[];
+      for(let l=1;l<=LEVELS;l++) for(let c=1;c<=CHAPTERS;c++) unlocked[user.username][l].push(c);
+    }
+    // Build menu
+    function buildMenu() {
+      let html = "";
+      for (let lvl = 1; lvl <= LEVELS; lvl++) {
+        // Progress for this level
+        const completedChaps = (completed[user.username][lvl] || []).length;
+        let open = (lvl === 1);
+        html += `<li>
+          <div class="level-header${open ? ' open' : ''}" onclick="toggleLevel(${lvl})">
+            <span>📘 Level ${lvl}</span>
+            <span class="progress-bar"><span class="progress-inner" style="width:${completedChaps/CHAPTERS*100}%"></span></span>
+            <span>${completedChaps}/${CHAPTERS}</span>
+          </div>
+          <div class="submenu${open ? ' open' : ''}" id="submenu${lvl}">`;
+        for (let chap = 1; chap <= CHAPTERS; chap++) {
+          let isUnlocked = (isAdmin() || (unlocked[user.username][lvl] && unlocked[user.username][lvl].includes(chap)));
+          let isCompleted = (completed[user.username][lvl] && completed[user.username][lvl].includes(chap));
+          let active = false;
+          html += `<a class="chapter-link${isUnlocked ? " unlocked" : " locked"}${active ? " active" : ""}" href="#" data-lvl="${lvl}" data-chap="${chap}" onclick="openChapter(event,${lvl},${chap})">
+            Chapter ${chap}
+            ${isUnlocked ? (isCompleted ? '<svg width="18" height="18" style="margin-left:8px" fill="none" stroke="#61c53e" stroke-width="2"><circle cx="9" cy="9" r="8" stroke="#61c53e" stroke-width="2"/><path d="M5 10l3 3 5-6" stroke="#61c53e" stroke-width="2"/></svg>' : '') : '<span class="lock-ico"><svg width="18" height="18" fill="none" stroke="#c44" stroke-width="2"><rect x="5" y="8" width="8" height="6" rx="2"/><path d="M9 8V6a3 3 0 016 0v2" /></svg></span>'}
+          </a>`;
+        }
+        html += `</div></li>`;
+      }
+      document.getElementById('menuList').innerHTML = html;
+    }
+    // ---------- MENU INTERACTIONS ----------
+    function toggleLevel(lvl) {
+      for (let l = 1; l <= LEVELS; l++) {
+        let header = document.querySelector(`.level-header:nth-of-type(${l})`);
+        let submenu = document.getElementById(`submenu${l}`);
+        if (header && submenu) {
+          if (l === lvl) {
+            let open = !submenu.classList.contains('open');
+            submenu.classList.toggle('open', open);
+            header.classList.toggle('open', open);
+          } else {
+            submenu.classList.remove('open');
+            header.classList.remove('open');
+          }
+        }
+      }
+    }
+    // ---------- SLIDESHOW LOGIC ----------
+    let slides = [
+      {img:"https://images.unsplash.com/photo-1519125323398-675f0ddb6308?fit=crop&w=900&q=80",caption:"Our students having fun in class!"},
+      {img:"https://images.unsplash.com/photo-1516834474-48c0abc1f6b2?fit=crop&w=900&q=80",caption:"Soroban Competition Winners!"},
+      {img:"https://images.unsplash.com/photo-1503676382389-4809596d5290?fit=crop&w=900&q=80",caption:"Working together and making friends!"},
+    ];
+    let slideIndex = 0;
+    function showSlide(idx) {
+      slideIndex = idx;
+      document.getElementById('slideImg').src = slides[idx].img;
+      document.getElementById('slideCaption').textContent = slides[idx].caption;
+      let dotsHtml = "";
+      for(let i=0;i<slides.length;i++)
+        dotsHtml += `<div class="slide-dot${i===idx?' active':''}" onclick="showSlide(${i})"></div>`;
+      document.getElementById('slideDots').innerHTML = dotsHtml;
+    }
+    function nextSlide() { showSlide((slideIndex+1)%slides.length);}
+    setInterval(nextSlide, 5000);
+    // ---------- CHAPTER PAGE -------------
+    const videoMap = {
+      1: ["K91CRNQg2dg","BbOq___WwNk","kL27V7PmlxI","Y7pPDrJ4ZB8"],
+      2: ["QLHYuklz9Ns","K91CRNQg2dg","kL27V7PmlxI"],
+    };
+    function openChapter(e,lvl,chap) {
+      e.preventDefault();
+      let isUnlocked = (isAdmin() || (unlocked[user.username][lvl] && unlocked[user.username][lvl].includes(chap)));
+      if (!isUnlocked) {
+        showMascotMessage("Finish previous chapters to unlock!");
+        return;
+      }
+      // Show chapter
+      document.getElementById('slideCard').style.display = "none";
+      document.getElementById('chapterMain').style.display = "flex";
+      document.getElementById('chapterTitle').textContent = `Level ${lvl} - Chapter ${chap}`;
+      document.getElementById('videoLabel').textContent = `Chapter ${chap}: ${videoMap[lvl] && videoMap[lvl][chap-1] ? "Special Training" : "Learning"}`;
+      document.getElementById('chapterVideo').src = videoMap[lvl] && videoMap[lvl][chap-1] ? `https://www.youtube.com/embed/${videoMap[lvl][chap-1]}` : "";
+      // EXERCISE button logic:
+      document.getElementById('exerciseBtn').onclick = () => {
+        if (lvl===1 && chap===1)
+          window.location.href = "sorobanquiz.html";
+        else
+          showMascotMessage("This exercise coming soon!");
+      }
+    }
+    // ------- SETTINGS AND LOGOUT -------
+    document.getElementById('settingsBtn').onclick = () => showMascotMessage("Settings coming soon!");
+    document.getElementById('logoutBtn').onclick = () => {
+      localStorage.removeItem("loggedInUser");
+      window.location.href = "index.html";
+    };
+    // ---------- CONFETTI ----------
+    function triggerConfetti() {
+      const node = document.getElementById('confettiBox');
+      node.innerHTML = '';
+      node.style.display = '';
+      const stars = ['✨','⭐','🌟','✦','✺','✧','🟡','💫','🎊','🎉','🦄','🍭','🎈','👏','😺'];
+      for(let i=0;i<44;i++) {
+        const el = document.createElement('span');
+        el.innerText = stars[Math.floor(Math.random()*stars.length)];
+        el.style.left = (Math.random()*97)+'vw';
+        el.style.top = (-40 + Math.random()*12)+'px';
+        el.style.fontSize = (1.9 + Math.random()*2.1)+'rem';
+        el.style.opacity = 0.67 + Math.random()*0.33;
+        el.style.animationDelay = (Math.random()*0.7)+'s';
+        node.appendChild(el);
+      }
+      setTimeout(()=>{ node.style.display='none'; }, 1700);
+      document.getElementById('soundConfetti').play();
+    }
+    // ---------- ONLOAD -------------
+    window.onload = function() {
+      buildMenu();
+      showSlide(0);
+      // Always start on home/slideshow:
+      document.getElementById('slideCard').style.display = "";
+      document.getElementById('chapterMain').style.display = "none";
+    }
+    // ---------- SIGNUP ACCOUNTS PERSIST -----------
+    // This page does not touch signups/logins; use your login logic on index.html.
+  </script>
+</body>
+</html>
