@@ -50,14 +50,13 @@
   background: linear-gradient(to bottom, #fff8c7 70%, #ffe99a 100%) !important;
   filter: brightness(1.06) drop-shadow(0 0 11px #fff7aa77);
 }
-    }
-    .bead.active {
-      background: radial-gradient(circle at 40% 38%, #ffd700 67%, #ffef8b 100%);
-      box-shadow: 0 2px 32px #ffd9ff77, 0 0 0 0 #fff0;
-      filter: drop-shadow(0 0 11px #ffe066aa);
-      border-top: 3px solid #fff4b0;
-      border-bottom: 3px solid #ffe066;
-    }
+.bead.active:not(.dragged) {
+  background: radial-gradient(circle at 40% 38%, #ffd700 67%, #ffef8b 100%) !important;
+  box-shadow: 0 2px 32px #ffd9ff77, 0 0 0 0 #fff0;
+  filter: drop-shadow(0 0 11px #ffe066aa);
+  border-top: 3px solid #fff4b0;
+  border-bottom: 3px solid #ffe066;
+}
     .bead.heaven.active { transform: translateY(100%) scale(1.07);}
     .bead.earth.active { transform: translateY(-150%) scale(1.07);}
     /* Quiz panel card */
