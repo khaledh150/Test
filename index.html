@@ -20,10 +20,15 @@
       overflow: hidden; z-index: 1;
     }
     .soroban {
-      display: flex; justify-content: right; align-items: center;
-      padding: 20px; width: 160%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      padding: 5px; width: 160%; height: 100%;
       background: none !important;
     }
+@media (max-width: 400px) {
+  #abacusRoot {
+    transform: translateX(528px);  /* Change 28px to what you like */
+  }
+}
     .rod {
       position: relative; width: 95px; height: 390px;
       background: rgba(255,255,255,0.58);
