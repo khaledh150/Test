@@ -6,235 +6,441 @@
   <title>Wonder Kids</title>
   <link href="https://fonts.googleapis.com/css?family=Nunito:700,400&display=swap" rel="stylesheet">
   <style>
-    html,body {
-      margin: 0; padding: 0; width: 100vw; height: 100vh;
-      font-family: 'Nunito', Arial, sans-serif;
-      background: #f6f7fa;
-      overflow: hidden;
+    :root {
       --blue: #b4d7ff;
-      --blue-dark: #263965;
-      --blue-btn: #6cc2ff;
-      --blue-light: #e4f1ff;
-      --level-folded: #e4f1ff;
-      --level-open: #b4d7ff;
-      --chapter-selected: #fff3fb;
-      --scrollbar: #93c2fa;
-      --scrollbar-bg: transparent;
-      --chapter-check: #28cb76;
-      --dark-bg: #232347;
-      --dark-top: #232347;
-      --dark-card: #222234;
-      --dark-level: #223255;
-      --dark-blue: #2a3144;
-      --dark-scroll: #435b89;
-      --dark-btn: #273050;
-      --dark-light: #30364a;
-      --dark-chapter-selected: #342d38;
-      --dark-chapter-row: #272643;
-      --dark-text: #ffe066;
+      --blue-dark: #668cff;
+      --pink: #fd90d7;
+      --bg: #f6f7fa;
+      --bg-card: #fff;
+      --chapter-selected: #fff6fa;
+      --level-folded: #e7f4ff;
+      --level-unfolded: #b4d7ff;
+      --level-unfolded-dark: #233454;
+      --scrollbar: #b4d7ffcc;
+      --scrollbar-dark: #344570;
+      --chapter-check: #5be075;
+      --chapter-check-dark: #7bfdc7;
+      --main-text: #3e366b;
+      --main-text-dark: #ffe066;
+      --card-shadow: 0 2px 16px #b993d644;
+      --card-shadow-dark: 0 2px 20px #23234799;
     }
-    body {
-      display: flex; flex-direction: column;
-      width: 100vw; height: 100vh; min-height: 100vh;
-      background: var(--bg, #f6f7fa);
+    body,html {
+      margin: 0; padding: 0; box-sizing: border-box;
+      width: 100vw; height: 100vh;
+      font-family: 'Nunito', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--main-text);
+      overflow: hidden;
+      transition: background .3s, color .3s;
     }
     body.dark {
-      --bg: var(--dark-bg);
-      --level-folded: var(--dark-level);
-      --level-open: var(--blue-dark);
-      --chapter-selected: var(--dark-chapter-selected);
-      --scrollbar: var(--dark-scroll);
-      --scrollbar-bg: transparent;
-      --chapter-check: #28cb76;
-      --top-bg: var(--dark-top);
-      --card-bg: var(--dark-card);
-      --level-bg: var(--dark-level);
-      --btn-bg: var(--dark-btn);
-      --text: var(--dark-text);
+      --bg: #202136;
+      --bg-card: #2d2e48;
+      --chapter-selected: #34314b;
+      --level-folded: #232347;
+      --level-unfolded: #344570;
+      --scrollbar: #344570;
+      --main-text: #ffe066;
+      --card-shadow: 0 2px 20px #23234799;
     }
+    /* --- Top card --- */
     .fixed-top {
-      width: 100vw; max-width: 100vw;
-      min-height: 50vh; max-height: 50vh;
-      background: var(--top-bg, #faf7fe);
-      z-index: 3; position: relative;
-      display: flex; flex-direction: column; align-items: center;
-      box-shadow: 0 2px 18px #c7bae57a;
-      transition: min-height .3s, background .3s;
+      width: 100vw; min-width: 100vw; max-width: 100vw;
+      min-height: 50vh; max-height: 50vh; height: 50vh;
+      background: var(--bg-card);
+      box-shadow: var(--card-shadow);
+      z-index: 3;
+      position: relative;
+      padding: 0;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      transition: background .3s, min-height .3s, max-height .3s;
       overflow: hidden;
     }
     .topbar-btns {
-      position: absolute; top: 18px; right: 18px;
-      display: flex; align-items: center; z-index: 10; gap: 13px;
+      position: absolute;
+      top: 12px; right: 15px;
+      display: flex; gap: 15px;
+      z-index: 100;
     }
     .icon-btn {
-      background: #e7f2ffcc; border-radius: 50%;
-      width: 40px; height: 40px;
-      border: none; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 7px #b993d62a;
-      cursor: pointer; transition: background .17s, transform .11s;
+      background: #f3f6fc;
+      border-radius: 50%;
+      width: 41px; height: 41px;
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 7px #b993d62a;
+      cursor: pointer;
+      transition: background .16s, transform .11s;
+      margin-left: 3px;
     }
-    .icon-btn:active { background: #6cc2ff; transform: scale(1.08);}
-    .icon-btn svg { width: 25px; height: 25px; display: block; }
+    .icon-btn:active, .icon-btn.active {
+      background: var(--pink);
+      transform: scale(1.09);
+    }
+    .icon-btn svg { width: 25px; height: 25px; }
+    /* Top content */
     .top-content-area {
-      width: 99vw; max-width: 790px;
-      margin: 65px auto 0 auto; border-radius: 17px;
-      background: var(--card-bg,#fff);
-      box-shadow: 0 2px 16px #b993d644;
-      display: flex; flex-direction: column; align-items: center;
-      transition: height .3s, background .3s;
-      min-height: 260px; height: calc(50vh - 85px);
-      overflow: hidden;
+      width: 100vw; height: 100%; max-width: 100vw; max-height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      background: none; box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+      position: absolute; left: 0; top: 0;
     }
     .top-title {
-      text-align: center; font-size: 2rem;
-      color: #8d79c9; font-weight: 700;
-      margin: 8px 0 13px 0; letter-spacing: 0.03em;
-      transition: color .2s;
+      text-align: center;
+      font-size: 2.15rem;
+      color: #8d79c9;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.01em;
+      width: 100vw;
+      position: relative; top: 15px;
+      z-index: 2;
     }
-    body.dark .top-title { color: var(--dark-text);}
-    .slideshow-img-area { width: 99%; min-height: 180px; max-height: 360px; display: flex; justify-content: center; align-items: center; margin: 0 0 15px 0; position: relative; overflow: hidden; }
-    .slideshow-img { width: 100%; height: 220px; object-fit: cover; border-radius: 15px; box-shadow: 0 2px 16px #b993d624; opacity: 0; position: absolute; transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s; left: 0; top: 0; z-index: 1;}
+    /* Slideshow */
+    .slideshow-img-area {
+      width: 97vw; height: 35vh; min-height: 180px; max-height: 35vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      margin: 0 auto 0 auto;
+    }
+    .slideshow-img {
+      width: 99%; height: 97%;
+      object-fit: cover;
+      border-radius: 18px;
+      box-shadow: 0 2px 16px #b993d624;
+      opacity: 0;
+      position: absolute;
+      left: 1%; top: 0;
+      transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s;
+      z-index: 1;
+    }
     .slideshow-img.active { opacity: 1; z-index: 2; transform: scale(1.04);}
-    .slideshow-dots { display: flex; gap: 9px; justify-content: center; margin: 10px 0 0 0;}
-    .slideshow-dot { width: 13px; height: 13px; background: #b4d7ff; border-radius: 7px; border: 2px solid #b993d6; box-shadow: 0 2px 7px #b993d64a; cursor: pointer; transition: background .16s; opacity: 0.59;}
-    .slideshow-dot.active { background: #fd90d7; opacity: 1;}
-    /* VIDEO/CHAPTER */
-    .chapter-video { width: 99%; max-width: 720px; aspect-ratio: 16/9; background: #ddd; border-radius: 13px; box-shadow: 0 3px 13px #b993d63c; border: 5px solid #b993d6; margin: 0 auto 18px auto; display: block; transition: height .3s, width .3s;}
-    .chapter-btns { display: flex; gap: 15px; margin: 9px auto 0 auto; justify-content: center; align-items: center;}
-    .main-btn {
-      background: var(--blue-btn); color: #234078;
-      border: none; font-size: 1.13rem; font-weight: 700; border-radius: 15px;
-      box-shadow: 0 2px 11px #bdd6ff1c;
-      padding: 0.8em 2.2em; margin: 0; outline: none;
-      cursor: pointer; transition: background .14s, color .14s, transform .11s; letter-spacing: .01em;
-      min-width: 7em; display: flex; align-items: center; justify-content: center; position: relative;
+    .slideshow-dots {
+      display: flex; gap: 9px;
+      justify-content: center; margin: 6px 0 0 0;
+      position: absolute; left: 0; right: 0; bottom: 8px;
+      width: 100%; z-index: 3;
     }
-    .main-btn:active { background: #fd90d7; color: #fff; transform: scale(1.07);}
-    .main-btn .btn-check { margin-left: 9px;}
-    .main-btn .btn-check svg { width: 17px; height: 17px; vertical-align: -3px;}
-    /* Levels & Chapters */
-    .levels-area { flex: 1 1 0; width: 100vw; max-width: 100vw; min-height: 0; background: none; display: flex; flex-direction: column; align-items: center; overflow: hidden;}
-    .levels-scroll-area { width: 99vw; max-width: 580px; margin: 0 auto; padding: 8px 0 26px 0; overflow-y: auto; flex: 1; height: 100%; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--scrollbar-bg);}
-    .levels-scroll-area::-webkit-scrollbar { width: 6px; background: var(--scrollbar-bg);}
-    .levels-scroll-area::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px;}
-    .levels-scroll-area::-webkit-scrollbar-track { background: var(--scrollbar-bg);}
-    .level-card { background: var(--level-folded); border-radius: 21px; margin: 14px 0; box-shadow: 0 2px 12px #e5d3ff23; padding: 0 0 7px 0; width: 97%; max-width: 520px; transition: background .16s, box-shadow .13s; position: relative;}
-    .level-card.open { background: var(--level-open);}
-    .level-header-row { display: flex; align-items: center; height: 48px; cursor: pointer; font-size: 1.22rem; font-weight: 800; color: #668cff; padding: 0 17px; border-radius: 24px 24px 0 0; transition: background .13s, color .13s; position: relative; user-select: none; min-height: 48px;}
-    .level-card.open .level-header-row { color: #fff;}
-    .level-icon { width: 24px; height: 24px; margin-right: 13px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.43em; box-shadow: 0 2px 7px #8ca6db2b;}
-    .level-name { font-weight: 700; margin-right: 8px; letter-spacing: 0.01em; flex-shrink: 0;}
-    .level-progress { flex: 1; margin: 0 0 0 10px; height: 8.7px; background: #ede3ff; border-radius: 7px; max-width: 110px; position: relative; display: flex; align-items: center;}
-    .level-progress-bar { background: linear-gradient(90deg,#ffe066 30%,#28cb76 100%); height: 100%; border-radius: 7px; transition: width .4s cubic-bezier(.71,1.14,.53,.93); box-shadow: 0 1px 4px #ffd70036;}
-    .level-arrow { margin-left: 14px; font-size: 1.43rem; color: #8ca6db; transition: transform .15s; user-select: none;}
+    .slideshow-dot {
+      width: 13px; height: 13px; background: var(--blue);
+      border-radius: 7px; border: 2px solid #b993d6;
+      box-shadow: 0 2px 7px #b993d64a;
+      cursor: pointer; transition: background .16s;
+      opacity: 0.59;
+    }
+    .slideshow-dot.active { background: var(--pink); opacity: 1; }
+    /* --- Chapter view --- */
+    .chapter-view-card {
+      width: 97vw; height: 97%; max-width: 900px;
+      margin: 0 auto; background: none; box-shadow: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+      position: relative; padding: 0;
+    }
+    .chapter-view-title {
+      text-align: center;
+      font-size: 1.38em;
+      color: #8d79c9;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: 0.01em;
+      width: 100%;
+      position: relative;
+      top: 2vw;
+    }
+    .chapter-video-area {
+      width: 98vw; max-width: 860px; aspect-ratio: 16/9;
+      display: flex; justify-content: center; align-items: center;
+      margin: 0 auto 0 auto;
+      background: #222; border-radius: 16px;
+      box-shadow: 0 2px 11px #b993d63c;
+      overflow: hidden;
+      margin-top: 1vw;
+      position: relative;
+    }
+    .chapter-video-area iframe {
+      width: 100%; height: 100%;
+      border: none;
+      border-radius: 16px;
+      background: #222;
+      display: block;
+    }
+    .chapter-btns {
+      display: flex; gap: 15px; margin: 13px auto 0 auto;
+      justify-content: center; align-items: center;
+      position: relative; top: 1vw;
+    }
+    .main-btn {
+      background: var(--blue);
+      color: #4d528e;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border-radius: 16px;
+      box-shadow: 0 2px 12px #bdd6ff1c;
+      padding: 0.7em 2.2em;
+      margin: 0;
+      outline: none;
+      cursor: pointer;
+      transition: background .14s, color .14s, transform .12s;
+      letter-spacing: .01em;
+      min-width: 7em;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .main-btn:active, .main-btn.active {
+      background: var(--pink);
+      color: #fff;
+      transform: scale(1.08);
+    }
+    .main-btn .btn-check {
+      margin-left: 11px;
+      width: 21px; height: 21px; display: inline-flex; vertical-align: middle;
+    }
+    /* --- Levels & Chapters --- */
+    .levels-area {
+      width: 100vw; height: 50vh; min-height: 50vh; max-height: 50vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      background: none; position: relative;
+      z-index: 2;
+    }
+    .levels-scroll-area {
+      width: 99vw; max-width: 640px;
+      margin: 0 auto; padding: 12px 0 0 0;
+      overflow-y: auto; height: 100%; max-height: 50vh;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar) #fff0;
+      transition: scrollbar-color .3s;
+    }
+    .levels-scroll-area::-webkit-scrollbar { width: 7px; background: none;}
+    .levels-scroll-area::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px; }
+    .levels-scroll-area::-webkit-scrollbar-track { background: none;}
+    .levels-scroll-area:active::-webkit-scrollbar-thumb,
+    .levels-scroll-area:focus::-webkit-scrollbar-thumb,
+    .levels-scroll-area:hover::-webkit-scrollbar-thumb {
+      background: var(--blue-dark);
+    }
+    /* --- Level card --- */
+    .level-card {
+      background: var(--level-folded);
+      border-radius: 23px;
+      margin: 13px 0;
+      box-shadow: 0 2px 14px #f0c9fd32;
+      padding: 0 0 10px 0;
+      width: 98%; max-width: 540px;
+      transition: background .18s, box-shadow .15s;
+      position: relative;
+      border: none;
+    }
+    .level-card.open {
+      background: var(--level-unfolded);
+      box-shadow: 0 4px 24px #b993d6aa;
+    }
+    .level-header-row {
+      display: flex;
+      align-items: center;
+      height: 48px;
+      cursor: pointer;
+      font-size: 1.23rem;
+      font-weight: 800;
+      color: #668cff;
+      padding: 0 18px;
+      border-radius: 23px 23px 0 0;
+      transition: background .13s, color .13s;
+      position: relative;
+      user-select: none;
+      min-height: 48px;
+      background: transparent;
+    }
+    .level-card.open .level-header-row { color: #fff; background: var(--level-unfolded);}
+    .level-icon {
+      width: 27px; height: 27px; margin-right: 13px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5em;
+      box-shadow: 0 2px 7px #8ca6db2b;
+    }
+    .level-name { font-weight: 700; margin-right: 11px; letter-spacing: 0.01em; flex-shrink: 0; }
+    .level-progress {
+      flex: 1; margin: 0 0 0 10px; height: 10px;
+      background: #ede3ff; border-radius: 7px;
+      max-width: 120px; position: relative; display: flex; align-items: center;
+    }
+    .level-progress-bar {
+      background: linear-gradient(90deg,#ffe066 30%,#b4d7ff 100%);
+      height: 100%; border-radius: 7px;
+      transition: width .5s cubic-bezier(.71,1.14,.53,.93);
+      box-shadow: 0 1px 4px #ffd70036;
+    }
+    .level-arrow {
+      margin-left: 17px;
+      font-size: 1.45rem;
+      color: #8ca6db;
+      transition: transform .18s;
+      user-select: none;
+    }
     .level-card.open .level-arrow { color: #fff;}
     .level-card.closed .level-arrow { transform: rotate(90deg);}
-    .chapters-list { width: 96%; margin: 0 auto 0 auto; display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; transition: max-height .25s; padding: 3px 0 8px 0; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--scrollbar-bg);}
-    .chapters-list::-webkit-scrollbar { width: 4px; background: var(--scrollbar-bg);}
-    .chapters-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px;}
-    .chapter-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 12px; box-shadow: 0 1px 7px #b993d629; padding: 0.52em 1em; font-size: 1.08rem; font-weight: 700; margin: 0; border: 1.7px solid #b4d7ff; color: #668cff; transition: background .13s, color .13s, border .12s, transform .12s; cursor: pointer; min-height: 33px; position: relative;}
-    .chapter-row.completed { color: #28cb76; border: 1.7px solid #28cb76;}
-    .chapter-row.active, .chapter-row.unlocked:hover, .chapter-row.unlocked:focus { background: var(--chapter-selected); color: #e6689c; border: 1.8px solid #fd90d7; transform: scale(1.03);}
-    .chapter-row .chapter-check { margin-left: 7px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--chapter-check);}
-    /* Responsive */
-    @media (max-width: 750px) {
-      .top-content-area { max-width: 99vw;}
-      .levels-scroll-area { max-width: 99vw;}
-      .level-card { max-width: 97vw;}
-      .chapter-video { max-width: 98vw;}
+    /* --- Chapters --- */
+    .chapters-list {
+      width: 95%; margin: 0 auto 0 auto;
+      display: flex; flex-direction: column; gap: 8px;
+      max-height: 290px; overflow-y: auto;
+      transition: max-height .27s; padding: 4px 0 10px 0;
+      scrollbar-width: none;
     }
-    @media (max-width: 500px) {
-      .fixed-top { min-height: 53vw; max-height: 58vw;}
-      .top-content-area { border-radius: 0 0 15px 15px; padding: 7px 0vw 7px 0vw; margin: 50px auto 0 auto; min-height: 43vw;}
-      .chapter-video { height: 34vw !important; }
+    .chapters-list::-webkit-scrollbar { display: none; }
+    .chapter-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 1px 7px #b993d629;
+      padding: 0.58em 1em;
+      font-size: 1.13rem;
+      font-weight: 700;
+      margin: 0;
+      border: 1.5px solid #b4d7ff;
+      color: #668cff;
+      transition: background .13s, color .12s, border .12s, transform .13s;
+      cursor: pointer; min-height: 34px; position: relative;
+    }
+    .chapter-row.selected, .chapter-row:hover, .chapter-row:focus {
+      background: var(--chapter-selected);
+      color: #8d79c9;
+      border: 1.5px solid #fd90d7;
+      z-index: 2;
+      transform: scale(1.03);
+    }
+    .chapter-row.completed {
+      color: #aaa;
+      border: 1.5px solid var(--chapter-check);
+    }
+    .chapter-row .chapter-check {
+      margin-left: 13px;
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--chapter-check);
+    }
+    /* Responsive: phone/tablet horizontal, top area fills screen */
+    @media (orientation: landscape) and (max-width: 950px) {
+      .fixed-top {
+        min-height: 100vh !important; max-height: 100vh !important; height: 100vh !important;
+        background: var(--bg-card);
+        padding: 0;
+      }
+      .top-content-area { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; }
+      .chapter-view-card, .slideshow-img-area { width: 100vw !important; }
+      .chapter-video-area { width: 100vw !important; height: 66vw !important; max-width: 100vw !important; }
+      .levels-area { display: none !important; }
+    }
+    @media (max-width: 760px) {
+      .fixed-top, .levels-area { max-width: 100vw; }
       .levels-scroll-area { max-width: 100vw;}
       .level-card { max-width: 100vw;}
+      .chapter-video-area { max-width: 99vw; }
     }
-    /* Fullscreen mode (body.fullscreen) */
-    body.fullscreen, body.fullscreen .fixed-top { min-height: 100vh !important; height: 100vh !important; max-height: 100vh !important; }
-    body.fullscreen .top-content-area { height: 98vh !important; min-height: 85vh !important; max-width: 100vw; border-radius: 0; margin: 0 auto;}
-    body.fullscreen .chapter-video { width: 99vw; max-width: 99vw; height: 60vw !important; max-height: 79vh;}
-    body.fullscreen .levels-area { display: none !important;}
-    body.fullscreen .topbar-btns { top: 15px; right: 16px;}
-    /* Settings modal */
+    @media (max-width: 540px) {
+      .fixed-top, .levels-area { max-width: 100vw;}
+      .chapter-view-title { font-size: 1.08em;}
+    }
+    /* --- Settings Modal --- */
     #settingsModal {
-      display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; z-index:1000; background:#0004;
+      display: none; position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1100;
+      background:#0007; align-items: center; justify-content: center;
     }
-    .settings-box {
-      background: #fff; padding: 1.5em 1.5em 1.1em 1.5em; min-width:300px; max-width:340px; border-radius:18px;
-      box-shadow: 0 4px 40px #b993d658; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      display: flex; flex-direction: column; gap: 1.3em; align-items:center;
+    #settingsModal.show { display: flex;}
+    .settings-panel {
+      background: var(--bg-card);
+      border-radius: 2em;
+      padding: 2em 2.2em 1.2em 2.2em;
+      min-width: 340px; max-width: 95vw;
+      box-shadow: 0 8px 34px #b993d658;
+      display: flex; flex-direction: column; gap: 1.2em;
+      align-items: center;
+      position: relative;
     }
-    body.dark .settings-box { background: var(--dark-light);}
-    .settings-title {
-      font-weight:800; font-size:1.3em; color:#8d79c9; margin-bottom:0.7em; text-align:center; width: 100%;
+    .settings-close-btn {
+      position: absolute; top: 18px; right: 16px;
+      background: none; border: none; font-size: 2.1em;
+      color: #b993d6;
+      cursor: pointer;
+      z-index: 3;
     }
-    body.dark .settings-title { color:var(--dark-text);}
-    .settings-x {
-      position: absolute; top: 1.1em; right: 1.4em; background: none; border: none; font-size: 1.9em; color: #b993d6; cursor: pointer; z-index: 3;
-      border-radius: 50%; padding: 0 0.2em;
-      transition: background .12s;
-    }
-    .settings-x:active { background: #f5e8fd;}
+    .settings-title { font-weight:800; font-size:1.37em; color:#8d79c9;margin-bottom:1em;text-align:center; }
     .settings-row {
-      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1em;
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1.1em;
+      margin-bottom: 1em;
     }
-    .settings-row label { font-size: 1.09rem; color: #7785d7; font-weight: 700;}
-    body.dark .settings-row label { color: #ffe066;}
-    .settings-box select, .settings-box button, .settings-box input[type="range"] {
-      background: #e2eefd; color: #4d528e; border-radius: 1.2em; box-shadow: 0 3px 14px #bdd6ff14; font-size: 1.07rem;
-      font-weight: 700; border: none; padding: 0.43em 1.1em; margin-left: 0.3em; outline: none; cursor: pointer; min-width: 2.8em;
-      transition: background .12s, color .12s;
+    .settings-label { font-size:1.09em; font-weight:700; color: #668cff; }
+    .settings-switch, .settings-select, .settings-slider {
+      border-radius: 1.5em; font-size:1em; border: none; outline: none;
+      background: var(--blue); color:#3e366b; padding: 0.39em 1.2em;
+      transition: background .15s, color .15s;
+      box-shadow: 0 2px 12px #bdd6ff24;
+      margin-left: 0.5em;
     }
-    .settings-box select:active, .settings-box button:active, .settings-box input[type="range"]:active { background: #b4d7ff; color: #fff;}
-    .settings-logout { margin: 0.7em 0 0 0; width: 100%; text-align: center;}
-    .settings-logout-btn { background: #fd90d7; color: #fff; font-size: 1.1em; padding: 0.7em 2.6em; border-radius: 15px; border: none; box-shadow: 0 2px 10px #fd90d748; cursor: pointer; margin: 0 auto;}
-    .settings-logout-btn:active { background: #ff4786;}
+    .settings-switch:active, .settings-select:active, .settings-slider:active {
+      background: var(--pink); color: #fff;
+    }
+    .settings-select { min-width: 6em;}
+    .settings-slider { width: 95px; height: 7px; }
+    .settings-logout-btn {
+      background: var(--blue-dark); color: #fff; font-size:1.1em;
+      font-weight:700; border: none; border-radius: 1.5em;
+      padding: 0.5em 2.2em; margin-top: 2.2em;
+      transition: background .15s, color .13s;
+      box-shadow: 0 2px 13px #b993d62b;
+      cursor: pointer;
+    }
+    .settings-logout-btn:active { background: var(--pink);}
   </style>
 </head>
 <body>
-  <div class="fixed-top">
+  <!-- Top/fixed area -->
+  <div class="fixed-top" id="fixedTop">
     <div class="topbar-btns">
       <button class="icon-btn" id="settingsBtn" title="Settings">
-        <svg viewBox="0 0 24 24"><g><circle cx="12" cy="12" r="9" fill="#b993d6"/><path d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm0 5.4a1.9 1.9 0 110-3.8 1.9 1.9 0 010 3.8z" fill="#fff"/></g></svg>
+        <svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#b993d6" stroke-width="2"/><path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z" fill="#668cff"/><path d="M21.3 13.06a1 1 0 0 1-.13 1.15l-1.46 1.86a1 1 0 0 1-1.31.28l-2.17-.98a7.02 7.02 0 0 1-1.44.84l-.36 2.37A1 1 0 0 1 13 20h-2a1 1 0 0 1-1-.83l-.36-2.37a7.02 7.02 0 0 1-1.44-.84l-2.17.98a1 1 0 0 1-1.31-.28l-1.46-1.86a1 1 0 0 1-.13-1.15l1.14-2a7.01 7.01 0 0 1 0-1.68l-1.14-2a1 1 0 0 1 .13-1.15l1.46-1.86a1 1 0 0 1 1.31-.28l2.17.98a7.02 7.02 0 0 1 1.44-.84l.36-2.37A1 1 0 0 1 11 4h2a1 1 0 0 1 1 .83l.36 2.37a7.02 7.02 0 0 1 1.44.84l2.17-.98a1 1 0 0 1 1.31.28l1.46 1.86a1 1 0 0 1 .13 1.15l-1.14 2c.06.27.09.54.09.82s-.03.55-.09.82l1.14 2Z" fill="#b993d6"/></svg>
       </button>
-      <button class="icon-btn" id="fullscreenBtn" title="Full Screen">
-        <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="3.5" y="3.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="14.5" y="3.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="18.5" y="3.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="3.5" y="18.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="3.5" y="14.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="14.5" y="18.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="18.5" y="14.5" width="2" height="6" rx="1" fill="#6cc2ff"/></svg>
+      <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="2" fill="#668cff"/><rect x="14" y="3" width="7" height="7" rx="2" fill="#668cff"/><rect x="3" y="14" width="7" height="7" rx="2" fill="#668cff"/><rect x="14" y="14" width="7" height="7" rx="2" fill="#668cff"/></svg>
       </button>
     </div>
     <div class="top-content-area" id="topContentArea"><div id="topContent"></div></div>
   </div>
+  <!-- Levels/chapters scroll area -->
   <div class="levels-area">
     <div class="levels-scroll-area" id="levelsScrollArea"></div>
   </div>
-  <!-- Settings Modal -->
+  <!-- Settings modal -->
   <div id="settingsModal">
-    <div class="settings-box">
-      <button class="settings-x" onclick="closeSettings()">&times;</button>
+    <div class="settings-panel">
+      <button class="settings-close-btn" onclick="closeSettings()">&times;</button>
       <div class="settings-title">Settings</div>
       <div class="settings-row">
-        <label>Font Size</label>
-        <input id="fontSizeSlider" type="range" min="0.95" max="1.25" step="0.01" value="1" />
+        <span class="settings-label">Mode</span>
+        <button class="settings-switch" id="darkToggle">Dark/Light</button>
       </div>
       <div class="settings-row">
-        <label>Dark Mode</label>
-        <input type="checkbox" id="darkModeSwitch" style="width:26px;height:26px;border-radius:15px;"/>
-      </div>
-      <div class="settings-row">
-        <label>Language</label>
-        <select id="langSelect">
-          <option value="en">English</option>
-          <option value="th">ไทย</option>
-          <option value="zh">中文</option>
+        <span class="settings-label">Language</span>
+        <select class="settings-select" id="langSelect">
+          <option>English</option>
+          <option>ไทย</option>
         </select>
       </div>
-      <div class="settings-logout">
-        <button class="settings-logout-btn" onclick="logout()">Log out</button>
+      <div class="settings-row">
+        <span class="settings-label">Font Size</span>
+        <input type="range" id="fontSizeSlider" min="0.95" max="1.21" step="0.01" value="1.0" class="settings-slider">
       </div>
+      <button class="settings-logout-btn" onclick="logout()">Log Out</button>
     </div>
   </div>
   <script>
-    // --- Level data: 10 levels, level 1=20 chapters, rest=10, all unlocked, session progress
+    // --- Data
     const bookIcons = [
       {color:'#5bb3ff',icon:'📘'},
       {color:'#6ccc88',icon:'📗'},
@@ -250,206 +456,174 @@
     const levelData = [];
     for(let i=1;i<=10;i++) {
       const nCh = i===1?20:10;
-      let chArr = [];
-      for(let j=0;j<nCh;j++){
-        chArr.push({
-          title:'Chapter '+(j+1),
-          videoWatched:false,
-          exerciseDone:false
-        });
-      }
       levelData.push({
         name:'Level '+i,
-        chapters:chArr,
-        progress:0, open:i===1
+        chapters: Array.from({length:nCh},(_,j)=>({
+          title:'Chapter '+(j+1),
+          completed:false,
+          exerciseDone:false,
+          watched:false,
+          unlocked:true // all unlocked
+        })),
+        open:(i===1)
       });
     }
-
-    // -- Slides for welcome
-    const slides=[
+    // Slides
+    const slides = [
       "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
       "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
       "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
     ];
-    let slideIdx=0;
-    let selected={level:0,chapter:0},showingChapter=false;
-    // -- Try to restore progress
-    if(sessionStorage.getItem('wkprogress')){
-      const saved=JSON.parse(sessionStorage.getItem('wkprogress'));
-      for(let i=0;i<levelData.length;i++)
-        for(let j=0;j<levelData[i].chapters.length;j++)
-          if(saved[i]&&saved[i][j])
-            Object.assign(levelData[i].chapters[j],saved[i][j]);
-    }
 
-    // -- Top area rendering
-    function renderTop(){
+    // --- State
+    let selected={level:0,chapter:0}, showingChapter=false, slideIdx=0;
+    function checkSvg() {
+      return `<svg width="19" height="19" viewBox="0 0 19 19"><circle cx="9.5" cy="9.5" r="9" fill="#51e77d" stroke="#44d77e"/><path d="M5.5 11.2l2.4 2 5.6-5.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+    }
+    // --- Top: Slideshow or chapter
+    function renderTop() {
       const tc=document.getElementById('topContent');
       tc.innerHTML='';
-      if(!showingChapter){
+      if(!showingChapter) {
         tc.innerHTML=`
           <div class="top-title">Welcome to Wonder Kids!</div>
-          <div class="slideshow-img-area">
-            ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}"/>`).join('')}
+          <div class="slideshow-img-area" style="margin-top:10px;">
+            ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}" />`).join('')}
           </div>
           <div class="slideshow-dots">
             ${slides.map((_,i)=>`<span class="slideshow-dot${i===slideIdx?' active':''}" onclick="goSlide(${i})"></span>`).join('')}
           </div>
         `;
-      }else{
+      } else {
         const lvl=levelData[selected.level], ch=lvl.chapters[selected.chapter];
         tc.innerHTML=`
-          <div class="top-title">${lvl.name} - ${ch.title}</div>
-          <iframe class="chapter-video" id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen onload="chapterWatched()"></iframe>
-          <div class="chapter-btns">
-            <button class="main-btn" onclick="goExercise()">EXERCISE${ch.exerciseDone?'<span class="btn-check">'+checkSvg()+'</span>':''}</button>
-            ${selected.chapter<lvl.chapters.length-1?'<button class="main-btn" onclick="goNextChapter()">NEXT</button>':''}
+          <div class="chapter-view-card">
+            <div class="chapter-view-title">${lvl.name} - ${ch.title}</div>
+            <div class="chapter-video-area">
+              <iframe id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen></iframe>
+            </div>
+            <div class="chapter-btns">
+              <button class="main-btn" id="exerciseBtn">EXERCISE${ch.exerciseDone?'<span class="btn-check">'+checkSvg()+'</span>':''}</button>
+              ${selected.chapter<lvl.chapters.length-1?'<button class="main-btn" onclick="goNextChapter()">NEXT</button>':''}
+            </div>
           </div>
         `;
-        // Mark video as watched when video is visible
-        setTimeout(()=>chapterWatched(),300);
+        setTimeout(()=>{
+          document.getElementById('exerciseBtn').onclick = function() {
+            // Mark exercise done and watched
+            ch.exerciseDone=true; ch.completed=true; ch.watched=true;
+            renderLevels(); renderTop();
+            window.open("sorobanquiz.html","_blank");
+          }
+        },15);
       }
     }
-    function chapterWatched(){
-      if(!showingChapter) return;
-      let ch=levelData[selected.level].chapters[selected.chapter];
-      if(!ch.videoWatched){
-        ch.videoWatched=true;
-        updateProgress(); renderLevels();
-        saveProgress();
-      }
-    }
-    // -- Check SVG
-    function checkSvg(){return `<svg width="17" height="17" viewBox="0 0 17 17"><circle cx="8.5" cy="8.5" r="8" fill="#28cb76"/><path d="M5.1 8.6l2 2 5-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
-    // -- Slideshow
-    window.goSlide=i=>{slideIdx=i; renderTop();}
-    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5000);
-
-    // -- Levels/chapters rendering
-    function renderLevels(){
-      // Calculate progress
-      for(let i=0;i<levelData.length;i++){
-        let lvl=levelData[i];
-        const n=lvl.chapters.length;
-        const nDone=lvl.chapters.filter(c=>c.videoWatched&&c.exerciseDone).length;
-        lvl.progress=nDone/n;
-      }
-      // Render levels/chapters
+    // --- Levels & chapters
+    function renderLevels() {
       const area=document.getElementById('levelsScrollArea');
       area.innerHTML='';
-      for(let i=0;i<levelData.length;i++){
+      for(let i=0;i<levelData.length;i++) {
         const lvl=levelData[i],book=bookIcons[i%bookIcons.length];
+        // Progress: % of chapters completed
+        const n= lvl.chapters.length, nDone=lvl.chapters.filter(c=>c.completed).length;
+        const progress = nDone/n;
+        // Level tab
         area.innerHTML+=`
           <div class="level-card${lvl.open?' open':' closed'}" id="levelCard${i}">
-            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?book.color:'#e4f1ff'};">
+            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?'var(--level-unfolded)':'var(--level-folded)'};">
               <span class="level-icon" style="background:${book.color};">${book.icon}</span>
               <span class="level-name">${lvl.name}</span>
-              <span class="level-progress"><span class="level-progress-bar" style="width:${Math.round(lvl.progress*100)}%;"></span></span>
-              <span class="level-arrow">${lvl.open?'▴':'▾'}</span>
+              <span class="level-progress"><span class="level-progress-bar" style="width:${Math.round(progress*100)}%;"></span></span>
+              <span class="level-arrow" id="levelArrow${i}">${lvl.open?'▴':'▾'}</span>
             </div>
             <div class="chapters-list" id="chaptersList${i}" style="display:${lvl.open?'flex':'none'};">
               ${lvl.chapters.map((ch,j)=>{
                 let classes="chapter-row";
-                if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' active';
-                if(ch.videoWatched&&ch.exerciseDone) classes+=' completed';
-                else classes+=' unlocked';
+                if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' selected';
+                if(ch.completed) classes+=' completed';
                 return `<div class="${classes}" onclick="selectChapter(event,${i},${j})">
                   <span>${ch.title}</span>
-                  ${(ch.videoWatched&&ch.exerciseDone)?`<span class="chapter-check">${checkSvg()}</span>`:''}
+                  ${ch.completed?`<span class="chapter-check">${checkSvg()}</span>`:''}
                 </div>`;
               }).join('')}
             </div>
           </div>
         `;
       }
+      // Scroll to current chapter if showing
+      if(showingChapter){
+        const sel=document.querySelector('.chapter-row.selected');
+        if(sel) sel.scrollIntoView({block:'nearest',behavior:'smooth'});
+      }
     }
+    // -- Handle toggling levels
     window.toggleLevel=function(i){
       for(let j=0;j<levelData.length;j++){
         levelData[j].open=(j===i)?!levelData[j].open:false;
         document.getElementById('chaptersList'+j).style.display=levelData[j].open?'flex':'none';
         document.getElementById('levelCard'+j).className='level-card'+(levelData[j].open?' open':' closed');
+        document.getElementById('levelArrow'+j).textContent=levelData[j].open?'▴':'▾';
       }
     };
+    // -- Handle selecting chapter
     window.selectChapter=function(e,li,ci){
-      showingChapter=true; selected={level:li,chapter:ci};
-      renderTop(); renderLevels(); e.stopPropagation();
+      selected={level:li,chapter:ci};
+      showingChapter=true;
+      renderTop(); renderLevels();
+      e.stopPropagation();
     };
-    // -- EXERCISE (open quiz.html)
-    window.goExercise=function(){
-      let ch=levelData[selected.level].chapters[selected.chapter];
-      ch.exerciseDone=true;
-      updateProgress(); renderLevels(); renderTop();
-      saveProgress();
-      window.open('sorobanquiz.html','_blank');
-    }
-    // -- NEXT button
+    // -- NEXT BUTTON LOGIC
     window.goNextChapter=function(){
       const {level:l,chapter:c}=selected;
       if(levelData[l].chapters[c+1]) {
         selected={level:l,chapter:c+1}; showingChapter=true;
         renderTop(); renderLevels();
-        document.querySelector(`#levelCard${l} .chapters-list`).scrollTo({top: 44*(c+1)-16,behavior:'smooth'});
       }
     }
-    function updateProgress(){ /* nothing needed, logic is live in renderLevels() */ }
-    function saveProgress(){
-      let d=levelData.map(lvl=>lvl.chapters.map(ch=>({videoWatched:ch.videoWatched,exerciseDone:ch.exerciseDone})));
-      sessionStorage.setItem('wkprogress',JSON.stringify(d));
-    }
-    // --- Fullscreen logic
-    document.getElementById('fullscreenBtn').onclick=()=>{
-      if(!document.fullscreenElement){
-        document.documentElement.requestFullscreen();
-        document.body.classList.add('fullscreen');
-      }else{
-        document.exitFullscreen();
-        document.body.classList.remove('fullscreen');
+    // -- Go to slide
+    window.goSlide=function(i){ slideIdx=i; renderTop();}
+    // -- Slideshow auto-rotate
+    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5000);
+
+    // -- Fullscreen logic (for the whole page)
+    document.getElementById('fullscreenBtn').onclick = ()=>{
+      const el = document.documentElement;
+      if (!document.fullscreenElement) {
+        if(el.requestFullscreen) el.requestFullscreen();
+        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      } else {
+        if(document.exitFullscreen) document.exitFullscreen();
+        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
       }
     };
-    document.addEventListener('fullscreenchange',()=>{
-      if(!document.fullscreenElement) document.body.classList.remove('fullscreen');
-      else document.body.classList.add('fullscreen');
-    });
-    // -- Auto full-video on horizontal mobile/tablet
-    function updateOrientation(){
-      if(window.matchMedia("(orientation: landscape)").matches && window.innerWidth<850){
-        // landscape on mobile/tablet: full video only
-        document.body.classList.add('fullscreen');
-      }else{
-        document.body.classList.remove('fullscreen');
-      }
+    // -- Settings modal
+    document.getElementById('settingsBtn').onclick=()=>{document.getElementById('settingsModal').classList.add('show');}
+    function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
+    // -- Dark/Light mode
+    document.getElementById('darkToggle').onclick=()=>{
+      document.body.classList.toggle('dark');
     }
-    window.addEventListener('orientationchange',updateOrientation);
-    window.addEventListener('resize',updateOrientation);
-
-    // --- Settings modal logic
-    document.getElementById('settingsBtn').onclick=()=>{document.getElementById('settingsModal').style.display='block';};
-    function closeSettings(){document.getElementById('settingsModal').style.display='none';}
-    document.getElementById('fontSizeSlider').oninput=e=>{
+    // -- Font size
+    document.getElementById('fontSizeSlider').oninput=(e)=>{
       document.documentElement.style.fontSize = e.target.value+'rem';
-      sessionStorage.setItem('wkfontsize',e.target.value);
     };
-    document.getElementById('darkModeSwitch').onchange=e=>{
-      document.body.classList.toggle('dark',e.target.checked);
-      sessionStorage.setItem('wkdark',e.target.checked?'1':'0');
+    // -- Language (for future use)
+    document.getElementById('langSelect').onchange=(e)=>{
+      // Save lang or reload
     };
-    document.getElementById('langSelect').onchange=e=>{
-      sessionStorage.setItem('wklang',e.target.value);
-      // You can add logic for language switch here
-    };
-    function logout(){
-      sessionStorage.clear();
-      window.location.reload();
-    }
-    // --- Restore settings
-    if(sessionStorage.getItem('wkfontsize')) document.documentElement.style.fontSize=sessionStorage.getItem('wkfontsize')+'rem';
-    if(sessionStorage.getItem('wkdark')==='1'){ document.body.classList.add('dark'); document.getElementById('darkModeSwitch').checked=true;}
-    if(sessionStorage.getItem('wklang')) document.getElementById('langSelect').value=sessionStorage.getItem('wklang');
+    // -- Logout
+    function logout(){ window.location.href='login.html'; }
 
-    // --- On load
+    // --- Responsive video resizing on orientation
+    window.addEventListener("orientationchange", function() {
+      setTimeout(()=>{renderTop();}, 220);
+    });
+
+    // --- INIT
     window.onload=()=>{
-      renderTop(); renderLevels(); updateOrientation();
-    };
+      renderTop();
+      renderLevels();
+    }
   </script>
 </body>
 </html>
