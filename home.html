@@ -7,419 +7,234 @@
   <link href="https://fonts.googleapis.com/css?family=Nunito:700,400&display=swap" rel="stylesheet">
   <style>
     html,body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
+      margin: 0; padding: 0; width: 100vw; height: 100vh;
       font-family: 'Nunito', Arial, sans-serif;
       background: #f6f7fa;
       overflow: hidden;
-      transition: background .35s;
-    }
-    body.dark {
-      background: #222639;
+      --blue: #b4d7ff;
+      --blue-dark: #263965;
+      --blue-btn: #6cc2ff;
+      --blue-light: #e4f1ff;
+      --level-folded: #e4f1ff;
+      --level-open: #b4d7ff;
+      --chapter-selected: #fff3fb;
+      --scrollbar: #93c2fa;
+      --scrollbar-bg: transparent;
+      --chapter-check: #28cb76;
+      --dark-bg: #232347;
+      --dark-top: #232347;
+      --dark-card: #222234;
+      --dark-level: #223255;
+      --dark-blue: #2a3144;
+      --dark-scroll: #435b89;
+      --dark-btn: #273050;
+      --dark-light: #30364a;
+      --dark-chapter-selected: #342d38;
+      --dark-chapter-row: #272643;
+      --dark-text: #ffe066;
     }
     body {
       display: flex; flex-direction: column;
-      width: 100vw; height: 100vh;
-      min-height: 100vh;
+      width: 100vw; height: 100vh; min-height: 100vh;
+      background: var(--bg, #f6f7fa);
+    }
+    body.dark {
+      --bg: var(--dark-bg);
+      --level-folded: var(--dark-level);
+      --level-open: var(--blue-dark);
+      --chapter-selected: var(--dark-chapter-selected);
+      --scrollbar: var(--dark-scroll);
+      --scrollbar-bg: transparent;
+      --chapter-check: #28cb76;
+      --top-bg: var(--dark-top);
+      --card-bg: var(--dark-card);
+      --level-bg: var(--dark-level);
+      --btn-bg: var(--dark-btn);
+      --text: var(--dark-text);
     }
     .fixed-top {
-      width: 100vw;
-      max-width: 100vw;
-      min-height: 50vh; /* Increased for card area */
-      background: #faf7fe;
-      box-shadow: 0 2px 18px #c7bae57a;
-      z-index: 3;
-      position: relative;
-      padding-bottom: 2vw;
-      transition: min-height .3s, background .3s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    body.dark .fixed-top { background: #22253a; }
-    .topbar-btns {
-      position: absolute;
-      top: 20px;
-      right: 22px;
-      display: flex;
-      align-items: center;
-      z-index: 10;
-      gap: 15px;
-    }
-    .icon-btn {
-      background: rgba(238,244,255,0.96);
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      border: none;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 7px #b993d62a;
-      cursor: pointer;
-      transition: background .18s, transform .12s;
-    }
-    body.dark .icon-btn { background: #323655; }
-    .icon-btn:active {
-      background: #fd90d7;
-      transform: scale(1.09);
-    }
-    .icon-btn svg {
-      width: 25px; height: 25px;
-      display: block;
-    }
-    .top-content-area {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto;
-      margin-top: 38px;
-      border-radius: 18px;
-      background: #fff;
-      box-shadow: 0 2px 16px #b993d644;
-      padding: 24px 2vw 28px 2vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: height .35s, background .3s;
-      min-height: 330px;
-    }
-    body.dark .top-content-area { background: #262943; }
-    .top-title {
-      text-align: center;
-      font-size: 2rem;
-      color: #8d79c9;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: 0.03em;
-      transition: color .3s;
-    }
-    body.dark .top-title { color: #ffe066; }
-    /* SLIDESHOW */
-    .slideshow-img-area {
-      width: 99%;
-      min-height: 210px; max-height: 320px;
-      display: flex; justify-content: center; align-items: center;
-      margin: 0 0 16px 0;
-      position: relative; overflow: hidden;
-    }
-    .slideshow-img {
-      width: 98%; height: 210px;
-      object-fit: cover;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px #b993d624;
-      opacity: 0;
-      position: absolute;
-      transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s;
-      left: 1%; top: 0;
-      z-index: 1;
-    }
-    .slideshow-img.active { opacity: 1; z-index: 2; transform: scale(1.04);}
-    .slideshow-dots {
-      display: flex; gap: 9px;
-      justify-content: center; margin: 10px 0 0 0;
-    }
-    .slideshow-dot {
-      width: 13px; height: 13px; background: #b4d7ff;
-      border-radius: 7px; border: 2px solid #b993d6;
-      box-shadow: 0 2px 7px #b993d64a;
-      cursor: pointer; transition: background .16s;
-      opacity: 0.59;
-    }
-    .slideshow-dot.active { background: #fd90d7; opacity: 1; }
-    /* --- VIDEO + BUTTONS --- */
-    .chapter-video-wrap {
-      width: 100%; display: flex; justify-content: center; margin-bottom: 15px;
-    }
-    .chapter-video {
-      width: 100%; max-width: 720px; aspect-ratio: 16/9;
-      background: #ddd;
-      border-radius: 15px;
-      box-shadow: 0 3px 13px #b993d63c;
-      border: 5px solid #b993d6;
-      margin: 0 auto 0 auto;
-      display: block;
-      transition: height .3s, width .3s, border .3s;
-    }
-    body.dark .chapter-video { border: 5px solid #ffe066; }
-    .chapter-btns {
-      display: flex; gap: 17px; margin: 8px auto 0 auto;
-      justify-content: center; align-items: center;
-    }
-    .main-btn {
-      background: #b4d7ff;
-      color: #4d528e;
-      border: none;
-      font-size: 1.13rem;
-      font-weight: 700;
-      border-radius: 17px;
-      box-shadow: 0 2px 11px #bdd6ff1c;
-      padding: 0.8em 2.3em;
-      margin: 0;
-      outline: none;
-      cursor: pointer;
-      transition: background .14s, color .14s, transform .11s;
-      letter-spacing: .01em;
-      min-width: 7.7em;
-      position: relative;
-    }
-    .main-btn:active {
-      background: #fd90d7;
-      color: #fff;
-      transform: scale(1.07);
-    }
-    .main-btn.exercise-complete::after {
-      content: '';
-      display: inline-block;
-      width: 19px; height: 19px;
-      position: absolute;
-      top: 6px; right: 7px;
-      background: url('data:image/svg+xml;utf8,<svg width="19" height="19" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="9" r="8" fill="%2304e376"/><path d="M5.5 9.5l2 2 5-5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-      background-size: 19px 19px;
-      background-repeat: no-repeat;
-      z-index: 2;
-    }
-    /* --- LEVELS & CHAPTERS --- */
-    .levels-area {
-      flex: 1 1 0;
-      width: 100vw; max-width: 100vw; min-height: 0;
-      background: none;
+      width: 100vw; max-width: 100vw;
+      min-height: 50vh; max-height: 50vh;
+      background: var(--top-bg, #faf7fe);
+      z-index: 3; position: relative;
       display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 2px 18px #c7bae57a;
+      transition: min-height .3s, background .3s;
       overflow: hidden;
     }
-    .levels-scroll-area {
-      width: 99vw; max-width: 580px;
-      margin: 0 auto; padding: 10px 0 26px 0;
-      overflow-y: auto;
-      flex: 1; height: 100%;
-      scrollbar-width: thin; scrollbar-color: #77b3ff99 #fff0;
-      transition: background .3s;
+    .topbar-btns {
+      position: absolute; top: 18px; right: 18px;
+      display: flex; align-items: center; z-index: 10; gap: 13px;
     }
-    .levels-scroll-area::-webkit-scrollbar { width: 8px; background: none;}
-    .levels-scroll-area::-webkit-scrollbar-thumb {
-      background: #77b3ff99;
-      border-radius: 7px;
-      opacity: 0;
-      transition: opacity .18s;
+    .icon-btn {
+      background: #e7f2ffcc; border-radius: 50%;
+      width: 40px; height: 40px;
+      border: none; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 7px #b993d62a;
+      cursor: pointer; transition: background .17s, transform .11s;
     }
-    .levels-scroll-area.scrolling::-webkit-scrollbar-thumb { opacity: 1;}
-    .levels-scroll-area::-webkit-scrollbar-track { background: none;}
-    .level-card {
-      background: #e9f3ff;
-      border-radius: 24px;
-      margin: 16px 0;
-      box-shadow: 0 2px 15px #f0c9fd32;
-      padding: 0 0 10px 0;
-      width: 97%;
-      max-width: 520px;
-      transition: background .21s, box-shadow .15s;
-      position: relative;
+    .icon-btn:active { background: #6cc2ff; transform: scale(1.08);}
+    .icon-btn svg { width: 25px; height: 25px; display: block; }
+    .top-content-area {
+      width: 99vw; max-width: 790px;
+      margin: 65px auto 0 auto; border-radius: 17px;
+      background: var(--card-bg,#fff);
+      box-shadow: 0 2px 16px #b993d644;
+      display: flex; flex-direction: column; align-items: center;
+      transition: height .3s, background .3s;
+      min-height: 260px; height: calc(50vh - 85px);
+      overflow: hidden;
     }
-    .level-card.open {
-      background: #b4d7ff;
-      box-shadow: 0 4px 24px #b993d6aa;
+    .top-title {
+      text-align: center; font-size: 2rem;
+      color: #8d79c9; font-weight: 700;
+      margin: 8px 0 13px 0; letter-spacing: 0.03em;
+      transition: color .2s;
     }
-    .level-header-row {
-      display: flex;
-      align-items: center;
-      height: 51px;
-      cursor: pointer;
-      font-size: 1.27rem;
-      font-weight: 800;
-      color: #668cff;
-      padding: 0 21px;
-      border-radius: 24px 24px 0 0;
-      transition: background .13s, color .13s;
-      position: relative;
-      user-select: none;
-      min-height: 51px;
-      background: none;
+    body.dark .top-title { color: var(--dark-text);}
+    .slideshow-img-area { width: 99%; min-height: 180px; max-height: 360px; display: flex; justify-content: center; align-items: center; margin: 0 0 15px 0; position: relative; overflow: hidden; }
+    .slideshow-img { width: 100%; height: 220px; object-fit: cover; border-radius: 15px; box-shadow: 0 2px 16px #b993d624; opacity: 0; position: absolute; transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s; left: 0; top: 0; z-index: 1;}
+    .slideshow-img.active { opacity: 1; z-index: 2; transform: scale(1.04);}
+    .slideshow-dots { display: flex; gap: 9px; justify-content: center; margin: 10px 0 0 0;}
+    .slideshow-dot { width: 13px; height: 13px; background: #b4d7ff; border-radius: 7px; border: 2px solid #b993d6; box-shadow: 0 2px 7px #b993d64a; cursor: pointer; transition: background .16s; opacity: 0.59;}
+    .slideshow-dot.active { background: #fd90d7; opacity: 1;}
+    /* VIDEO/CHAPTER */
+    .chapter-video { width: 99%; max-width: 720px; aspect-ratio: 16/9; background: #ddd; border-radius: 13px; box-shadow: 0 3px 13px #b993d63c; border: 5px solid #b993d6; margin: 0 auto 18px auto; display: block; transition: height .3s, width .3s;}
+    .chapter-btns { display: flex; gap: 15px; margin: 9px auto 0 auto; justify-content: center; align-items: center;}
+    .main-btn {
+      background: var(--blue-btn); color: #234078;
+      border: none; font-size: 1.13rem; font-weight: 700; border-radius: 15px;
+      box-shadow: 0 2px 11px #bdd6ff1c;
+      padding: 0.8em 2.2em; margin: 0; outline: none;
+      cursor: pointer; transition: background .14s, color .14s, transform .11s; letter-spacing: .01em;
+      min-width: 7em; display: flex; align-items: center; justify-content: center; position: relative;
     }
-    .level-card.open .level-header-row { color: #fff; background: #fd90d7;}
-    .level-icon {
-      width: 27px; height: 27px; margin-right: 13px;
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.6em;
-      box-shadow: 0 2px 7px #8ca6db2b;
-    }
-    .level-name { font-weight: 700; margin-right: 9px; letter-spacing: 0.01em; flex-shrink: 0; }
-    .level-progress {
-      flex: 1; margin: 0 0 0 10px; height: 10px;
-      background: #ede3ff; border-radius: 7px;
-      max-width: 110px; position: relative; display: flex; align-items: center;
-    }
-    .level-progress-bar {
-      background: linear-gradient(90deg,#ffe066 30%,#b4d7ff 100%);
-      height: 100%; border-radius: 7px;
-      transition: width .5s cubic-bezier(.71,1.14,.53,.93);
-      box-shadow: 0 1px 4px #ffd70036;
-    }
-    .level-arrow {
-      margin-left: 14px;
-      font-size: 1.6rem;
-      color: #8ca6db;
-      transition: transform .18s;
-      user-select: none;
-    }
+    .main-btn:active { background: #fd90d7; color: #fff; transform: scale(1.07);}
+    .main-btn .btn-check { margin-left: 9px;}
+    .main-btn .btn-check svg { width: 17px; height: 17px; vertical-align: -3px;}
+    /* Levels & Chapters */
+    .levels-area { flex: 1 1 0; width: 100vw; max-width: 100vw; min-height: 0; background: none; display: flex; flex-direction: column; align-items: center; overflow: hidden;}
+    .levels-scroll-area { width: 99vw; max-width: 580px; margin: 0 auto; padding: 8px 0 26px 0; overflow-y: auto; flex: 1; height: 100%; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--scrollbar-bg);}
+    .levels-scroll-area::-webkit-scrollbar { width: 6px; background: var(--scrollbar-bg);}
+    .levels-scroll-area::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px;}
+    .levels-scroll-area::-webkit-scrollbar-track { background: var(--scrollbar-bg);}
+    .level-card { background: var(--level-folded); border-radius: 21px; margin: 14px 0; box-shadow: 0 2px 12px #e5d3ff23; padding: 0 0 7px 0; width: 97%; max-width: 520px; transition: background .16s, box-shadow .13s; position: relative;}
+    .level-card.open { background: var(--level-open);}
+    .level-header-row { display: flex; align-items: center; height: 48px; cursor: pointer; font-size: 1.22rem; font-weight: 800; color: #668cff; padding: 0 17px; border-radius: 24px 24px 0 0; transition: background .13s, color .13s; position: relative; user-select: none; min-height: 48px;}
+    .level-card.open .level-header-row { color: #fff;}
+    .level-icon { width: 24px; height: 24px; margin-right: 13px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.43em; box-shadow: 0 2px 7px #8ca6db2b;}
+    .level-name { font-weight: 700; margin-right: 8px; letter-spacing: 0.01em; flex-shrink: 0;}
+    .level-progress { flex: 1; margin: 0 0 0 10px; height: 8.7px; background: #ede3ff; border-radius: 7px; max-width: 110px; position: relative; display: flex; align-items: center;}
+    .level-progress-bar { background: linear-gradient(90deg,#ffe066 30%,#28cb76 100%); height: 100%; border-radius: 7px; transition: width .4s cubic-bezier(.71,1.14,.53,.93); box-shadow: 0 1px 4px #ffd70036;}
+    .level-arrow { margin-left: 14px; font-size: 1.43rem; color: #8ca6db; transition: transform .15s; user-select: none;}
     .level-card.open .level-arrow { color: #fff;}
     .level-card.closed .level-arrow { transform: rotate(90deg);}
-    .chapters-list {
-      width: 96%; margin: 0 auto 0 auto;
-      display: flex; flex-direction: column; gap: 9px;
-      max-height: 300px; overflow-y: auto;
-      transition: max-height .31s;
-      padding: 4px 0 10px 0;
-      scrollbar-width: none;
-    }
-    .chapters-list::-webkit-scrollbar { display: none; }
-    .chapter-row {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 1px 7px #b993d629;
-      padding: 0.55em 1em;
-      font-size: 1.10rem;
-      font-weight: 700;
-      margin: 0;
-      border: 1.7px solid #b4d7ff;
-      color: #668cff;
-      transition: background .16s, color .13s, border .13s, transform .13s;
-      cursor: pointer; min-height: 34px; position: relative;
-    }
-    .chapter-row.active {
-      background: #ffe6fc;
-      color: #fd90d7;
-      border: 2px solid #fd90d7;
-    }
-    /* --- Responsive --- */
+    .chapters-list { width: 96%; margin: 0 auto 0 auto; display: flex; flex-direction: column; gap: 8px; max-height: 210px; overflow-y: auto; transition: max-height .25s; padding: 3px 0 8px 0; scrollbar-width: thin; scrollbar-color: var(--scrollbar) var(--scrollbar-bg);}
+    .chapters-list::-webkit-scrollbar { width: 4px; background: var(--scrollbar-bg);}
+    .chapters-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px;}
+    .chapter-row { display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 12px; box-shadow: 0 1px 7px #b993d629; padding: 0.52em 1em; font-size: 1.08rem; font-weight: 700; margin: 0; border: 1.7px solid #b4d7ff; color: #668cff; transition: background .13s, color .13s, border .12s, transform .12s; cursor: pointer; min-height: 33px; position: relative;}
+    .chapter-row.completed { color: #28cb76; border: 1.7px solid #28cb76;}
+    .chapter-row.active, .chapter-row.unlocked:hover, .chapter-row.unlocked:focus { background: var(--chapter-selected); color: #e6689c; border: 1.8px solid #fd90d7; transform: scale(1.03);}
+    .chapter-row .chapter-check { margin-left: 7px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--chapter-check);}
+    /* Responsive */
     @media (max-width: 750px) {
       .top-content-area { max-width: 99vw;}
       .levels-scroll-area { max-width: 99vw;}
       .level-card { max-width: 97vw;}
-      .chapter-video { min-height: 135px;}
+      .chapter-video { max-width: 98vw;}
     }
-    @media (max-width: 480px) {
-      .top-content-area { border-radius: 0 0 16px 16px; padding: 12px 0vw 13px 0vw;}
-      .fixed-top { padding-bottom: 6px; min-height: 50vh;}
+    @media (max-width: 500px) {
+      .fixed-top { min-height: 53vw; max-height: 58vw;}
+      .top-content-area { border-radius: 0 0 15px 15px; padding: 7px 0vw 7px 0vw; margin: 50px auto 0 auto; min-height: 43vw;}
+      .chapter-video { height: 34vw !important; }
       .levels-scroll-area { max-width: 100vw;}
       .level-card { max-width: 100vw;}
-      .chapter-video { min-height: 110px;}
     }
-    /* Horizontal / landscape: video area fills screen, only top card visible */
-    @media (orientation: landscape) and (max-width: 900px) {
-      .fixed-top { min-height: 100vh !important; }
-      .top-content-area, .chapter-video-wrap { width: 100vw !important; max-width: 100vw !important; }
-      .chapter-video { min-width: 100vw !important; max-width: 100vw !important; min-height: 1px !important; aspect-ratio: 16/9;}
-      .levels-area { display: none !important;}
-      .top-title { font-size: 1.15rem;}
-    }
-    /* Settings Modal Cute Style */
+    /* Fullscreen mode (body.fullscreen) */
+    body.fullscreen, body.fullscreen .fixed-top { min-height: 100vh !important; height: 100vh !important; max-height: 100vh !important; }
+    body.fullscreen .top-content-area { height: 98vh !important; min-height: 85vh !important; max-width: 100vw; border-radius: 0; margin: 0 auto;}
+    body.fullscreen .chapter-video { width: 99vw; max-width: 99vw; height: 60vw !important; max-height: 79vh;}
+    body.fullscreen .levels-area { display: none !important;}
+    body.fullscreen .topbar-btns { top: 15px; right: 16px;}
+    /* Settings modal */
     #settingsModal {
-      display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1000;background:#0004;
-      align-items:center;justify-content:center;
-      font-size:1.07rem;
+      display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; z-index:1000; background:#0004;
     }
-    .settings-panel-cute {
-      background:#fff;
-      padding:2.3em 2em 2.6em 2em;
-      border-radius:22px;
-      box-shadow:0 8px 44px #b993d638;
-      position:relative;
-      min-width:308px; max-width:96vw;
-      display:flex;flex-direction:column;gap:1.1em;align-items:center;
+    .settings-box {
+      background: #fff; padding: 1.5em 1.5em 1.1em 1.5em; min-width:300px; max-width:340px; border-radius:18px;
+      box-shadow: 0 4px 40px #b993d658; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      display: flex; flex-direction: column; gap: 1.3em; align-items:center;
     }
-    body.dark .settings-panel-cute { background: #23243c; color: #ffe066;}
-    .settings-close-x {
-      position:absolute;top:15px;right:19px;font-size:2.1em;cursor:pointer;font-weight:700;color:#fd90d7;
-      background: #f6f7fa; border-radius: 1em; width: 1.2em; height: 1.2em; line-height:1.13em; text-align:center;
-      z-index:2;box-shadow:0 2px 12px #b993d62c;
-      display:flex;align-items:center;justify-content:center;
+    body.dark .settings-box { background: var(--dark-light);}
+    .settings-title {
+      font-weight:800; font-size:1.3em; color:#8d79c9; margin-bottom:0.7em; text-align:center; width: 100%;
     }
-    .settings-close-x:hover { background:#fd90d7; color:#fff;}
-    .settings-row-cute {
-      width:95%; display:flex;align-items:center;justify-content:space-between;gap:1.1em;margin:10px 0;
+    body.dark .settings-title { color:var(--dark-text);}
+    .settings-x {
+      position: absolute; top: 1.1em; right: 1.4em; background: none; border: none; font-size: 1.9em; color: #b993d6; cursor: pointer; z-index: 3;
+      border-radius: 50%; padding: 0 0.2em;
+      transition: background .12s;
     }
-    .settings-row-cute label { font-weight:700;color:#668cff; }
-    body.dark .settings-row-cute label { color:#ffe066;}
-    .settings-switch-cute {
-      width:44px;height:25px;border-radius:16px;background:#b4d7ff;
-      position:relative;cursor:pointer;transition:background .2s;
-      box-shadow:0 2px 12px #b993d632;
-      display:inline-block;
+    .settings-x:active { background: #f5e8fd;}
+    .settings-row {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1em;
     }
-    .settings-switch-cute input {display:none;}
-    .settings-switch-cute span {
-      display:block;position:absolute;left:2px;top:2.1px;width:21px;height:21px;
-      background:#fff;border-radius:13px;transition:left .18s;
-      box-shadow:0 1px 5px #b993d66a;
+    .settings-row label { font-size: 1.09rem; color: #7785d7; font-weight: 700;}
+    body.dark .settings-row label { color: #ffe066;}
+    .settings-box select, .settings-box button, .settings-box input[type="range"] {
+      background: #e2eefd; color: #4d528e; border-radius: 1.2em; box-shadow: 0 3px 14px #bdd6ff14; font-size: 1.07rem;
+      font-weight: 700; border: none; padding: 0.43em 1.1em; margin-left: 0.3em; outline: none; cursor: pointer; min-width: 2.8em;
+      transition: background .12s, color .12s;
     }
-    .settings-switch-cute input:checked+span { left:20px;background:#fd90d7;}
-    .settings-lang-cute {
-      border-radius:11px;background:#e9f3ff;
-      border:none;padding:6px 17px;font-weight:700;font-size:1em;color:#668cff;
-      box-shadow:0 2px 8px #b993d62a;outline:none;cursor:pointer;
-      transition:background .17s,color .16s;
-    }
-    body.dark .settings-lang-cute {background:#28294d;color:#ffe066;}
-    .settings-fontsize-cute {
-      accent-color:#b4d7ff;width:120px;height:6px;margin:0 6px;
-    }
-    .settings-logout-cute {
-      background:#fd90d7;color:#fff;font-weight:800;padding:0.7em 1.7em;
-      border:none;border-radius:13px;box-shadow:0 2px 16px #b993d62c;
-      margin-top:18px;font-size:1.08em;cursor:pointer;
-      transition:background .15s;
-    }
-    .settings-logout-cute:active {background:#b4d7ff;color:#fd90d7;}
-    /* Super soft tap, animation: */
-    .main-btn,.icon-btn,.settings-lang-cute,.settings-logout-cute { transition: background .17s, color .13s, transform .10s;}
-    .main-btn:active,.icon-btn:active,.settings-lang-cute:active,.settings-logout-cute:active {transform:scale(1.06);}
+    .settings-box select:active, .settings-box button:active, .settings-box input[type="range"]:active { background: #b4d7ff; color: #fff;}
+    .settings-logout { margin: 0.7em 0 0 0; width: 100%; text-align: center;}
+    .settings-logout-btn { background: #fd90d7; color: #fff; font-size: 1.1em; padding: 0.7em 2.6em; border-radius: 15px; border: none; box-shadow: 0 2px 10px #fd90d748; cursor: pointer; margin: 0 auto;}
+    .settings-logout-btn:active { background: #ff4786;}
   </style>
 </head>
 <body>
-  <!-- Top Area: Fixed Card (50% height) -->
   <div class="fixed-top">
     <div class="topbar-btns">
-      <button class="icon-btn" id="fullscreenBtn" title="Fullscreen" tabindex="0">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7V4h3M4 17v3h3M17 4h3v3M20 17v3h-3" stroke="#b993d6" stroke-width="2.2" stroke-linecap="round"/></svg>
+      <button class="icon-btn" id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 24 24"><g><circle cx="12" cy="12" r="9" fill="#b993d6"/><path d="M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm0 5.4a1.9 1.9 0 110-3.8 1.9 1.9 0 010 3.8z" fill="#fff"/></g></svg>
       </button>
-      <button class="icon-btn" id="settingsBtn" title="Settings" tabindex="0">
-        <svg viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="11" stroke="#b993d6" stroke-width="2"/><path d="M13 8v5l3 3" stroke="#b993d6" stroke-width="2" stroke-linecap="round"/><circle cx="13" cy="13" r="3" fill="#fd90d7"/></svg>
+      <button class="icon-btn" id="fullscreenBtn" title="Full Screen">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="3.5" y="3.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="14.5" y="3.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="18.5" y="3.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="3.5" y="18.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="3.5" y="14.5" width="2" height="6" rx="1" fill="#6cc2ff"/><rect x="14.5" y="18.5" width="6" height="2" rx="1" fill="#6cc2ff"/><rect x="18.5" y="14.5" width="2" height="6" rx="1" fill="#6cc2ff"/></svg>
       </button>
     </div>
-    <div class="top-content-area" id="topContentArea">
-      <div id="topContent"></div>
-    </div>
+    <div class="top-content-area" id="topContentArea"><div id="topContent"></div></div>
   </div>
-  <!-- Levels & Chapters -->
   <div class="levels-area">
     <div class="levels-scroll-area" id="levelsScrollArea"></div>
   </div>
-  <!-- Settings Modal (cute) -->
+  <!-- Settings Modal -->
   <div id="settingsModal">
-    <div class="settings-panel-cute">
-      <div class="settings-close-x" id="settingsCloseX">&times;</div>
-      <div class="settings-row-cute">
-        <label>Dark Mode</label>
-        <label class="settings-switch-cute">
-          <input type="checkbox" id="darkModeSwitch">
-          <span></span>
-        </label>
+    <div class="settings-box">
+      <button class="settings-x" onclick="closeSettings()">&times;</button>
+      <div class="settings-title">Settings</div>
+      <div class="settings-row">
+        <label>Font Size</label>
+        <input id="fontSizeSlider" type="range" min="0.95" max="1.25" step="0.01" value="1" />
       </div>
-      <div class="settings-row-cute">
+      <div class="settings-row">
+        <label>Dark Mode</label>
+        <input type="checkbox" id="darkModeSwitch" style="width:26px;height:26px;border-radius:15px;"/>
+      </div>
+      <div class="settings-row">
         <label>Language</label>
-        <select id="langSelect" class="settings-lang-cute">
-          <option>English</option>
-          <option>ภาษาไทย</option>
-          <option>中文</option>
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="th">ไทย</option>
+          <option value="zh">中文</option>
         </select>
       </div>
-      <div class="settings-row-cute">
-        <label>Font Size</label>
-        <input type="range" min="0.93" max="1.24" step="0.01" value="1" id="fontSizeSlider" class="settings-fontsize-cute">
+      <div class="settings-logout">
+        <button class="settings-logout-btn" onclick="logout()">Log out</button>
       </div>
-      <button class="settings-logout-cute" id="logoutBtn">Log out</button>
     </div>
   </div>
   <script>
-    // Book icons/colors for levels
+    // --- Level data: 10 levels, level 1=20 chapters, rest=10, all unlocked, session progress
     const bookIcons = [
       {color:'#5bb3ff',icon:'📘'},
       {color:'#6ccc88',icon:'📗'},
@@ -432,93 +247,115 @@
       {color:'#a685e2',icon:'📓'},
       {color:'#f7c873',icon:'📙'}
     ];
-    // --- LEVELS/CHAPTERS DATA ---
     const levelData = [];
     for(let i=1;i<=10;i++) {
       const nCh = i===1?20:10;
+      let chArr = [];
+      for(let j=0;j<nCh;j++){
+        chArr.push({
+          title:'Chapter '+(j+1),
+          videoWatched:false,
+          exerciseDone:false
+        });
+      }
       levelData.push({
         name:'Level '+i,
-        chapters: Array.from({length:nCh},(_,j)=>({
-          title:'Chapter '+(j+1),
-          completed:false,
-          unlocked:true, // **ALL CHAPTERS UNLOCKED**
-          exerciseDone:false
-        })),
-        progress:0, open:(i===1)
+        chapters:chArr,
+        progress:0, open:i===1
       });
     }
-    // -- Slides for welcome (replace as needed)
+
+    // -- Slides for welcome
     const slides=[
       "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
       "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
       "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
     ];
-
-    // -- State: which chapter is selected
-    let selected={level:0,chapter:0}, showingChapter=false, slideIdx=0;
-
-    // -- Helper: green check SVG for Exercise button
-    function exerciseCheckSvg() {
-      return `<svg width="19" height="19" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#04e376"/><path d="M5.5 9.5l2 2 5-5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    let slideIdx=0;
+    let selected={level:0,chapter:0},showingChapter=false;
+    // -- Try to restore progress
+    if(sessionStorage.getItem('wkprogress')){
+      const saved=JSON.parse(sessionStorage.getItem('wkprogress'));
+      for(let i=0;i<levelData.length;i++)
+        for(let j=0;j<levelData[i].chapters.length;j++)
+          if(saved[i]&&saved[i][j])
+            Object.assign(levelData[i].chapters[j],saved[i][j]);
     }
 
-    // -- Top area: slideshow or chapter
-    function renderTop() {
+    // -- Top area rendering
+    function renderTop(){
       const tc=document.getElementById('topContent');
       tc.innerHTML='';
-      if(!showingChapter) {
-        // Welcome slideshow
+      if(!showingChapter){
         tc.innerHTML=`
           <div class="top-title">Welcome to Wonder Kids!</div>
-          <div class="slideshow-img-area" style="margin-top:10px;">
-            ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}" />`).join('')}
+          <div class="slideshow-img-area">
+            ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}"/>`).join('')}
           </div>
           <div class="slideshow-dots">
             ${slides.map((_,i)=>`<span class="slideshow-dot${i===slideIdx?' active':''}" onclick="goSlide(${i})"></span>`).join('')}
           </div>
         `;
-      } else {
-        // Chapter view
+      }else{
         const lvl=levelData[selected.level], ch=lvl.chapters[selected.chapter];
         tc.innerHTML=`
           <div class="top-title">${lvl.name} - ${ch.title}</div>
-          <div class="chapter-video-wrap">
-            <iframe class="chapter-video" id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen></iframe>
-          </div>
+          <iframe class="chapter-video" id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen onload="chapterWatched()"></iframe>
           <div class="chapter-btns">
-            <button class="main-btn${ch.exerciseDone?' exercise-complete':''}" onclick="exerciseBtn()">
-              EXERCISE ${ch.exerciseDone?exerciseCheckSvg():''}
-            </button>
+            <button class="main-btn" onclick="goExercise()">EXERCISE${ch.exerciseDone?'<span class="btn-check">'+checkSvg()+'</span>':''}</button>
             ${selected.chapter<lvl.chapters.length-1?'<button class="main-btn" onclick="goNextChapter()">NEXT</button>':''}
           </div>
         `;
+        // Mark video as watched when video is visible
+        setTimeout(()=>chapterWatched(),300);
       }
     }
+    function chapterWatched(){
+      if(!showingChapter) return;
+      let ch=levelData[selected.level].chapters[selected.chapter];
+      if(!ch.videoWatched){
+        ch.videoWatched=true;
+        updateProgress(); renderLevels();
+        saveProgress();
+      }
+    }
+    // -- Check SVG
+    function checkSvg(){return `<svg width="17" height="17" viewBox="0 0 17 17"><circle cx="8.5" cy="8.5" r="8" fill="#28cb76"/><path d="M5.1 8.6l2 2 5-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+    // -- Slideshow
+    window.goSlide=i=>{slideIdx=i; renderTop();}
+    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5000);
 
-    // --- Levels & Chapters ---
-    function renderLevels() {
+    // -- Levels/chapters rendering
+    function renderLevels(){
+      // Calculate progress
+      for(let i=0;i<levelData.length;i++){
+        let lvl=levelData[i];
+        const n=lvl.chapters.length;
+        const nDone=lvl.chapters.filter(c=>c.videoWatched&&c.exerciseDone).length;
+        lvl.progress=nDone/n;
+      }
+      // Render levels/chapters
       const area=document.getElementById('levelsScrollArea');
       area.innerHTML='';
-      for(let i=0;i<levelData.length;i++) {
+      for(let i=0;i<levelData.length;i++){
         const lvl=levelData[i],book=bookIcons[i%bookIcons.length];
-        // Progress: % of chapters completed
-        const n= lvl.chapters.length, nDone=lvl.chapters.filter(c=>c.completed||c.exerciseDone).length;
-        lvl.progress = nDone/n;
-        // Level tab
         area.innerHTML+=`
           <div class="level-card${lvl.open?' open':' closed'}" id="levelCard${i}">
-            <div class="level-header-row" onclick="toggleLevel(${i})" tabindex="0">
+            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?book.color:'#e4f1ff'};">
               <span class="level-icon" style="background:${book.color};">${book.icon}</span>
               <span class="level-name">${lvl.name}</span>
               <span class="level-progress"><span class="level-progress-bar" style="width:${Math.round(lvl.progress*100)}%;"></span></span>
-              <span class="level-arrow" id="levelArrow${i}">${lvl.open?'▴':'▾'}</span>
+              <span class="level-arrow">${lvl.open?'▴':'▾'}</span>
             </div>
             <div class="chapters-list" id="chaptersList${i}" style="display:${lvl.open?'flex':'none'};">
               ${lvl.chapters.map((ch,j)=>{
                 let classes="chapter-row";
                 if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' active';
-                return `<div class="${classes}" onclick="selectChapter(event,${i},${j})" tabindex="0">
+                if(ch.videoWatched&&ch.exerciseDone) classes+=' completed';
+                else classes+=' unlocked';
+                return `<div class="${classes}" onclick="selectChapter(event,${i},${j})">
                   <span>${ch.title}</span>
+                  ${(ch.videoWatched&&ch.exerciseDone)?`<span class="chapter-check">${checkSvg()}</span>`:''}
                 </div>`;
               }).join('')}
             </div>
@@ -526,96 +363,93 @@
         `;
       }
     }
-    // -- Toggle levels (fold/unfold)
     window.toggleLevel=function(i){
       for(let j=0;j<levelData.length;j++){
         levelData[j].open=(j===i)?!levelData[j].open:false;
         document.getElementById('chaptersList'+j).style.display=levelData[j].open?'flex':'none';
         document.getElementById('levelCard'+j).className='level-card'+(levelData[j].open?' open':' closed');
-        document.getElementById('levelArrow'+j).textContent=levelData[j].open?'▴':'▾';
       }
     };
-    // -- Selecting chapter
     window.selectChapter=function(e,li,ci){
-      showingChapter=true;
-      selected={level:li,chapter:ci};
-      renderTop(); renderLevels();
-      e.stopPropagation();
+      showingChapter=true; selected={level:li,chapter:ci};
+      renderTop(); renderLevels(); e.stopPropagation();
     };
-    // --- Exercise button logic (go to page, check done) ---
-    window.exerciseBtn = function() {
-      // Open in current tab and mark as done
-      levelData[selected.level].chapters[selected.chapter].exerciseDone = true;
-      renderTop(); renderLevels();
-      window.location.href = "sorobanquiz.html";
+    // -- EXERCISE (open quiz.html)
+    window.goExercise=function(){
+      let ch=levelData[selected.level].chapters[selected.chapter];
+      ch.exerciseDone=true;
+      updateProgress(); renderLevels(); renderTop();
+      saveProgress();
+      window.open('sorobanquiz.html','_blank');
     }
-    // --- Next button ---
+    // -- NEXT button
     window.goNextChapter=function(){
       const {level:l,chapter:c}=selected;
       if(levelData[l].chapters[c+1]) {
         selected={level:l,chapter:c+1}; showingChapter=true;
         renderTop(); renderLevels();
+        document.querySelector(`#levelCard${l} .chapters-list`).scrollTo({top: 44*(c+1)-16,behavior:'smooth'});
       }
     }
-    // --- Slideshow navigation ---
-    window.goSlide=function(i){ slideIdx=i; renderTop();}
-    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5000);
-
-    // -- Fullscreen (for whole app)
-    document.getElementById('fullscreenBtn').onclick = ()=>{
-      if(document.fullscreenElement){
-        document.exitFullscreen();
-      } else {
+    function updateProgress(){ /* nothing needed, logic is live in renderLevels() */ }
+    function saveProgress(){
+      let d=levelData.map(lvl=>lvl.chapters.map(ch=>({videoWatched:ch.videoWatched,exerciseDone:ch.exerciseDone})));
+      sessionStorage.setItem('wkprogress',JSON.stringify(d));
+    }
+    // --- Fullscreen logic
+    document.getElementById('fullscreenBtn').onclick=()=>{
+      if(!document.fullscreenElement){
         document.documentElement.requestFullscreen();
+        document.body.classList.add('fullscreen');
+      }else{
+        document.exitFullscreen();
+        document.body.classList.remove('fullscreen');
       }
     };
-
-    // -- Settings modal
-    function showSettings() { document.getElementById('settingsModal').style.display='flex'; }
-    function closeSettings() { document.getElementById('settingsModal').style.display='none'; }
-    document.getElementById('settingsBtn').onclick=showSettings;
-    document.getElementById('settingsCloseX').onclick=closeSettings;
-    document.getElementById('logoutBtn').onclick=function(){
-      // Clear any local/session storage as needed here
-      window.location.href='login.html';
-    };
-    // Dark mode switch
-    document.getElementById('darkModeSwitch').onchange = function(e){
-      document.body.classList.toggle('dark', e.target.checked);
-    };
-    // Font size
-    document.getElementById('fontSizeSlider').oninput=function(e){
-      document.documentElement.style.fontSize = e.target.value+'rem';
-    };
-
-    // -- Hide/show scroll bar on scroll (mobile app style)
-    const levelsScrollArea = document.getElementById('levelsScrollArea');
-    levelsScrollArea.addEventListener('scroll',function(){
-      this.classList.add('scrolling');
-      clearTimeout(this._sbT);
-      this._sbT = setTimeout(()=>this.classList.remove('scrolling'),900);
+    document.addEventListener('fullscreenchange',()=>{
+      if(!document.fullscreenElement) document.body.classList.remove('fullscreen');
+      else document.body.classList.add('fullscreen');
     });
-
-    // -- Make video area resize 16:9 and scale on larger screens
-    function resizeVideo() {
-      const vid = document.getElementById('chapterVideo');
-      if (!vid) return;
-      const area = document.getElementById('topContentArea');
-      let W = area.offsetWidth, H = area.offsetHeight-80;
-      let vW = W, vH = vW*9/16;
-      if (vH > H) { vH = H; vW = vH*16/9; }
-      vid.style.width = vW+'px'; vid.style.height = vH+'px';
+    // -- Auto full-video on horizontal mobile/tablet
+    function updateOrientation(){
+      if(window.matchMedia("(orientation: landscape)").matches && window.innerWidth<850){
+        // landscape on mobile/tablet: full video only
+        document.body.classList.add('fullscreen');
+      }else{
+        document.body.classList.remove('fullscreen');
+      }
     }
-    window.onresize = resizeVideo;
-    const obs = new MutationObserver(resizeVideo);
-    obs.observe(document.getElementById('topContent'),{childList:true,subtree:true});
+    window.addEventListener('orientationchange',updateOrientation);
+    window.addEventListener('resize',updateOrientation);
 
-    // -- On load
+    // --- Settings modal logic
+    document.getElementById('settingsBtn').onclick=()=>{document.getElementById('settingsModal').style.display='block';};
+    function closeSettings(){document.getElementById('settingsModal').style.display='none';}
+    document.getElementById('fontSizeSlider').oninput=e=>{
+      document.documentElement.style.fontSize = e.target.value+'rem';
+      sessionStorage.setItem('wkfontsize',e.target.value);
+    };
+    document.getElementById('darkModeSwitch').onchange=e=>{
+      document.body.classList.toggle('dark',e.target.checked);
+      sessionStorage.setItem('wkdark',e.target.checked?'1':'0');
+    };
+    document.getElementById('langSelect').onchange=e=>{
+      sessionStorage.setItem('wklang',e.target.value);
+      // You can add logic for language switch here
+    };
+    function logout(){
+      sessionStorage.clear();
+      window.location.reload();
+    }
+    // --- Restore settings
+    if(sessionStorage.getItem('wkfontsize')) document.documentElement.style.fontSize=sessionStorage.getItem('wkfontsize')+'rem';
+    if(sessionStorage.getItem('wkdark')==='1'){ document.body.classList.add('dark'); document.getElementById('darkModeSwitch').checked=true;}
+    if(sessionStorage.getItem('wklang')) document.getElementById('langSelect').value=sessionStorage.getItem('wklang');
+
+    // --- On load
     window.onload=()=>{
-      renderTop();
-      renderLevels();
-      setTimeout(resizeVideo,200);
-    }
+      renderTop(); renderLevels(); updateOrientation();
+    };
   </script>
 </body>
 </html>
