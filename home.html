@@ -5,270 +5,210 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
   <title>Wonder Kids</title>
   <link href="https://fonts.googleapis.com/css?family=Nunito:700,400&display=swap" rel="stylesheet">
+  <!-- Material Icons (ripple, icons) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
   <style>
-    :root {
-      --blue: #b4d7ff;
-      --blue-dark: #668cff;
-      --pink: #fd90d7;
-      --bg: #f6f7fa;
-      --bg-card: #fff;
-      --chapter-selected: #fff6fa;
-      --level-folded: #e7f4ff;
-      --level-unfolded: #b4d7ff;
-      --level-unfolded-dark: #233454;
-      --scrollbar: #b4d7ffcc;
-      --scrollbar-dark: #344570;
-      --chapter-check: #5be075;
-      --chapter-check-dark: #7bfdc7;
-      --main-text: #3e366b;
-      --main-text-dark: #ffe066;
-      --card-shadow: 0 2px 16px #b993d644;
-      --card-shadow-dark: 0 2px 20px #23234799;
-    }
-    body,html {
-      margin: 0; padding: 0; box-sizing: border-box;
+    html,body {
+      margin: 0; padding: 0;
       width: 100vw; height: 100vh;
       font-family: 'Nunito', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--main-text);
+      background: #f6f7fa;
+      min-height: 100vh;
       overflow: hidden;
-      transition: background .3s, color .3s;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, select, textarea, button:focus, button:active {
+      -webkit-user-select: auto !important;
+      user-select: auto !important;
     }
     body.dark {
-      --bg: #202136;
-      --bg-card: #2d2e48;
-      --chapter-selected: #34314b;
-      --level-folded: #232347;
-      --level-unfolded: #344570;
-      --scrollbar: #344570;
-      --main-text: #ffe066;
-      --card-shadow: 0 2px 20px #23234799;
+      background: #23223a;
     }
-    /* --- Top card --- */
+    body {
+      display: flex; flex-direction: column; width: 100vw; height: 100vh;
+      min-height: 100vh;
+    }
     .fixed-top {
-      width: 100vw; min-width: 100vw; max-width: 100vw;
-      min-height: 50vh; max-height: 50vh; height: 50vh;
-      background: var(--bg-card);
-      box-shadow: var(--card-shadow);
-      z-index: 3;
-      position: relative;
+      width: 100vw; max-width: 100vw;
+      min-height: 50vh; height: 50vh; /* always 50% screen height */
+      background: #faf7fe;
+      box-shadow: 0 2px 18px #c7bae57a;
+      z-index: 3; position: relative;
       padding: 0;
-      display: flex; flex-direction: column;
-      justify-content: flex-end;
-      align-items: center;
-      transition: background .3s, min-height .3s, max-height .3s;
-      overflow: hidden;
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      transition: background .3s, min-height .3s, height .3s;
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
     }
+    body.dark .fixed-top { background: #2b2547; }
     .topbar-btns {
       position: absolute;
-      top: 12px; right: 15px;
-      display: flex; gap: 15px;
-      z-index: 100;
+      top: 20px; right: 22px;
+      display: flex; align-items: center; z-index: 10; gap: 15px;
     }
     .icon-btn {
-      background: #f3f6fc;
+      background: rgba(238,244,255,0.96);
       border-radius: 50%;
-      width: 41px; height: 41px;
+      width: 42px; height: 42px;
       border: none;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 7px #b993d62a;
+      box-shadow: 0 1px 7px #b993d62a;
       cursor: pointer;
-      transition: background .16s, transform .11s;
-      margin-left: 3px;
+      transition: background .18s, transform .12s;
+      position: relative;
+      overflow: hidden;
     }
-    .icon-btn:active, .icon-btn.active {
-      background: var(--pink);
-      transform: scale(1.09);
+    .icon-btn:active, .icon-btn.rippled { background: #fd90d7; color: #fff; }
+    .icon-btn svg, .icon-btn .material-icons-outlined {
+      width: 26px; height: 26px; display: block; font-size: 26px !important;
+      color: #8d79c9;
+      transition: color .2s;
     }
-    .icon-btn svg { width: 25px; height: 25px; }
-    /* Top content */
+    body.dark .icon-btn svg, body.dark .icon-btn .material-icons-outlined { color: #ffe066; }
     .top-content-area {
-      width: 100vw; height: 100%; max-width: 100vw; max-height: 100%;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-      background: none; box-shadow: none;
-      border-radius: 0;
-      padding: 0;
-      position: absolute; left: 0; top: 0;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto; margin-top: 38px;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 2px 16px #b993d644;
+      padding: 22px 2vw 25px 2vw;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: height .35s, width .3s, background .3s;
+      min-height: 260px; height: calc(50vh - 45px);
     }
+    body.dark .top-content-area { background: #363457;}
     .top-title {
       text-align: center;
-      font-size: 2.15rem;
+      font-size: 2.1rem;
       color: #8d79c9;
       font-weight: 700;
-      margin: 0 0 6px 0;
-      letter-spacing: 0.01em;
-      width: 100vw;
-      position: relative; top: 15px;
-      z-index: 2;
+      margin-bottom: 8px;
+      letter-spacing: 0.03em;
     }
-    /* Slideshow */
+    body.dark .top-title { color: #ffe066;}
     .slideshow-img-area {
-      width: 97vw; height: 35vh; min-height: 180px; max-height: 35vh;
-      display: flex; align-items: center; justify-content: center;
-      position: relative;
-      margin: 0 auto 0 auto;
+      width: 99%; min-height: 220px; max-height: 350px;
+      display: flex; justify-content: center; align-items: center;
+      margin: 0 0 16px 0;
+      position: relative; overflow: hidden;
     }
     .slideshow-img {
-      width: 99%; height: 97%;
-      object-fit: cover;
-      border-radius: 18px;
+      width: 98%; height: 238px; object-fit: cover;
+      border-radius: 16px;
       box-shadow: 0 2px 16px #b993d624;
       opacity: 0;
       position: absolute;
-      left: 1%; top: 0;
       transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s;
+      left: 1%; top: 0;
       z-index: 1;
     }
     .slideshow-img.active { opacity: 1; z-index: 2; transform: scale(1.04);}
     .slideshow-dots {
       display: flex; gap: 9px;
-      justify-content: center; margin: 6px 0 0 0;
-      position: absolute; left: 0; right: 0; bottom: 8px;
-      width: 100%; z-index: 3;
+      justify-content: center; margin: 10px 0 0 0;
     }
     .slideshow-dot {
-      width: 13px; height: 13px; background: var(--blue);
+      width: 13px; height: 13px; background: #b4d7ff;
       border-radius: 7px; border: 2px solid #b993d6;
       box-shadow: 0 2px 7px #b993d64a;
       cursor: pointer; transition: background .16s;
       opacity: 0.59;
     }
-    .slideshow-dot.active { background: var(--pink); opacity: 1; }
-    /* --- Chapter view --- */
-    .chapter-view-card {
-      width: 97vw; height: 97%; max-width: 900px;
-      margin: 0 auto; background: none; box-shadow: none;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-      position: relative; padding: 0;
-    }
-    .chapter-view-title {
-      text-align: center;
-      font-size: 1.38em;
-      color: #8d79c9;
-      font-weight: 700;
-      margin: 0 0 6px 0;
-      letter-spacing: 0.01em;
-      width: 100%;
-      position: relative;
-      top: 2vw;
-    }
-    .chapter-video-area {
-      width: 98vw; max-width: 860px; aspect-ratio: 16/9;
-      display: flex; justify-content: center; align-items: center;
-      margin: 0 auto 0 auto;
-      background: #222; border-radius: 16px;
-      box-shadow: 0 2px 11px #b993d63c;
-      overflow: hidden;
-      margin-top: 1vw;
-      position: relative;
-    }
-    .chapter-video-area iframe {
-      width: 100%; height: 100%;
-      border: none;
-      border-radius: 16px;
-      background: #222;
+    .slideshow-dot.active { background: #fd90d7; opacity: 1; }
+    /* --- VIDEO + BUTTONS --- */
+    .chapter-video {
+      width: 100%; max-width: 900px;
+      aspect-ratio: 16/9;
+      background: #ddd;
+      border-radius: 17px;
+      box-shadow: 0 3px 13px #b993d63c;
+      border: 6px solid #b993d6;
+      margin: 0 auto 18px auto;
       display: block;
+      transition: height .3s, width .3s;
+      background: #333;
     }
+    body.dark .chapter-video { border-color:#ffe066; background:#191919; }
     .chapter-btns {
-      display: flex; gap: 15px; margin: 13px auto 0 auto;
+      display: flex; gap: 17px; margin: 8px auto 0 auto;
       justify-content: center; align-items: center;
-      position: relative; top: 1vw;
     }
     .main-btn {
-      background: var(--blue);
+      background: #b4d7ff;
       color: #4d528e;
       border: none;
-      font-size: 1.15rem;
+      font-size: 1.14rem;
       font-weight: 700;
-      border-radius: 16px;
-      box-shadow: 0 2px 12px #bdd6ff1c;
-      padding: 0.7em 2.2em;
-      margin: 0;
-      outline: none;
-      cursor: pointer;
-      transition: background .14s, color .14s, transform .12s;
-      letter-spacing: .01em;
-      min-width: 7em;
-      position: relative;
+      border-radius: 17px;
+      box-shadow: 0 2px 11px #bdd6ff1c;
+      padding: 0.8em 2.3em 0.8em 2.9em;
+      margin: 0; outline: none;
+      cursor: pointer; position:relative;
+      transition: background .14s, color .14s, transform .11s;
+      letter-spacing: .01em; min-width: 8em; min-height: 2.8em;
+      overflow: hidden;
       display: flex; align-items: center; justify-content: center;
     }
-    .main-btn:active, .main-btn.active {
-      background: var(--pink);
-      color: #fff;
-      transform: scale(1.08);
+    .main-btn .material-icons-outlined { margin-right: 0.4em; font-size: 22px !important;}
+    .main-btn:active, .main-btn.rippled { background: #fd90d7; color: #fff; }
+    .main-btn.completed .exercise-check {
+      position: absolute; right: 12px; top: 48%; transform: translateY(-50%);
+      width: 20px; height: 20px; z-index: 3;
     }
-    .main-btn .btn-check {
-      margin-left: 11px;
-      width: 21px; height: 21px; display: inline-flex; vertical-align: middle;
-    }
-    /* --- Levels & Chapters --- */
+    /* --- LEVELS & CHAPTERS --- */
     .levels-area {
-      width: 100vw; height: 50vh; min-height: 50vh; max-height: 50vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      background: none; position: relative;
-      z-index: 2;
+      flex: 1 1 0;
+      width: 100vw; max-width: 100vw; min-height: 0;
+      background: none;
+      display: flex; flex-direction: column; align-items: center;
+      overflow: hidden;
+      padding-top: 0;
     }
     .levels-scroll-area {
-      width: 99vw; max-width: 640px;
-      margin: 0 auto; padding: 12px 0 0 0;
-      overflow-y: auto; height: 100%; max-height: 50vh;
-      scrollbar-width: thin;
-      scrollbar-color: var(--scrollbar) #fff0;
-      transition: scrollbar-color .3s;
+      width: 99vw; max-width: 560px;
+      margin: 0 auto; padding: 8px 0 18px 0;
+      overflow-y: auto;
+      flex: 1; height: 100%;
+      scrollbar-width: thin; scrollbar-color: #b4d7ff33 #fff0;
     }
     .levels-scroll-area::-webkit-scrollbar { width: 7px; background: none;}
-    .levels-scroll-area::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 7px; }
+    .levels-scroll-area::-webkit-scrollbar-thumb { background: #b4d7ff38; border-radius: 7px;}
     .levels-scroll-area::-webkit-scrollbar-track { background: none;}
-    .levels-scroll-area:active::-webkit-scrollbar-thumb,
-    .levels-scroll-area:focus::-webkit-scrollbar-thumb,
-    .levels-scroll-area:hover::-webkit-scrollbar-thumb {
-      background: var(--blue-dark);
-    }
-    /* --- Level card --- */
+    .levels-scroll-area.scrolling::-webkit-scrollbar-thumb { background: #69a3e7; }
     .level-card {
-      background: var(--level-folded);
-      border-radius: 23px;
-      margin: 13px 0;
-      box-shadow: 0 2px 14px #f0c9fd32;
+      border-radius: 24px; margin: 14px 0;
+      box-shadow: 0 2px 15px #f0c9fd32;
       padding: 0 0 10px 0;
-      width: 98%; max-width: 540px;
-      transition: background .18s, box-shadow .15s;
+      width: 97%; max-width: 520px;
+      transition: background .16s, box-shadow .15s;
       position: relative;
-      border: none;
+      background: #e3f0ff;
     }
-    .level-card.open {
-      background: var(--level-unfolded);
-      box-shadow: 0 4px 24px #b993d6aa;
-    }
+    .level-card.closed { background: #e3f0ff;}
+    .level-card.open { background: #69a3e7;}
     .level-header-row {
-      display: flex;
-      align-items: center;
-      height: 48px;
-      cursor: pointer;
-      font-size: 1.23rem;
-      font-weight: 800;
-      color: #668cff;
-      padding: 0 18px;
-      border-radius: 23px 23px 0 0;
-      transition: background .13s, color .13s;
-      position: relative;
-      user-select: none;
-      min-height: 48px;
+      display: flex; align-items: center; height: 51px;
+      cursor: pointer; font-size: 1.27rem; font-weight: 800;
+      color: #668cff; padding: 0 19px; border-radius: 24px 24px 0 0;
+      transition: background .12s, color .13s;
+      position: relative; user-select: none; min-height: 51px;
       background: transparent;
     }
-    .level-card.open .level-header-row { color: #fff; background: var(--level-unfolded);}
-    .level-icon {
-      width: 27px; height: 27px; margin-right: 13px;
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.5em;
+    .level-card.open .level-header-row { color: #fff;}
+    .level-icon { width: 27px; height: 27px; margin-right: 13px;
+      border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 1.58em;
       box-shadow: 0 2px 7px #8ca6db2b;
     }
-    .level-name { font-weight: 700; margin-right: 11px; letter-spacing: 0.01em; flex-shrink: 0; }
+    .level-name { font-weight: 700; margin-right: 9px; letter-spacing: 0.01em; flex-shrink: 0;}
     .level-progress {
       flex: 1; margin: 0 0 0 10px; height: 10px;
       background: #ede3ff; border-radius: 7px;
-      max-width: 120px; position: relative; display: flex; align-items: center;
+      max-width: 110px; position: relative; display: flex; align-items: center;
     }
     .level-progress-bar {
       background: linear-gradient(90deg,#ffe066 30%,#b4d7ff 100%);
@@ -276,21 +216,14 @@
       transition: width .5s cubic-bezier(.71,1.14,.53,.93);
       box-shadow: 0 1px 4px #ffd70036;
     }
-    .level-arrow {
-      margin-left: 17px;
-      font-size: 1.45rem;
-      color: #8ca6db;
-      transition: transform .18s;
-      user-select: none;
-    }
+    .level-arrow { margin-left: 14px; font-size: 1.6rem; color: #8ca6db; transition: transform .18s; user-select: none;}
     .level-card.open .level-arrow { color: #fff;}
     .level-card.closed .level-arrow { transform: rotate(90deg);}
-    /* --- Chapters --- */
     .chapters-list {
-      width: 95%; margin: 0 auto 0 auto;
-      display: flex; flex-direction: column; gap: 8px;
-      max-height: 290px; overflow-y: auto;
-      transition: max-height .27s; padding: 4px 0 10px 0;
+      width: 96%; margin: 0 auto 0 auto;
+      display: flex; flex-direction: column; gap: 9px;
+      max-height: 300px; overflow-y: auto;
+      transition: max-height .31s; padding: 4px 0 10px 0;
       scrollbar-width: none;
     }
     .chapters-list::-webkit-scrollbar { display: none; }
@@ -299,148 +232,148 @@
       background: #fff;
       border-radius: 14px;
       box-shadow: 0 1px 7px #b993d629;
-      padding: 0.58em 1em;
-      font-size: 1.13rem;
+      padding: 0.55em 1em;
+      font-size: 1.10rem;
       font-weight: 700;
       margin: 0;
-      border: 1.5px solid #b4d7ff;
+      border: 1.7px solid #b4d7ff;
       color: #668cff;
-      transition: background .13s, color .12s, border .12s, transform .13s;
+      transition: background .16s, color .13s, border .13s, transform .13s;
       cursor: pointer; min-height: 34px; position: relative;
-    }
-    .chapter-row.selected, .chapter-row:hover, .chapter-row:focus {
-      background: var(--chapter-selected);
-      color: #8d79c9;
-      border: 1.5px solid #fd90d7;
-      z-index: 2;
-      transform: scale(1.03);
-    }
-    .chapter-row.completed {
-      color: #aaa;
-      border: 1.5px solid var(--chapter-check);
+      overflow: hidden;
     }
     .chapter-row .chapter-check {
       margin-left: 13px;
-      width: 18px; height: 18px;
+      width: 20px; height: 20px;
       display: flex; align-items: center; justify-content: center;
-      color: var(--chapter-check);
+      color: #16c878;
     }
-    /* Responsive: phone/tablet horizontal, top area fills screen */
-    @media (orientation: landscape) and (max-width: 950px) {
-      .fixed-top {
-        min-height: 100vh !important; max-height: 100vh !important; height: 100vh !important;
-        background: var(--bg-card);
-        padding: 0;
-      }
-      .top-content-area { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; }
-      .chapter-view-card, .slideshow-img-area { width: 100vw !important; }
-      .chapter-video-area { width: 100vw !important; height: 66vw !important; max-width: 100vw !important; }
-      .levels-area { display: none !important; }
+    .chapter-row.completed { color: #a5c7b3; border: 1.5px solid #16c878; }
+    .chapter-row.active, .chapter-row.unlocked:hover, .chapter-row.unlocked:focus {
+      background: #fff1f7;
+      color: #fd90d7;
+      border: 1.7px solid #fd90d7;
+      transform: scale(1.03);
+      z-index: 2;
+      box-shadow: 0 2px 18px #fd90d726;
     }
-    @media (max-width: 760px) {
-      .fixed-top, .levels-area { max-width: 100vw; }
+    /* --- Responsive --- */
+    @media (max-width: 750px) {
+      .top-content-area { max-width: 99vw;}
+      .levels-scroll-area { max-width: 99vw;}
+      .level-card { max-width: 97vw;}
+      .chapter-video { height: unset; }
+      .fixed-top { min-height: 50vh !important; height: 50vh !important;}
+    }
+    @media (max-width: 480px) {
+      .top-content-area { border-radius: 0 0 16px 16px; padding: 10px 1vw 8px 1vw;}
+      .fixed-top { padding-bottom: 2px; min-height: 50vh !important; height: 50vh !important;}
       .levels-scroll-area { max-width: 100vw;}
       .level-card { max-width: 100vw;}
-      .chapter-video-area { max-width: 99vw; }
     }
-    @media (max-width: 540px) {
-      .fixed-top, .levels-area { max-width: 100vw;}
-      .chapter-view-title { font-size: 1.08em;}
+    /* Fullscreen video landscape on mobile/tablet */
+    @media (orientation: landscape) and (max-width: 1000px) {
+      .fixed-top { min-height: 99vh !important; height: 99vh !important; border-radius: 0;}
+      .top-content-area, .chapter-video { width: 100vw !important; max-width: 100vw !important; height: 98vh !important; }
+      .levels-area { display: none !important;}
+      .top-title { font-size: 1.13rem;}
     }
-    /* --- Settings Modal --- */
+    /* Ripple effect */
+    .ripple {
+      position: absolute; border-radius: 50%; transform: scale(0); animation: ripple .55s linear;
+      background-color: #fff8;
+      pointer-events: none; z-index: 2;
+    }
+    @keyframes ripple {
+      to { transform: scale(2.7); opacity: 0; }
+    }
+    /* Settings Modal */
     #settingsModal {
-      display: none; position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1100;
-      background:#0007; align-items: center; justify-content: center;
+      display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1000;background:#0005;
     }
-    #settingsModal.show { display: flex;}
-    .settings-panel {
-      background: var(--bg-card);
-      border-radius: 2em;
-      padding: 2em 2.2em 1.2em 2.2em;
-      min-width: 340px; max-width: 95vw;
-      box-shadow: 0 8px 34px #b993d658;
-      display: flex; flex-direction: column; gap: 1.2em;
-      align-items: center;
-      position: relative;
+    #settingsPanel {
+      background:#fff; padding:2.2em 2.6em 1.9em 2.6em;
+      max-width:340px; border-radius:22px;
+      box-shadow:0 4px 40px #b993d658;
+      position:absolute; top:50%;left:50%;transform:translate(-50%,-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 1.5em;
     }
-    .settings-close-btn {
-      position: absolute; top: 18px; right: 16px;
-      background: none; border: none; font-size: 2.1em;
-      color: #b993d6;
-      cursor: pointer;
-      z-index: 3;
+    body.dark #settingsPanel { background: #373457; color: #ffe066;}
+    #settingsPanel label { font-weight:700; margin-right: 1em;}
+    #settingsPanel input[type=range] { width: 120px; accent-color: #b993d6; }
+    #settingsPanel select, #settingsPanel button, #settingsPanel input[type="checkbox"] {
+      border-radius: 19px; border: none; font-size: 1.12em;
+      padding: 0.35em 1.2em;
+      margin-left: 0.8em; background: #e5e6fd;
+      box-shadow: 0 2px 7px #b993d611;
+      transition: background .13s, color .13s;
+      outline: none; color: #6a59b1;
     }
-    .settings-title { font-weight:800; font-size:1.37em; color:#8d79c9;margin-bottom:1em;text-align:center; }
-    .settings-row {
-      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1.1em;
-      margin-bottom: 1em;
+    #settingsPanel select:active, #settingsPanel button:active, #settingsPanel input[type="checkbox"]:active { background: #fd90d7; color: #fff;}
+    #settingsPanel .settings-row { display: flex; align-items: center; width:100%; margin-bottom: 0.4em;}
+    #settingsPanel .settings-close {
+      position:absolute;top:11px;right:13px;background: none;border: none;font-size:1.87em;cursor:pointer;color:#b993d6;
+      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      transition: background .13s;
     }
-    .settings-label { font-size:1.09em; font-weight:700; color: #668cff; }
-    .settings-switch, .settings-select, .settings-slider {
-      border-radius: 1.5em; font-size:1em; border: none; outline: none;
-      background: var(--blue); color:#3e366b; padding: 0.39em 1.2em;
+    #settingsPanel .settings-close:active { background: #fd90d7; color: #fff;}
+    #logoutBtn {
+      margin-top: 1.8em;
+      width: 89%;
+      background: #ff7388;
+      color: #fff;
+      border: none; border-radius: 14px; font-weight: 700;
+      font-size: 1.13em; padding: 0.81em 0; box-shadow: 0 2px 9px #fd90d726;
       transition: background .15s, color .15s;
-      box-shadow: 0 2px 12px #bdd6ff24;
-      margin-left: 0.5em;
     }
-    .settings-switch:active, .settings-select:active, .settings-slider:active {
-      background: var(--pink); color: #fff;
-    }
-    .settings-select { min-width: 6em;}
-    .settings-slider { width: 95px; height: 7px; }
-    .settings-logout-btn {
-      background: var(--blue-dark); color: #fff; font-size:1.1em;
-      font-weight:700; border: none; border-radius: 1.5em;
-      padding: 0.5em 2.2em; margin-top: 2.2em;
-      transition: background .15s, color .13s;
-      box-shadow: 0 2px 13px #b993d62b;
-      cursor: pointer;
-    }
-    .settings-logout-btn:active { background: var(--pink);}
+    #logoutBtn:active { background: #fd90d7; color: #fff;}
   </style>
 </head>
 <body>
-  <!-- Top/fixed area -->
-  <div class="fixed-top" id="fixedTop">
+  <div class="fixed-top">
     <div class="topbar-btns">
       <button class="icon-btn" id="settingsBtn" title="Settings">
-        <svg fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#b993d6" stroke-width="2"/><path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0Z" fill="#668cff"/><path d="M21.3 13.06a1 1 0 0 1-.13 1.15l-1.46 1.86a1 1 0 0 1-1.31.28l-2.17-.98a7.02 7.02 0 0 1-1.44.84l-.36 2.37A1 1 0 0 1 13 20h-2a1 1 0 0 1-1-.83l-.36-2.37a7.02 7.02 0 0 1-1.44-.84l-2.17.98a1 1 0 0 1-1.31-.28l-1.46-1.86a1 1 0 0 1-.13-1.15l1.14-2a7.01 7.01 0 0 1 0-1.68l-1.14-2a1 1 0 0 1 .13-1.15l1.46-1.86a1 1 0 0 1 1.31-.28l2.17.98a7.02 7.02 0 0 1 1.44-.84l.36-2.37A1 1 0 0 1 11 4h2a1 1 0 0 1 1 .83l.36 2.37a7.02 7.02 0 0 1 1.44.84l2.17-.98a1 1 0 0 1 1.31.28l1.46 1.86a1 1 0 0 1 .13 1.15l-1.14 2c.06.27.09.54.09.82s-.03.55-.09.82l1.14 2Z" fill="#b993d6"/></svg>
+        <span class="material-icons-outlined">settings</span>
       </button>
       <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">
-        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="7" rx="2" fill="#668cff"/><rect x="14" y="3" width="7" height="7" rx="2" fill="#668cff"/><rect x="3" y="14" width="7" height="7" rx="2" fill="#668cff"/><rect x="14" y="14" width="7" height="7" rx="2" fill="#668cff"/></svg>
+        <span class="material-icons-outlined">fullscreen</span>
       </button>
     </div>
-    <div class="top-content-area" id="topContentArea"><div id="topContent"></div></div>
+    <div class="top-content-area" id="topContentArea">
+      <div id="topContent"></div>
+    </div>
   </div>
-  <!-- Levels/chapters scroll area -->
   <div class="levels-area">
     <div class="levels-scroll-area" id="levelsScrollArea"></div>
   </div>
-  <!-- Settings modal -->
+  <!-- Settings Modal -->
   <div id="settingsModal">
-    <div class="settings-panel">
-      <button class="settings-close-btn" onclick="closeSettings()">&times;</button>
-      <div class="settings-title">Settings</div>
+    <div id="settingsPanel">
+      <button class="settings-close" onclick="closeSettings()">&times;</button>
       <div class="settings-row">
-        <span class="settings-label">Mode</span>
-        <button class="settings-switch" id="darkToggle">Dark/Light</button>
-      </div>
-      <div class="settings-row">
-        <span class="settings-label">Language</span>
-        <select class="settings-select" id="langSelect">
-          <option>English</option>
-          <option>ไทย</option>
+        <label for="themeToggle">Mode</label>
+        <select id="themeToggle">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
         </select>
       </div>
       <div class="settings-row">
-        <span class="settings-label">Font Size</span>
-        <input type="range" id="fontSizeSlider" min="0.95" max="1.21" step="0.01" value="1.0" class="settings-slider">
+        <label for="langToggle">Language</label>
+        <select id="langToggle">
+          <option value="en">English</option>
+          <option value="th">ไทย</option>
+        </select>
       </div>
-      <button class="settings-logout-btn" onclick="logout()">Log Out</button>
+      <div class="settings-row">
+        <label for="fontSizeSlider">Font Size</label>
+        <input id="fontSizeSlider" type="range" min="0.92" max="1.22" step="0.01" value="1"/>
+      </div>
+      <button id="logoutBtn">Log Out</button>
     </div>
   </div>
   <script>
-    // --- Data
+    // --- ICONS AND DATA ---
     const bookIcons = [
       {color:'#5bb3ff',icon:'📘'},
       {color:'#6ccc88',icon:'📗'},
@@ -453,6 +386,11 @@
       {color:'#a685e2',icon:'📓'},
       {color:'#f7c873',icon:'📙'}
     ];
+    const slides=[
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
+    ];
     const levelData = [];
     for(let i=1;i<=10;i++) {
       const nCh = i===1?20:10;
@@ -461,33 +399,63 @@
         chapters: Array.from({length:nCh},(_,j)=>({
           title:'Chapter '+(j+1),
           completed:false,
-          exerciseDone:false,
-          watched:false,
-          unlocked:true // all unlocked
+          exerciseCompleted:false,
+          unlocked:true // All chapters unlocked!
         })),
+        progress:0,
         open:(i===1)
       });
     }
-    // Slides
-    const slides = [
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
-    ];
-
-    // --- State
-    let selected={level:0,chapter:0}, showingChapter=false, slideIdx=0;
+    // --- ICONS ---
     function checkSvg() {
-      return `<svg width="19" height="19" viewBox="0 0 19 19"><circle cx="9.5" cy="9.5" r="9" fill="#51e77d" stroke="#44d77e"/><path d="M5.5 11.2l2.4 2 5.6-5.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+      return `<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8.5" fill="#16c878" stroke="#16c878"/><path d="M5.5 9.5l2 2 5-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     }
-    // --- Top: Slideshow or chapter
+    // --- Ripple Effect ---
+    function ripple(e){
+      const btn = e.currentTarget;
+      let circle = document.createElement("span");
+      circle.className = "ripple";
+      let rect = btn.getBoundingClientRect();
+      let d = Math.max(rect.width,rect.height);
+      circle.style.width = circle.style.height = d+"px";
+      circle.style.left = (e.clientX-rect.left-d/2)+"px";
+      circle.style.top = (e.clientY-rect.top-d/2)+"px";
+      btn.appendChild(circle);
+      setTimeout(()=>circle.remove(),430);
+      btn.classList.add("rippled");
+      setTimeout(()=>btn.classList.remove("rippled"),220);
+    }
+    function addRippleToAllBtns() {
+      document.querySelectorAll('button').forEach(btn=>{
+        if(!btn._hasRipple) {
+          btn.addEventListener('click',ripple);
+          btn._hasRipple = true;
+        }
+      });
+    }
+    // --- Haptic ---
+    function haptic() {
+      if(window.navigator.vibrate) window.navigator.vibrate(20);
+    }
+    // --- State ---
+    let selected={level:0,chapter:0}, showingChapter=false, slideIdx=0;
+    let sessionProgress = JSON.parse(sessionStorage.getItem("wk_progress")||"null")||null;
+    if(sessionProgress) {
+      for(let i=0;i<levelData.length;i++) {
+        for(let j=0;j<levelData[i].chapters.length;j++) {
+          levelData[i].chapters[j].completed = !!sessionProgress[i]?.[j]?.completed;
+          levelData[i].chapters[j].exerciseCompleted = !!sessionProgress[i]?.[j]?.exerciseCompleted;
+        }
+      }
+    }
+    // --- Top: Welcome or Chapter
     function renderTop() {
       const tc=document.getElementById('topContent');
       tc.innerHTML='';
       if(!showingChapter) {
         tc.innerHTML=`
           <div class="top-title">Welcome to Wonder Kids!</div>
-          <div class="slideshow-img-area" style="margin-top:10px;">
+          <div class="slideshow-img-area">
             ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}" />`).join('')}
           </div>
           <div class="slideshow-dots">
@@ -497,66 +465,67 @@
       } else {
         const lvl=levelData[selected.level], ch=lvl.chapters[selected.chapter];
         tc.innerHTML=`
-          <div class="chapter-view-card">
-            <div class="chapter-view-title">${lvl.name} - ${ch.title}</div>
-            <div class="chapter-video-area">
-              <iframe id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen></iframe>
-            </div>
-            <div class="chapter-btns">
-              <button class="main-btn" id="exerciseBtn">EXERCISE${ch.exerciseDone?'<span class="btn-check">'+checkSvg()+'</span>':''}</button>
-              ${selected.chapter<lvl.chapters.length-1?'<button class="main-btn" onclick="goNextChapter()">NEXT</button>':''}
-            </div>
+          <div class="top-title">${lvl.name} - ${ch.title}</div>
+          <iframe class="chapter-video" id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen></iframe>
+          <div class="chapter-btns">
+            <button class="main-btn${ch.exerciseCompleted?' completed':''}" onclick="doExercise(this)">
+              <span class="material-icons-outlined">sports_esports</span>
+              Exercise
+              ${ch.exerciseCompleted?`<span class="exercise-check">${checkSvg()}</span>`:""}
+            </button>
+            ${selected.chapter<lvl.chapters.length-1?`
+            <button class="main-btn" onclick="goNextChapter()">
+              <span class="material-icons-outlined">navigate_next</span>
+              Next
+            </button>`:""}
           </div>
         `;
-        setTimeout(()=>{
-          document.getElementById('exerciseBtn').onclick = function() {
-            // Mark exercise done and watched
-            ch.exerciseDone=true; ch.completed=true; ch.watched=true;
-            renderLevels(); renderTop();
-            window.open("sorobanquiz.html","_blank");
-          }
-        },15);
       }
+      addRippleToAllBtns();
     }
-    // --- Levels & chapters
+    // --- Levels/Chapters ---
     function renderLevels() {
       const area=document.getElementById('levelsScrollArea');
       area.innerHTML='';
       for(let i=0;i<levelData.length;i++) {
         const lvl=levelData[i],book=bookIcons[i%bookIcons.length];
-        // Progress: % of chapters completed
-        const n= lvl.chapters.length, nDone=lvl.chapters.filter(c=>c.completed).length;
-        const progress = nDone/n;
-        // Level tab
+        const n= lvl.chapters.length, nDone=lvl.chapters.filter(c=>c.exerciseCompleted).length;
+        lvl.progress = nDone/n;
         area.innerHTML+=`
           <div class="level-card${lvl.open?' open':' closed'}" id="levelCard${i}">
-            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?'var(--level-unfolded)':'var(--level-folded)'};">
+            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?'#69a3e7':'#e3f0ff'};color:${lvl.open?'#fff':'#668cff'};">
               <span class="level-icon" style="background:${book.color};">${book.icon}</span>
               <span class="level-name">${lvl.name}</span>
-              <span class="level-progress"><span class="level-progress-bar" style="width:${Math.round(progress*100)}%;"></span></span>
+              <span class="level-progress">
+                <span class="level-progress-bar" style="width:${Math.round(lvl.progress*100)}%;"></span>
+              </span>
               <span class="level-arrow" id="levelArrow${i}">${lvl.open?'▴':'▾'}</span>
             </div>
             <div class="chapters-list" id="chaptersList${i}" style="display:${lvl.open?'flex':'none'};">
               ${lvl.chapters.map((ch,j)=>{
                 let classes="chapter-row";
-                if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' selected';
-                if(ch.completed) classes+=' completed';
+                if(ch.exerciseCompleted) classes+=' completed';
+                else classes+=' unlocked';
+                if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' active';
                 return `<div class="${classes}" onclick="selectChapter(event,${i},${j})">
                   <span>${ch.title}</span>
-                  ${ch.completed?`<span class="chapter-check">${checkSvg()}</span>`:''}
+                  ${ch.exerciseCompleted?`<span class="chapter-check">${checkSvg()}</span>`:""}
                 </div>`;
               }).join('')}
             </div>
           </div>
         `;
       }
-      // Scroll to current chapter if showing
-      if(showingChapter){
-        const sel=document.querySelector('.chapter-row.selected');
-        if(sel) sel.scrollIntoView({block:'nearest',behavior:'smooth'});
-      }
+      // Hide scrollbar unless scrolling
+      const scroll = document.getElementById('levelsScrollArea');
+      scroll.onscroll = ()=>{
+        scroll.classList.add('scrolling');
+        clearTimeout(scroll._scrollTO);
+        scroll._scrollTO = setTimeout(()=>scroll.classList.remove('scrolling'),600);
+      };
+      addRippleToAllBtns();
     }
-    // -- Handle toggling levels
+    // --- Level toggle ---
     window.toggleLevel=function(i){
       for(let j=0;j<levelData.length;j++){
         levelData[j].open=(j===i)?!levelData[j].open:false;
@@ -565,65 +534,100 @@
         document.getElementById('levelArrow'+j).textContent=levelData[j].open?'▴':'▾';
       }
     };
-    // -- Handle selecting chapter
+    // --- Chapter select ---
     window.selectChapter=function(e,li,ci){
-      selected={level:li,chapter:ci};
       showingChapter=true;
+      selected={level:li,chapter:ci};
       renderTop(); renderLevels();
+      haptic();
       e.stopPropagation();
     };
-    // -- NEXT BUTTON LOGIC
+    // --- Exercise ---
+    window.doExercise=function(btn){
+      // Mark exercise complete, show check
+      const {level:l,chapter:c}=selected;
+      levelData[l].chapters[c].exerciseCompleted=true;
+      levelData[l].chapters[c].completed=true;
+      saveProgress();
+      renderLevels(); renderTop();
+      haptic();
+      setTimeout(()=>{ window.location='sorobanquiz.html'; },400);
+    }
+    // --- Next ---
     window.goNextChapter=function(){
       const {level:l,chapter:c}=selected;
       if(levelData[l].chapters[c+1]) {
         selected={level:l,chapter:c+1}; showingChapter=true;
         renderTop(); renderLevels();
+        haptic();
+        document.getElementById('chaptersList'+l).scrollTo({top:34*(c+1)-7,behavior:'smooth'});
       }
     }
-    // -- Go to slide
+    // --- Slideshow ---
     window.goSlide=function(i){ slideIdx=i; renderTop();}
-    // -- Slideshow auto-rotate
-    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5000);
-
-    // -- Fullscreen logic (for the whole page)
+    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5200);
+    // --- Fullscreen (entire app) ---
     document.getElementById('fullscreenBtn').onclick = ()=>{
-      const el = document.documentElement;
-      if (!document.fullscreenElement) {
-        if(el.requestFullscreen) el.requestFullscreen();
-        else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      } else {
-        if(document.exitFullscreen) document.exitFullscreen();
-        else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-      }
+      let el=document.documentElement;
+      if(document.fullscreenElement) document.exitFullscreen();
+      else if(el.requestFullscreen) el.requestFullscreen();
+      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      else if(el.msRequestFullscreen) el.msRequestFullscreen();
+      haptic();
     };
-    // -- Settings modal
-    document.getElementById('settingsBtn').onclick=()=>{document.getElementById('settingsModal').classList.add('show');}
-    function closeSettings(){document.getElementById('settingsModal').classList.remove('show');}
-    // -- Dark/Light mode
-    document.getElementById('darkToggle').onclick=()=>{
-      document.body.classList.toggle('dark');
+    // --- Responsive (fullscreen on phone/tablet landscape) ---
+    function updateLayout() {
+      if(window.matchMedia("(orientation: landscape)").matches && window.innerWidth<1000){
+        document.querySelector(".levels-area").style.display="none";
+        document.querySelector(".fixed-top").style.height="99vh";
+        document.querySelector(".top-content-area").style.width="100vw";
+      } else {
+        document.querySelector(".levels-area").style.display="flex";
+        document.querySelector(".fixed-top").style.height="50vh";
+        document.querySelector(".top-content-area").style.width="";
+      }
     }
-    // -- Font size
+    window.addEventListener("resize",updateLayout);
+    // --- Settings panel ---
+    function closeSettings(){document.getElementById('settingsModal').style.display='none';}
+    document.getElementById('settingsBtn').onclick=()=>{
+      document.getElementById('settingsModal').style.display='block';
+      haptic();
+    };
     document.getElementById('fontSizeSlider').oninput=(e)=>{
       document.documentElement.style.fontSize = e.target.value+'rem';
     };
-    // -- Language (for future use)
-    document.getElementById('langSelect').onchange=(e)=>{
-      // Save lang or reload
+    document.getElementById('themeToggle').onchange=(e)=>{
+      if(e.target.value=="dark") document.body.classList.add("dark");
+      else document.body.classList.remove("dark");
     };
-    // -- Logout
-    function logout(){ window.location.href='login.html'; }
-
-    // --- Responsive video resizing on orientation
-    window.addEventListener("orientationchange", function() {
-      setTimeout(()=>{renderTop();}, 220);
-    });
-
-    // --- INIT
-    window.onload=()=>{
-      renderTop();
-      renderLevels();
+    document.getElementById('langToggle').onchange=(e)=>{
+      // Add language switching logic here if needed
     }
+    document.getElementById('logoutBtn').onclick=()=>{
+      sessionStorage.removeItem("wk_progress");
+      window.location='login.html';
+    }
+    // --- Save/load session progress ---
+    function saveProgress(){
+      let arr=[];
+      for(let i=0;i<levelData.length;i++){
+        arr[i]=[];
+        for(let j=0;j<levelData[i].chapters.length;j++)
+          arr[i][j]={completed:!!levelData[i].chapters[j].completed,exerciseCompleted:!!levelData[i].chapters[j].exerciseCompleted};
+      }
+      sessionStorage.setItem("wk_progress",JSON.stringify(arr));
+    }
+    // --- Init ---
+    window.onload=()=>{
+      renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
+    }
+    // --- Allow user selection in input/select only ---
+    document.addEventListener('selectstart',function(e){
+      if(["input","textarea","select"].indexOf(e.target.tagName.toLowerCase())>=0) return true;
+      e.preventDefault();
+      return false;
+    });
   </script>
 </body>
 </html>
