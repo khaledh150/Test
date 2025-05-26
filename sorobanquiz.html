@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,8 +74,7 @@
       transition: background .3s, box-shadow .2s;
       overflow-x: visible;
     }
-   
-}
+  
     @media (max-width: 900px) and (max-height: 500px) {
       #quizPanel {
         width: 100vw; min-width: 0; max-width: 100vw; padding: .22rem; border-radius: 0 2.6rem 2.6rem 0;
@@ -377,7 +377,6 @@
     ::-webkit-scrollbar-thumb {
       background: #b4d7ff; border-radius: 9px;
     }
-}
 @media (max-width: 600px) {
   .results-card {
     max-height: 70vh;   /* Adjust this value as you wish */
@@ -506,456 +505,1768 @@
   <audio id="applauseSound" src="applause.mp3"></audio>
   <audio id="losingHorn" src="losing-horn.mp3"></audio>
   <script>
-    // Utility selectors
-    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-    // Confetti fun
-    function launchConfetti(node) {
-      node = node || $('#confettiBox');
-      node.innerHTML = '';
-      const colors = ['#ffd700','#b993d6','#4d79ff','#66e6ff','#ffb3e6','#fd90d7','#c8ffb0'];
-      for(let i=0;i<36;i++) {
-        const el = document.createElement('span');
-        el.style.left = (Math.random()*96+2)+'%';
-        el.style.background = colors[Math.floor(Math.random()*colors.length)];
-        el.style.animationDuration = (1.1+Math.random()*0.5)+'s';
-        el.style.opacity = 0.82 + Math.random()*0.18;
-        el.style.transform = `rotate(${Math.random()*360}deg)`;
-        node.appendChild(el);
-      }
-      setTimeout(()=>{ node.innerHTML=''; }, 1600);
-    }
-    // RAIN sparkle/stars/emoji (like rain, not freeze!)
-    function rainSparkleBurst(style="happy") {
-      const rain = $('#rainSparkle');
-      rain.innerHTML = '';
-      rain.style.display = '';
-      let stars;
-      if(style==="sad") {
-        stars = ['💫','💪','💪','💪','💪','💪','💪','👏'];
-      } else {
-        stars = ['✨','⭐','🌟','✦','✺','✧','🟡','💫','🎊','🎉','🦄','🍭','🎈','👏','😺'];
-      }
-      const N = 34 + Math.floor(Math.random()*8);
-      for(let i=0;i<N;i++) {
-        const el = document.createElement('span');
-        el.innerText = stars[Math.floor(Math.random()*stars.length)];
-        el.style.left = (Math.random()*97)+'vw';
-        el.style.top = (-40 + Math.random()*12)+'px';
-        el.style.fontSize = (1.6 + Math.random()*2.1)+'rem';
-        el.style.opacity = 0.47 + Math.random()*0.53;
-        el.style.animationDelay = (Math.random()*0.5)+'s';
-        rain.appendChild(el);
-      }
-      setTimeout(()=>{ rain.style.display='none'; }, 2300);
-    }
-    // Soroban abacus logic (unchanged, only color via CSS)
-    const DEAD_ZONE=2, SHAKE_G=20, HAPTIC_MS=12; let mute=false;
-    const board=$('#sorobanBoard');
-    function createRod(){
-      const r=document.createElement('div');
-      r.className='rod';
-      r.innerHTML="<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>"+'<div class=\"bead earth\"></div>'.repeat(4)+"</div><div class='bar'></div>";
-      return r;
-    }
-    for(let i=0;i<8;i++) board.appendChild(createRod());
-    function clearBoard(){
-      $$('.bead.active').forEach(b=>b.classList.remove('active'));
-    }
-    $('#resetBtn').onclick=()=>{
-      clearBoard();
-      shakeEffect();
-    };
-    function setBead(b,active){
-      const hv=b.classList.contains('heaven'),was=b.classList.contains('active');
-      if(hv) b.classList.toggle('active',active);
-      else{
-        const cs=[...b.parentElement.children],idx=cs.indexOf(b);
-        cs.forEach((e,i)=>e.classList.toggle('active',active?i<=idx:i<idx));
-      }
-      if(HAPTIC_MS)navigator.vibrate(HAPTIC_MS);
-      if(!mute){
-        if(active&&!was) $('#soundOn').play();
-        if(!active&&was) $('#soundOff').play();
-      }
-    }
-    $$('.bead').forEach(b=>{
-      b.addEventListener('pointerdown',e=>{
-        b.classList.add('dragged');
-        const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;
-        b.setPointerCapture(e.pointerId);
-        b.onpointermove=ev=>{
-          let dy=ev.clientY-sy;
-          if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}
-        };
-        b.onpointerup=b.onpointercancel=()=>{
-          b.onpointermove=null;
-          b.classList.remove('dragged');
-          b.releasePointerCapture(e.pointerId);
-        }
-      });
-    });
-    // Shake to reset soroban + app shake effect
-    function shakeEffect(){
-      const abacusRoot=$('#abacusRoot');
-      abacusRoot.classList.remove('shake');
-      void abacusRoot.offsetWidth;
-      abacusRoot.classList.add('shake');
-      setTimeout(()=>abacusRoot.classList.remove('shake'),220);
-    }
-    if(window.DeviceMotionEvent){
-      let last=0;
-      window.addEventListener('devicemotion',e=>{
-        const{x,y,z}=e.accelerationIncludingGravity,mag=Math.hypot(x,y,z),now=performance.now();
-        if(mag>SHAKE_G&&now-last>800){
-          clearBoard(); shakeEffect();
-          last=now;
-        }
-      });
-    }
-    function randomChapter1(numQuestions = 20) {
-  const out = [];
-  const usedQuestions = new Set();
+                     // ― QUIZ STATE (must be declared before use) ―
+let QUESTIONS     = [];
+let currentIndex  = 0;
+let answers       = [];
+let currentInput  = "";
+let inputLocked   = false;
+let timerInterval = null;
+let timeLeft      = 600;
 
-  while (out.length < numQuestions) {
-    const A = r15(), B = r15(), C = r15(), op1 = rOp();
-    if (A === 5 && op1 === '-' && B !== 5) continue;     // 5 − B rule
-    if (A === 5 && op1 === '+' && B === 5) continue;     // forbid 5 + 5
-    if (A === 4 && op1 === '-' && !(B >= 1 && B <= 4)) continue;
-    if (A === 4 && op1 === '+' && B !== 5) continue;
-    if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
-    const AB = evalOp(A, op1, B);
-    if (AB < 0 || AB > 9) continue;
-    if (AB === 5) continue;
-    let op2 = (AB === 0) ? '+' : rOp();
-    if (AB === 4 && C !== 5) continue;
-    if (A === 5 && op2 === '+' && !(AB + C >= 5 && AB + C <= 9)) continue;
-    if (A === 5 && op2 === '-' && !(B > C)) continue;
-    const D = evalOp(AB, op2, C);
-    if (D < 0 || D > 9 || D === 5) continue;
-    if (AB < 4 && !(D < 4 || C === 5)) continue;
-    if (A + B === 5 || A + C === 5 || B + C === 5) continue;
-
-    // Format the question as a string for duplicate checking
-    const questionStr = `${A} ${op1} ${B} ${op2} ${C}`;
-
-    // Only add if NOT already used
-    if (!usedQuestions.has(questionStr)) {
-      out.push({ q: questionStr, a: D.toString() });
-      usedQuestions.add(questionStr);
-    }
-    // If duplicate, do nothing and let loop try again
-  }
-
-  return out;
-
-  function r15()  { return Math.floor(Math.random() * 5) + 1; }
-  function rOp()  { return Math.random() < 0.5 ? '+' : '-'; }
-  function evalOp(x,o,y){ return o === '+' ? x + y : x - y; }
-}
-    // Settings & state
-    let numQuestions = 20, flashSpeed = 1, flashEnabled = true, timerMinutes = 10;
-    let QUESTIONS = [], currentIndex = 0, answers = [], currentInput = '', inputLocked = false, timerInterval, timeLeft = 600;
-    let flashTokenTimer = null;
-    const qNumEl = $('#qNum'), answerEl = $('#answerDisplay'), sendBtnEl = $('#sendBtn');
-    const timerEl = $('#quizTimer'), padContainer = $('#numpad');
-    const settingsBtn = $('#settingsBtn'), settingsPanel = $('#settingsPanel');
-    const flashSpeedSec = $('#flashSpeedSec'), flashToggle = $('#flashToggle');
-    const numQuestionsInput = $('#numQuestions');
-    const timerSelect = $('#timerSelect'), muteSoundInput = $('#muteSound');
-    const questionFlashArea = $('#questionFlashArea');
-    for(let i=1;i<=10;i++) {
-      let opt = document.createElement('option');
-      opt.value = i; opt.textContent = i;
-      if(i===10) opt.selected = true;
-      timerSelect.appendChild(opt);
-    }
-    padContainer.innerHTML='';
-    ['0','1','2','3','4','5','6','7','8','9','C','BACK'].forEach(d=>{
-      const b=document.createElement('button');
-      b.innerHTML = d==='BACK' ? '⌫' : d;
-      b.onclick=()=>appendDigit(d);
-      padContainer.appendChild(b);
-    });
-    // Start Panel logic
-    function showStartPanel() {
-      $('#startPanel').style.display='flex';
-      $('#quizPanel').style.display='none';
-      $('#resultsPanel').style.display='none';
-      $('#timeUpPanel').style.display='none';
-      $('#mainMascot').classList.add('mascot-bounce-in');
-    }
-    function hideStartPanel() {
-      $('#startPanel').style.display='none';
-      $('#mainMascot').classList.remove('mascot-bounce-in');
-    }
-    // Ready-Set-Go flash sequence
-    function showReadySetGo(cb) {
-      questionFlashArea.innerHTML = '';
-      const seq = ['Ready','Set','Go!'];
-      let i = 0;
-      function flashNext() {
-        qNumEl.style.visibility = 'hidden';
-        questionFlashArea.innerHTML = `<div class="flash-center">${seq[i]}</div>`;
-        if(i === 2){
-          $('#goSound').currentTime=0; $('#goSound').play();
-        }
-        if(i < 2) {
-          setTimeout(()=>{ i++; flashNext(); }, 650);
-        } else {
-          setTimeout(()=>{
-            questionFlashArea.innerHTML = '';
-            qNumEl.style.visibility = '';
-            cb();
-          }, 650);
-        }
-      }
-      flashNext();
-    }
-    $('#startQuizBtn').onclick = () => {
-      hideStartPanel();
-      setTimeout(() => launchConfetti($('#confettiBox')), 130);
-      startQuiz(true);
-    };
-    $('#startSettingsBtn').onclick = () => { settingsPanel.style.display='flex'; };
-    // Settings panel setup
-    let updatingQuizNow = false;
-    settingsBtn.onclick=()=>{
-      settingsPanel.style.display='flex';
-      numQuestionsInput.value=numQuestions;
-      flashSpeedSec.value=flashSpeed;
-      flashToggle.checked=flashEnabled;
-      timerSelect.value=timerMinutes;
-      muteSoundInput.checked=mute;
-      updatingQuizNow = ($('#quizPanel').style.display==='flex');
-    };
-    $('#cancelSettings').onclick=()=>{settingsPanel.style.display='none';};
-    $('#saveSettings').onclick=()=>{
-      const prevNumQ = numQuestions, prevTimer = timerMinutes;
-      numQuestions = Math.max(1, Math.min(50, Number(numQuestionsInput.value)));
-      flashSpeed = Math.max(1, Math.min(5, Number(flashSpeedSec.value)));
-      flashEnabled = !!flashToggle.checked;
-      timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
-      mute = muteSoundInput.checked;
-      settingsPanel.style.display='none';
-      if(updatingQuizNow && (numQuestions!==prevNumQ || timerMinutes!==prevTimer)){
-        startQuiz(true);
-      }
-    };
-    // ---- Tokenize logic for flash
-    function parseQuestionToTokens(q) {
-      let arr = q.split(/([+-])/).map(s=>s.trim()).filter(Boolean);
-      let tokens = [];
-      tokens.push({type: 'first', val: arr[0]});
-      for(let i=1;i<arr.length;i+=2) {
-        tokens.push({type:'op', op:arr[i], val:arr[i+1]});
-      }
-      return tokens;
-    }
-    function flashQuestionTokens(questionString, cb) {
-      if (flashTokenTimer) clearTimeout(flashTokenTimer);
-      let tokens = parseQuestionToTokens(questionString);
-      let idx = 0;
-      questionFlashArea.innerHTML = '';
-      let centerDiv = document.createElement('div');
-      centerDiv.className = 'flash-center';
-      centerDiv.style.fontSize = "2.99rem";
-      questionFlashArea.appendChild(centerDiv);
-      inputLocked=true; sendBtnEl.disabled=true;
-      function showNext() {
-        centerDiv.innerHTML = '';
-        if (idx < tokens.length) {
-          let html = '';
-          if(tokens[idx].type === 'first') {
-            html = tokens[idx].val;
-          } else {
-            html = `<span style="font-size:2.99rem">${tokens[idx].op}</span> <span style="font-size:2.99rem">${tokens[idx].val}</span>`;
-            if(idx === tokens.length-1) {
-              html += `<span class="qmark" style="font-size:2.99rem">?</span>`;
+         // ― URL parameters ―
+              const url = new URL(window.location.href);
+              const currentLevel = Math.max(1, Math.min(10, parseInt(url.searchParams.get("level")) || 1));
+              const currentChapter = Math.max(1, Math.min(20, parseInt(url.searchParams.get("chapter")) || 1));
+            // Utility selectors
+            const $ = (s) => document.querySelector(s),
+                $$ = (s) => [...document.querySelectorAll(s)];
+            
+            // Confetti fun
+            function launchConfetti(node) {
+                node = node || $("#confettiBox");
+                node.innerHTML = "";
+                const colors = ["#ffd700", "#b993d6", "#4d79ff", "#66e6ff", "#ffb3e6", "#fd90d7", "#c8ffb0"];
+                for (let i = 0; i < 36; i++) {
+                    const el = document.createElement("span");
+                    el.style.left = Math.random() * 96 + 2 + "%";
+                    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    el.style.animationDuration = 1.1 + Math.random() * 0.5 + "s";
+                    el.style.opacity = 0.82 + Math.random() * 0.18;
+                    el.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    node.appendChild(el);
+                }
+                setTimeout(() => {
+                    node.innerHTML = "";
+                }, 1600);
             }
-          }
-          centerDiv.innerHTML = html;
-          if(!mute){ $('#tickSound').currentTime=0; $('#tickSound').play();}
-          if(idx === tokens.length-1) {
-            flashTokenTimer = setTimeout(()=>{
-              questionFlashArea.innerHTML = `<span class="full-question-text">${questionString.replace(/\s*$/, '')} <span class="qmark">?</span></span>`;
-              inputLocked=false; sendBtnEl.disabled=(currentInput==='');
-              cb&&cb();
-            }, flashSpeed*1000);
-            sendBtnEl.disabled=false;
-          } else {
-            flashTokenTimer = setTimeout(()=>{
-              idx++;
-              showNext();
-            }, flashSpeed*1000);
-          }
+            // RAIN sparkle/stars/emoji (like rain, not freeze!)
+            function rainSparkleBurst(style = "happy") {
+                const rain = $("#rainSparkle");
+                rain.innerHTML = "";
+                rain.style.display = "";
+                let stars;
+                if (style === "sad") {
+                    stars = ["💫", "💪", "💪", "💪", "💪", "💪", "💪", "👏"];
+                } else {
+                    stars = ["✨", "⭐", "🌟", "✦", "✺", "✧", "🟡", "💫", "🎊", "🎉", "🦄", "🍭", "🎈", "👏", "😺"];
+                }
+                const N = 34 + Math.floor(Math.random() * 8);
+                for (let i = 0; i < N; i++) {
+                    const el = document.createElement("span");
+                    el.innerText = stars[Math.floor(Math.random() * stars.length)];
+                    el.style.left = Math.random() * 97 + "vw";
+                    el.style.top = -40 + Math.random() * 12 + "px";
+                    el.style.fontSize = 1.6 + Math.random() * 2.1 + "rem";
+                    el.style.opacity = 0.47 + Math.random() * 0.53;
+                    el.style.animationDelay = Math.random() * 0.5 + "s";
+                    rain.appendChild(el);
+                }
+                setTimeout(() => {
+                    rain.style.display = "none";
+                }, 2300);
+            }
+            // Soroban abacus logic (unchanged, only color via CSS)
+            const DEAD_ZONE = 2,
+                SHAKE_G = 20,
+                HAPTIC_MS = 12;
+            let mute = false;
+            const board = $("#sorobanBoard");
+            function createRod() {
+                const r = document.createElement("div");
+                r.className = "rod";
+                r.innerHTML =
+                    "<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>" + '<div class="bead earth"></div>'.repeat(4) + "</div><div class='bar'></div>";
+                return r;
+            }
+            for (let i = 0; i < 8; i++) board.appendChild(createRod());
+            function clearBoard() {
+                $$(".bead.active").forEach((b) => b.classList.remove("active"));
+            }
+            $("#resetBtn").onclick = () => {
+                clearBoard();
+                shakeEffect();
+            };
+            function setBead(b, active) {
+                const hv = b.classList.contains("heaven"),
+                    was = b.classList.contains("active");
+                if (hv) b.classList.toggle("active", active);
+                else {
+                    const cs = [...b.parentElement.children],
+                        idx = cs.indexOf(b);
+                    cs.forEach((e, i) => e.classList.toggle("active", active ? i <= idx : i < idx));
+                }
+                if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+                if (!mute) {
+                    if (active && !was) $("#soundOn").play();
+                    if (!active && was) $("#soundOff").play();
+                }
+            }
+            $$(".bead").forEach((b) => {
+                b.addEventListener("pointerdown", (e) => {
+                    b.classList.add("dragged");
+                    const rg = b.classList.contains("heaven") ? "heaven" : "earth",
+                        sy = e.clientY;
+                    b.setPointerCapture(e.pointerId);
+                    b.onpointermove = (ev) => {
+                        let dy = ev.clientY - sy;
+                        if (Math.abs(dy) > DEAD_ZONE) {
+                            setBead(b, rg === "heaven" ? dy > 0 : dy < 0);
+                            b.onpointermove = null;
+                        }
+                    };
+                    b.onpointerup = b.onpointercancel = () => {
+                        b.onpointermove = null;
+                        b.classList.remove("dragged");
+                        b.releasePointerCapture(e.pointerId);
+                    };
+                });
+            });
+            // Shake to reset soroban + app shake effect
+            function shakeEffect() {
+                const abacusRoot = $("#abacusRoot");
+                abacusRoot.classList.remove("shake");
+                void abacusRoot.offsetWidth;
+                abacusRoot.classList.add("shake");
+                setTimeout(() => abacusRoot.classList.remove("shake"), 220);
+            }
+            if (window.DeviceMotionEvent) {
+                let last = 0;
+                window.addEventListener("devicemotion", (e) => {
+                    const { x, y, z } = e.accelerationIncludingGravity,
+                        mag = Math.hypot(x, y, z),
+                        now = performance.now();
+                    if (mag > SHAKE_G && now - last > 800) {
+                        clearBoard();
+                        shakeEffect();
+                        last = now;
+                    }
+                });
+            }
+            function randomChapter1(numQuestions = 10, numNumbers = 4) {
+                const out = [];
+
+                while (out.length < numQuestions) {
+                    const A = r15(),
+                        B = r15(),
+                        C = r15(),
+                        op1 = rOp();
+
+                    if (A === 5 && op1 === "-" && B !== 5) continue; // 5 − B rule
+                    if (A === 5 && op1 === "+" && B === 5) continue; // forbid 5 + 5
+                    if (A === 4 && op1 === "-" && !(B >= 1 && B <= 4)) continue;
+                    if (A === 4 && op1 === "+" && B !== 5) continue;
+                    if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
+
+                    const AB = evalOp(A, op1, B); // first stage
+
+                    /* NEW guard: first-stage must be 0–9 */
+                    if (AB < 0 || AB > 9) continue;
+
+                    if (AB === 5) continue; // no stage total may be 5
+
+                    let op2 = AB === 0 ? "+" : rOp(); // 0 → force '+'
+
+                    if (AB === 4 && C !== 5) continue;
+                    if (A === 5 && op2 === "+" && !(AB + C >= 5 && AB + C <= 9)) continue;
+                    if (A === 5 && op2 === "-" && !(B > C)) continue;
+
+                    const D = evalOp(AB, op2, C); // final result
+
+                    if (D < 0 || D > 9 || D === 5) continue;
+                    if (AB < 4 && !(D < 4 || C === 5)) continue;
+                    if (A + B === 5 || A + C === 5 || B + C === 5) continue;
+
+                    out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+                }
+                return out;
+
+                function r15() {
+                    return Math.floor(Math.random() * 5) + 1;
+                }
+                function rOp() {
+                    return Math.random() < 0.5 ? "+" : "-";
+                }
+                function evalOp(x, o, y) {
+                    return o === "+" ? x + y : x - y;
+                }
+            }
+
+            /**
+             * Generate arithmetic questions for Chapter 2.
+             *  - A, B, C ∈ 1‥9
+             *  - Two operators (op1, op2) ∈ {+ ,-}
+             *  - Result D ∈ 0‥9
+             *  - All selection rules in the prompt are enforced.
+             */
+            function randomChapter2(numQuestions = 10) {
+                const out = [];
+
+                while (out.length < numQuestions) {
+                    const A = r19();
+                    const op1 = rOp();
+
+                    /* -------- FIRST STAGE : choose B that satisfies op1-rules -------- */
+                    let B = choose(r19, (b) => (op1 === "+" ? validB_plus(A, b) : validB_minus(A, b)));
+                    if (B == null) continue; // give up and retry
+
+                    const stage1 = evalOp(A, op1, B); // S = A ± B
+                    if (stage1 < 0 || stage1 > 9) continue; // keep D in 0-9 range later
+
+                    /* -------- SECOND STAGE : choose op2 and C that satisfy combo-rules -------- */
+                    const op2 = rOp();
+                    let C = choose(r19, (c) => {
+                        if (op1 === "+" && op2 === "+") return validC_plusplus(stage1, c);
+                        if (op1 === "+" && op2 === "-") return validC_plusminus(stage1, c);
+                        if (op1 === "-" && op2 === "+") return validC_minusplus(stage1, c);
+                        return validC_minusminus(stage1, c); // - -
+                    });
+                    if (C == null) continue;
+
+                    const D = evalOp(stage1, op2, C); // final answer
+                    if (D < 0 || D > 9) continue;
+
+                    out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+                }
+                return out;
+
+                /* ---------- helpers ---------- */
+                function r19() {
+                    return Math.floor(Math.random() * 9) + 1;
+                }
+                function rOp() {
+                    return Math.random() < 0.5 ? "+" : "-";
+                }
+                function evalOp(x, o, y) {
+                    return o === "+" ? x + y : x - y;
+                }
+
+                /** repeatedly pick a random value until the predicate is true, or give up */
+                function choose(generator, ok, tries = 60) {
+                    while (tries--) {
+                        const v = generator();
+                        if (ok(v)) return v;
+                    }
+                    return null; // give up after N attempts
+                }
+
+                /* ---------- rule predicates ---------- */
+
+                /* op1 = '+' ----------------------------------------------------------------*/
+                function validB_plus(A, B) {
+                    if (A <= 4) return !(B >= 10 - A || (B >= 5 - A && B < 5));
+                    if (A === 5) return B < 5;
+                    /* A = 6-9 */ return B < 10 - A;
+                }
+
+                /* op1 = '-' ----------------------------------------------------------------*/
+                function validB_minus(A, B) {
+                    if (A <= 4) return B <= A;
+                    if (A === 5) return B === 5;
+                    /* A = 6-9 */ return B <= A - 5 || B === 5;
+                }
+
+                /*  op1 '+'  , op2 '+' ------------------------------------------------------*/
+                function validC_plusplus(S, C) {
+                    if (S <= 4) return !(C >= 10 - S || (C >= 5 - S && C < 5));
+                    if (S === 5) return C < 5;
+                    /* S = 6-9 */ return C < 10 - S;
+                }
+
+                /*  op1 '+'  , op2 '-' ------------------------------------------------------*/
+                function validC_plusminus(S, C) {
+                    if (2 <= S && S <= 4) return C < S;
+                    if (S === 5) return C === 5;
+                    /* S = 6-9 */ return C <= S - 5 || C === 5;
+                }
+
+                /*  op1 '-'  , op2 '+' ------------------------------------------------------*/
+                function validC_minusplus(S, C) {
+                    if (S <= 4) return !(C >= 10 - S || (C >= 5 - S && C < 5));
+                    if (S === 5) return C < 5;
+                    /* S = 6-9 */ return C < 10 - S;
+                }
+
+                /*  op1 '-'  , op2 '-' ------------------------------------------------------*/
+                function validC_minusminus(S, C) {
+                    if (S <= 4) return C < S; // note: S = 0 gives no valid C
+                    if (S === 5) return C === 5;
+                    /* S = 6-9 */ return C <= S - 5 || C === 5;
+                }
+            }
+
+            function randomChapter3(numQuestions = 10) {
+                const out = [];
+                while (out.length < numQuestions) {
+                    const op1 = Math.random() < 0.5 ? "+" : "-";
+                    const op2 = Math.random() < 0.5 ? "+" : "-";
+                    let A, B, C;
+
+                    if (op1 === "+") {
+                        // A ∈ 1–4
+                        A = Math.floor(Math.random() * 4) + 1;
+                        const pivot = 5 - A;
+
+                        // exactly one of these six sub-cases:
+                        switch (Math.floor(Math.random() * 6) + 1) {
+                            case 1:
+                                B = pivot;
+                                C = op2 === "+" ? Math.floor(Math.random() * 4) + 1 : 5;
+                                break;
+                            case 2:
+                                if (pivot <= 1 || op2 !== "+") continue;
+                                B = Math.floor(Math.random() * (pivot - 1)) + 1;
+                                C = 5 - (A + B);
+                                break;
+                            case 3:
+                                if (pivot >= 5 || op2 !== "+") continue;
+                                B = Math.floor(Math.random() * (5 - pivot)) + (pivot + 1);
+                                C = Math.floor(Math.random() * (A + B - 1)) + 1;
+                                break;
+                            case 4:
+                                if (op2 !== "-") continue;
+                                B = pivot;
+                                C = 5;
+                                break;
+                            case 5:
+                                if (pivot <= 1 || op2 !== "-") continue;
+                                B = Math.floor(Math.random() * (pivot - 1)) + 1;
+                                C = Math.floor(Math.random() * (A + B)) + 1;
+                                break;
+                            case 6:
+                                if (pivot >= 5 || op2 !== "-") continue;
+                                B = Math.floor(Math.random() * (5 - pivot)) + (pivot + 1);
+                                C = [A + B - 5, 5][Math.random() < 0.5 ? 0 : 1];
+                                break;
+                        }
+                    } else {
+                        // op1 = "-"
+                        A = Math.floor(Math.random() * 9) + 1;
+                        if (A >= 1 && A <= 4) {
+                            if (A <= 1 || op2 !== "+") continue;
+                            B = Math.floor(Math.random() * (A - 1)) + 1;
+                            C = 5 - (A - B);
+                        } else if (A >= 6 && A <= 9) {
+                            if (op2 !== "+") continue;
+                            if (Math.random() < 0.5 && A - 5 >= 1) {
+                                B = Math.floor(Math.random() * (A - 5)) + 1;
+                                C = Math.floor(Math.random() * 4) + 1;
+                            } else {
+                                B = 5;
+                                C = 5 - (A - B);
+                            }
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    const stage1 = op1 === "+" ? A + B : A - B;
+                    const D = op2 === "+" ? stage1 + C : stage1 - C;
+                    if (D < 0 || D > 9) continue;
+
+                    out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+                }
+                return out;
+            }
+
+            function randomChapter4(numQuestions = 10) {
+                let A, B, C, op2, D, expr;
+                const questions = [];
+                while (questions.length < numQuestions) {
+                    let caseType = Math.random() < 0.5 ? 1 : 2;
+
+                    if (caseType === 1) {
+                        A = 5;
+                        B = [1, 2, 3, 4][Math.floor(Math.random() * 4)];
+                        let AB = A - B;
+                        op2 = Math.random() < 0.5 ? "+" : "-";
+
+                        if (op2 === "+") {
+                            if (AB === 4) {
+                                C = Math.floor(Math.random() * 5) + 1; // 1–5
+                            } else if (AB < 4) {
+                                let cMin = 5,
+                                    cMax = 10 - AB;
+                                let cOptions = [];
+                                for (let x = cMin; x < cMax; x++) cOptions.push(x);
+                                if (cOptions.length === 0) continue;
+                                C = cOptions[Math.floor(Math.random() * cOptions.length)];
+                            } else {
+                                C = Math.floor(Math.random() * 5) + 1;
+                            }
+                            D = AB + C;
+                        } else {
+                            if (AB < 1) continue;
+                            C = Math.floor(Math.random() * AB) + 1;
+                            D = AB - C;
+                        }
+                        expr = `${A} - ${B} ${op2} ${C}`;
+                    } else {
+                        A = [6, 7, 8][Math.floor(Math.random() * 3)];
+                        let bMin = A - 5 + 1,
+                            bMax = 4;
+                        let bOptions = [];
+                        for (let x = bMin; x < bMax; x++) bOptions.push(x);
+                        if (bOptions.length === 0) continue;
+                        B = bOptions[Math.floor(Math.random() * bOptions.length)];
+                        let AB = A - B;
+                        op2 = Math.random() < 0.5 ? "+" : "-";
+
+                        if (op2 === "+") {
+                            C = Math.floor(Math.random() * 5) + 1;
+                            D = AB + C;
+                        } else {
+                            if (AB < 1) continue;
+                            C = Math.floor(Math.random() * AB) + 1;
+                            D = AB - C;
+                        }
+                        expr = `${A} - ${B} ${op2} ${C}`;
+                    }
+
+                    if ([A, B, C].every((v) => v >= 1 && v <= 9) && D >= 0 && D <= 9) {
+                        questions.push({ q: expr, a: D.toString() });
+                    }
+                }
+                return questions;
+            }
+
+            function alternateQuestions(arr1, arr2, total) {
+                const mixed = [];
+                let i = 0;
+                while (mixed.length < total) {
+                    if (i < arr1.length) mixed.push(arr1[i]);
+                    if (mixed.length < total && i < arr2.length) mixed.push(arr2[i]);
+                    i++;
+                }
+                return mixed;
+            }
+
+            function randomChapter6(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 3000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, D;
+
+                    // Pick a rule at random (0: Rule 1, 1: Rule 2, 2: Rule 3, 3: Rule 4)
+                    const ruleType = Math.floor(Math.random() * 4);
+
+                    if (ruleType === 0) {
+                        // Rule 1: op1 = '+', A = 1-9, B = 10-A, op2 = '+', C = 1-9
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 9) + 1;
+                        B = 10 - A;
+                        if (B < 1 || B > 9) continue;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // Rule 2: op1 = '+', A = 1-9, B = 1..(9-A), op2 = '+', C = 10-(A+B)
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 9) + 1;
+                        let maxB = 10 - A - 1; // x < (10-A), x >= 1
+                        if (maxB < 1) continue;
+                        B = Math.floor(Math.random() * maxB) + 1; // 1..maxB
+                        let sumAB = A + B;
+                        C = 10 - sumAB;
+                        if (C < 1 || C > 9) continue;
+                    } else if (ruleType === 2) {
+                        // Rule 3: op1 = '+', A = 1-9, B = 1..(9-A), op2 = '-', C <= (A+B)
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 9) + 1;
+                        let maxB = 10 - A - 1; // x < (10-A)
+                        if (maxB < 1) continue;
+                        B = Math.floor(Math.random() * maxB) + 1; // 1..maxB
+                        let sumAB = A + B;
+                        let maxC = Math.min(sumAB, 9);
+                        if (maxC < 1) continue;
+                        C = Math.floor(Math.random() * maxC) + 1; // 1..maxC
+                    } else if (ruleType === 3) {
+                        // Rule 4: op1 = '-', A = 1-9, B < A, op2 = '+', C = 10-(A+B)
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 9) + 1;
+                        if (A === 1) continue; // B must be < A
+                        B = Math.floor(Math.random() * (A - 1)) + 1; // 1..A-1
+                        let sumAB = A + B;
+                        C = 10 - sumAB;
+                        if (C < 1 || C > 9) continue;
+                    }
+
+                    // Build the expression and compute D left-to-right
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    let result = A;
+                    result = op1 === "+" ? result + B : result - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    // Only accept if all values in range and D in 0..30
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9) && result >= 0 && result <= 30) {
+                        questions.push({ q: expr, a: result.toString() });
+                    }
+                }
+
+                // Warning if unable to generate enough questions
+                if (questions.length < numQuestions) {
+                    alert("Warning: Could not generate enough questions.");
+                }
+
+                return questions;
+            }
+
+            function randomChapter7(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 5000) {
+                    attempts++;
+                    let A, B, C, D, expr;
+                    let possibleCs = [];
+
+                    // Randomly select which case for A
+                    let caseType = Math.random();
+
+                    // --- CASE 1: A = 1..4, B >= 10-A, op2 = '-'
+                    if (caseType < 0.38) {
+                        A = Math.floor(Math.random() * 4) + 1; // 1-4
+                        let minB = 10 - A;
+                        if (minB > 9) continue;
+                        B = Math.floor(Math.random() * (10 - minB)) + minB; // minB..9
+
+                        const sum = A + B;
+
+                        if (sum <= 10) {
+                            possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                        } else if (sum === 11) {
+                            possibleCs = [2, 3, 4, 5, 7, 8, 9];
+                        } else if (sum === 12) {
+                            possibleCs = [3, 4, 5, 8, 9];
+                        } else if (sum === 13) {
+                            possibleCs = [4, 5, 9];
+                        } else if (sum === 14) {
+                            possibleCs = [5];
+                        } else {
+                            continue;
+                        }
+                        if (possibleCs.length === 0) continue;
+                        C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+
+                        // --- CASE 2: A = 5, B = 5, op2 = '-', C = 1..9
+                    } else if (caseType < 0.54) {
+                        A = 5;
+                        B = 5;
+                        possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                        C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+
+                        // --- CASE 3: A = 6..9, B in [(10-A), 5], op2 = '-'
+                    } else {
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        let minB = 10 - A;
+                        let maxB = 5;
+                        if (minB > 5 || minB > 9) continue;
+                        // B in [minB, 5] and 1-9
+                        let possibleBs = [];
+                        for (let b = minB; b <= maxB; b++) {
+                            if (b >= 1 && b <= 9) possibleBs.push(b);
+                        }
+                        if (possibleBs.length === 0) continue;
+                        B = possibleBs[Math.floor(Math.random() * possibleBs.length)];
+
+                        const sum = A + B;
+
+                        if (sum === 10) {
+                            possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                        } else if (sum === 11) {
+                            possibleCs = [2, 3, 4, 5, 7, 8, 9];
+                        } else if (sum === 12) {
+                            possibleCs = [3, 4, 5, 8, 9];
+                        } else if (sum === 13) {
+                            possibleCs = [4, 5, 9];
+                        } else if (sum === 14) {
+                            possibleCs = [5];
+                        } else {
+                            continue;
+                        }
+                        if (possibleCs.length === 0) continue;
+                        C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+                    }
+
+                    expr = `${A} + ${B} - ${C}`;
+                    D = A + B - C;
+
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9) && D >= 0 && D <= 100) {
+                        questions.push({ q: expr, a: D.toString() });
+                    }
+                }
+
+                if (questions.length < numQuestions) {
+                    alert("Warning: Could not generate enough questions.");
+                }
+
+                return questions;
+            }
+
+            function alternateQuestions1(arr1, arr2, total) {
+                const mixed = [];
+                let i = 0;
+                while (mixed.length < total) {
+                    if (i < arr1.length) mixed.push(arr1[i]);
+                    if (mixed.length < total && i < arr2.length) mixed.push(arr2[i]);
+                    i++;
+                }
+                return mixed;
+            }
+
+            function randomChapter9(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 2000) {
+                    attempts++;
+                    let A, B, C, D, op1, op2, expr;
+
+                    // Randomly select which rule to use
+                    let ruleType = Math.floor(Math.random() * 4);
+
+                    if (ruleType === 0) {
+                        // Rule 1: op1 = '+', A = 5, B = 9, op2 = '+', C = 1-9
+                        op1 = "+";
+                        op2 = "+";
+                        A = 5;
+                        B = 9;
+                        C = Math.floor(Math.random() * 9) + 1; // 1-9
+                    } else if (ruleType === 1) {
+                        // Rule 2: op1 = '+', A = 1-4, B = 5-A, op2 = '+', C = 9
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1; // 1-4
+                        B = 5 - A;
+                        C = 9;
+                    } else if (ruleType === 2) {
+                        // Rule 3: op1 = '+', A = 6-9, B = 15-A, op2 = '+', C = 9
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 15 - A;
+                        C = 9;
+                    } else if (ruleType === 3) {
+                        // Rule 4: op1 = '-', A = 6-9, B = A-5, op2 = '+', C = 9
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = A - 5;
+                        C = 9;
+                    }
+
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    // Compute D left-to-right
+                    let result = A;
+                    result = op1 === "+" ? result + B : result - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+                return questions;
+            }
+
+            function randomChapter10(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 4000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // Pick one of the 7 rules randomly
+                    let ruleType = Math.floor(Math.random() * 7);
+
+                    if (ruleType === 0) {
+                        // Rule 1: op1 = '+', A = 5 or 6, B = 8, op2 = '+', C = 1-9
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.random() < 0.5 ? 5 : 6;
+                        B = 8;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // Rule 2: op1 = '+', A = 1-4, B = 5-A, op2 = '+', C = 8
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 5 - A;
+                        C = 8;
+                    } else if (ruleType === 2) {
+                        // Rule 3: op1 = '+', A = 1-4, B = 6-A, op2 = '+', C = 8
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 6 - A;
+                        C = 8;
+                    } else if (ruleType === 3) {
+                        // Rule 4: op1 = '+', A = 6-9, B = 15-A, op2 = '+', C = 8
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 15 - A;
+                        C = 8;
+                    } else if (ruleType === 4) {
+                        // Rule 5: op1 = '+', A = 6-9, B = 16-A, op2 = '+', C = 8
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 16 - A;
+                        C = 8;
+                    } else if (ruleType === 5) {
+                        // Rule 6: op1 = '-', A = 6-9, B = A-5, op2 = '+', C = 8
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 5;
+                        C = 8;
+                    } else if (ruleType === 6) {
+                        // Rule 7: op1 = '-', A = 6-9, B = A-6, op2 = '+', C = 8
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 6;
+                        C = 8;
+                    }
+
+                    // Make sure all values are in 1-9
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                        expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                        result = A;
+                        result = op1 === "+" ? result + B : result - B;
+                        result = op2 === "+" ? result + C : result - C;
+
+                        if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                            questions.push({ q: expr, a: result.toString() });
+                            seen.add(expr);
+                        }
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter11(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 6000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // Randomly pick a rule (there are 10)
+                    let ruleType = Math.floor(Math.random() * 10);
+
+                    if (ruleType === 0) {
+                        // 1: op1 = '+', A=5/6/7, B=7, op2='+', C=1-9
+                        op1 = "+";
+                        op2 = "+";
+                        A = [5, 6, 7][Math.floor(Math.random() * 3)];
+                        B = 7;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // 2: op1='+', A=1-4, B=5-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 5 - A;
+                        C = 7;
+                    } else if (ruleType === 2) {
+                        // 3: op1='+', A=1-4, B=6-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 6 - A;
+                        C = 7;
+                    } else if (ruleType === 3) {
+                        // 4: op1='+', A=1-4, B=7-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 7 - A;
+                        C = 7;
+                    } else if (ruleType === 4) {
+                        // 5: op1='+', A=6-9, B=15-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 15 - A;
+                        C = 7;
+                    } else if (ruleType === 5) {
+                        // 6: op1='+', A=6-9, B=16-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 16 - A;
+                        C = 7;
+                    } else if (ruleType === 6) {
+                        // 7: op1='+', A=6-9, B=17-A, op2='+', C=7
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 17 - A;
+                        C = 7;
+                    } else if (ruleType === 7) {
+                        // 8: op1='-', A=6-9, B=A-5, op2='+', C=7
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 5;
+                        C = 7;
+                    } else if (ruleType === 8) {
+                        // 9: op1='-', A=6-9, B=A-6, op2='+', C=7
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 6;
+                        C = 7;
+                    } else if (ruleType === 9) {
+                        // 10: op1='-', A=7-9, B=A-7, op2='+', C=7
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 3) + 7;
+                        B = A - 7;
+                        C = 7;
+                    }
+
+                    // Check all are 1-9
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                        expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                        result = op1 === "+" ? A + B : A - B;
+                        result = op2 === "+" ? result + C : result - C;
+
+                        if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                            questions.push({ q: expr, a: result.toString() });
+                            seen.add(expr);
+                        }
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter12(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 8000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // 14 total rules
+                    let ruleType = Math.floor(Math.random() * 14);
+
+                    if (ruleType === 0) {
+                        // 1: op1 = '+', A=5/6/7/8, B=6, op2='+', C=1-9
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 5; // 5-8
+                        B = 6;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // 2: op1='+', A=1-4, B=5-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 5 - A;
+                        C = 6;
+                    } else if (ruleType === 2) {
+                        // 3: op1='+', A=1-4, B=6-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 6 - A;
+                        C = 6;
+                    } else if (ruleType === 3) {
+                        // 4: op1='+', A=1-4, B=7-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 7 - A;
+                        C = 6;
+                    } else if (ruleType === 4) {
+                        // 5: op1='+', A=1-4, B=8-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 1;
+                        B = 8 - A;
+                        C = 6;
+                    } else if (ruleType === 5) {
+                        // 6: op1='+', A=6-9, B=15-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 15 - A;
+                        C = 6;
+                    } else if (ruleType === 6) {
+                        // 7: op1='+', A=6-9, B=16-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 16 - A;
+                        C = 6;
+                    } else if (ruleType === 7) {
+                        // 8: op1='+', A=6-9, B=17-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 17 - A;
+                        C = 6;
+                    } else if (ruleType === 8) {
+                        // 9: op1='+', A=6-9, B=18-A, op2='+', C=6
+                        op1 = "+";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = 18 - A;
+                        C = 6;
+                    } else if (ruleType === 9) {
+                        // 10: op1='-', A=6-9, B=A-5, op2='+', C=6
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 5;
+                        C = 6;
+                    } else if (ruleType === 10) {
+                        // 11: op1='-', A=6-9, B=A-6, op2='+', C=6
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 6;
+                        B = A - 6;
+                        C = 6;
+                    } else if (ruleType === 11) {
+                        // 12: op1='-', A=7-9, B=A-7, op2='+', C=6
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 3) + 7;
+                        B = A - 7;
+                        C = 6;
+                    } else if (ruleType === 12) {
+                        // 13: op1='-', A=8-9, B=A-8, op2='+', C=6
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 2) + 8;
+                        B = A - 8;
+                        C = 6;
+                    }
+
+                    // Only allow A, B, C in 1-9
+                    if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                        expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                        result = op1 === "+" ? A + B : A - B;
+                        result = op2 === "+" ? result + C : result - C;
+
+                        if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                            questions.push({ q: expr, a: result.toString() });
+                            seen.add(expr);
+                        }
+                    }
+                }
+                return questions;
+            }
+
+            function randomChapter13(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 2000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // Randomly choose one of the three rules
+                    const ruleType = Math.floor(Math.random() * 3);
+
+                    if (ruleType === 0) {
+                        // Rule 1: '-'  A=14, B=9, op2='+', C=1-9
+                        op1 = "-";
+                        op2 = "+";
+                        A = 14;
+                        B = 9;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // Rule 2: '-'  A=14, B=9, op2='-', C=1-5
+                        op1 = "-";
+                        op2 = "-";
+                        A = 14;
+                        B = 9;
+                        C = Math.floor(Math.random() * 5) + 1;
+                    } else if (ruleType === 2) {
+                        // Rule 3: '+'  A=6-9, B=14-A, op2='-', C=9
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 14 - A;
+                        C = 9;
+                        // Make sure B is in 1-9 range
+                        if (B < 1 || B > 9) continue;
+                    }
+
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    // Make sure everything is within bounds and not duplicate
+                    if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter14(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 2000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // Randomly choose one of the four rules
+                    const ruleType = Math.floor(Math.random() * 4);
+
+                    if (ruleType === 0) {
+                        // Rule 1: '-'  A=13 or 14, B=8, op2='+', C=1-9
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.random() < 0.5 ? 13 : 14;
+                        B = 8;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // Rule 2: '-'  A=13 or 14, B=8, op2='-', C=1-5
+                        op1 = "-";
+                        op2 = "-";
+                        A = Math.random() < 0.5 ? 13 : 14;
+                        B = 8;
+                        C = Math.floor(Math.random() * 5) + 1;
+                    } else if (ruleType === 2) {
+                        // Rule 3: '+'  A=6-9, B=14-A, op2='-', C=8
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 14 - A;
+                        C = 8;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 3) {
+                        // Rule 4: '+'  A=6-9, B=13-A, op2='-', C=8
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 13 - A;
+                        C = 8;
+                        if (B < 1 || B > 9) continue;
+                    }
+
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    // Check values and uniqueness
+                    if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter15(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 2000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // Randomly pick a rule (there are 6 rules)
+                    let ruleType = Math.floor(Math.random() * 6);
+
+                    if (ruleType === 0) {
+                        // Rule 1: '-' A=12,13,14 B=7 op2='+' C=1-9
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 3) + 12; // 12-14
+                        B = 7;
+                        C = Math.floor(Math.random() * 9) + 1;
+                    } else if (ruleType === 1) {
+                        // Rule 2: '-' A=12,13,14 B=7 op2='-' C=1-5
+                        op1 = "-";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 3) + 12; // 12-14
+                        B = 7;
+                        C = Math.floor(Math.random() * 5) + 1;
+                    } else if (ruleType === 2) {
+                        // Rule 3: '+' A=6-9 B=14-A op2='-' C=7
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 14 - A;
+                        C = 7;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 3) {
+                        // Rule 4: '+' A=6-9 B=13-A op2='-' C=7
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 13 - A;
+                        C = 7;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 4) {
+                        // Rule 5: '+' A=6-9 B=12-A op2='-' C=7
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 12 - A;
+                        C = 7;
+                        if (B < 1 || B > 9) continue;
+                    }
+
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    // All values in allowed range, uniqueness check
+                    if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter16(numQuestions = 10) {
+                const questions = [];
+                const seen = new Set();
+                let attempts = 0;
+
+                while (questions.length < numQuestions && attempts < 3000) {
+                    attempts++;
+                    let A, B, C, op1, op2, expr, result;
+
+                    // There are 6 rules
+                    let ruleType = Math.floor(Math.random() * 6);
+
+                    if (ruleType === 0) {
+                        // Rule 1: '-' A=11,12,13,14 B=6 op2='+' C=1-9
+                        op1 = "-";
+                        op2 = "+";
+                        A = Math.floor(Math.random() * 4) + 11; // 11-14
+                        B = 6;
+                        C = Math.floor(Math.random() * 9) + 1; // 1-9
+                    } else if (ruleType === 1) {
+                        // Rule 2: '-' A=11,12,13,14 B=6 op2='-' C=1-5
+                        op1 = "-";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 11; // 11-14
+                        B = 6;
+                        C = Math.floor(Math.random() * 5) + 1; // 1-5
+                    } else if (ruleType === 2) {
+                        // Rule 3: '+' A=6-9 B=14-A op2='-' C=6
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 14 - A;
+                        C = 6;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 3) {
+                        // Rule 4: '+' A=6-9 B=13-A op2='-' C=6
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 13 - A;
+                        C = 6;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 4) {
+                        // Rule 5: '+' A=6-9 B=12-A op2='-' C=6
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 12 - A;
+                        C = 6;
+                        if (B < 1 || B > 9) continue;
+                    } else if (ruleType === 5) {
+                        // Rule 6: '+' A=6-9 B=11-A op2='-' C=6
+                        op1 = "+";
+                        op2 = "-";
+                        A = Math.floor(Math.random() * 4) + 6; // 6-9
+                        B = 11 - A;
+                        C = 6;
+                        if (B < 1 || B > 9) continue;
+                    }
+
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    // All values in allowed range, uniqueness check
+                    if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter17(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+                const ops = ["+", "-"];
+
+                while (questions.length < numQuestions && attempts < 3000) {
+                    attempts++;
+                    const A = Math.floor(Math.random() * 9) + 1;
+                    const B = Math.floor(Math.random() * 9) + 1;
+                    const C = Math.floor(Math.random() * 9) + 1;
+                    const op1 = ops[Math.floor(Math.random() * 2)];
+                    const op2 = ops[Math.floor(Math.random() * 2)];
+
+                    // If op1 is '-', ensure A >= B (A-B not negative)
+                    if (op1 === "-" && A < B) continue;
+
+                    // Calculate intermediate step
+                    let step1 = op1 === "+" ? A + B : A - B;
+
+                    // If op2 is '-' ensure step1 >= C ((A+-B)-C not negative)
+                    if (op2 === "-" && step1 < C) continue;
+
+                    // Calculate final result
+                    let D = op2 === "+" ? step1 + C : step1 - C;
+
+                    // D must be in 0-9
+                    if (D >= 0 && D <= 9) {
+                        questions.push({
+                            q: `${A} ${op1} ${B} ${op2} ${C}`,
+                            a: D.toString(),
+                        });
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter18(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+                const ops = ["+", "-"];
+
+                while (questions.length < numQuestions && attempts < 10000) {
+                    attempts++;
+                    const A = Math.floor(Math.random() * 59) + 1;
+                    const B = Math.floor(Math.random() * 59) + 1;
+                    const C = Math.floor(Math.random() * 59) + 1;
+                    const op1 = ops[Math.floor(Math.random() * 2)];
+                    const op2 = ops[Math.floor(Math.random() * 2)];
+
+                    // If op1 is '-', ensure A >= B (A-B not negative)
+                    if (op1 === "-" && A < B) continue;
+
+                    // Calculate intermediate step
+                    let step1 = op1 === "+" ? A + B : A - B;
+
+                    // If op2 is '-', ensure step1 >= C
+                    if (op2 === "-" && step1 < C) continue;
+
+                    // Calculate final result
+                    let D = op2 === "+" ? step1 + C : step1 - C;
+
+                    // D must be in 10–99
+                    if (D >= 10 && D <= 99) {
+                        questions.push({
+                            q: `${A} ${op1} ${B} ${op2} ${C}`,
+                            a: D.toString(),
+                        });
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter19(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+                const ops = ["+", "-"];
+
+                while (questions.length < numQuestions && attempts < 30000) {
+                    attempts++;
+                    const A = Math.floor(Math.random() * 99) + 1;
+                    const B = Math.floor(Math.random() * 99) + 1;
+                    const C = Math.floor(Math.random() * 99) + 1;
+                    const op1 = ops[Math.floor(Math.random() * 2)];
+                    const op2 = ops[Math.floor(Math.random() * 2)];
+
+                    // Ensure no negatives after first op
+                    if (op1 === "-" && A < B) continue;
+
+                    let step1 = op1 === "+" ? A + B : A - B;
+
+                    // Ensure no negatives after second op
+                    if (op2 === "-" && step1 < C) continue;
+
+                    let D = op2 === "+" ? step1 + C : step1 - C;
+
+                    // D must be 100–999
+                    if (D >= 100 && D <= 999) {
+                        questions.push({
+                            q: `${A} ${op1} ${B} ${op2} ${C}`,
+                            a: D.toString(),
+                        });
+                    }
+                }
+
+                return questions;
+            }
+
+            function randomChapter20(numQuestions = 10) {
+                const questions = [];
+                let attempts = 0;
+                const ops = ["+", "-"];
+
+                while (questions.length < numQuestions && attempts < 40000) {
+                    attempts++;
+
+                    const A = Math.floor(Math.random() * 999) + 1;
+                    const B = Math.floor(Math.random() * 999) + 1;
+                    const C = Math.floor(Math.random() * 999) + 1;
+                    const op1 = ops[Math.floor(Math.random() * 2)];
+                    const op2 = ops[Math.floor(Math.random() * 2)];
+
+                    // A-B must not be negative
+                    if (op1 === "-" && A < B) continue;
+
+                    let step1 = op1 === "+" ? A + B : A - B;
+
+                    // (A+-B)-C must not be negative
+                    if (op2 === "-" && step1 < C) continue;
+
+                    let D = op2 === "+" ? step1 + C : step1 - C;
+
+                    // D must be 1000–9999
+                    if (D >= 1000 && D <= 9999) {
+                        questions.push({
+                            q: `${A} ${op1} ${B} ${op2} ${C}`,
+                            a: D.toString(),
+                        });
+                    }
+                }
+
+                return questions;
+            }
+            // Settings & state
+            let numQuestions = 20,
+                flashSpeed = 1,
+                flashEnabled = true,
+                timerMinutes = 10;
+            let flashTokenTimer = null;
+            const qNumEl = $("#qNum"),
+                answerEl = $("#answerDisplay"),
+                sendBtnEl = $("#sendBtn");
+            const timerEl = $("#quizTimer"),
+                padContainer = $("#numpad");
+            const settingsBtn = $("#settingsBtn"),
+                settingsPanel = $("#settingsPanel");
+            const flashSpeedSec = $("#flashSpeedSec"),
+                flashToggle = $("#flashToggle");
+            const numQuestionsInput = $("#numQuestions");
+            const timerSelect = $("#timerSelect"),
+                muteSoundInput = $("#muteSound");
+            const questionFlashArea = $("#questionFlashArea");
+            for (let i = 1; i <= 10; i++) {
+                let opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = i;
+                if (i === 10) opt.selected = true;
+                timerSelect.appendChild(opt);
+            }
+            padContainer.innerHTML = "";
+            ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "BACK"].forEach((d) => {
+                const b = document.createElement("button");
+                b.innerHTML = d === "BACK" ? "⌫" : d;
+                b.onclick = () => appendDigit(d);
+                padContainer.appendChild(b);
+            });
+            // Start Panel logic
+            function showStartPanel() {
+                $("#startPanel").style.display = "flex";
+                $("#quizPanel").style.display = "none";
+                $("#resultsPanel").style.display = "none";
+                $("#timeUpPanel").style.display = "none";
+                $("#mainMascot").classList.add("mascot-bounce-in");
+            }
+            function hideStartPanel() {
+                $("#startPanel").style.display = "none";
+                $("#mainMascot").classList.remove("mascot-bounce-in");
+            }
+            // Ready-Set-Go flash sequence
+            function showReadySetGo(cb) {
+                questionFlashArea.innerHTML = "";
+                const seq = ["Ready", "Set", "Go!"];
+                let i = 0;
+                function flashNext() {
+                    qNumEl.style.visibility = "hidden";
+                    questionFlashArea.innerHTML = `<div class="flash-center">${seq[i]}</div>`;
+                    if (i === 2) {
+                        $("#goSound").currentTime = 0;
+                        $("#goSound").play();
+                    }
+                    if (i < 2) {
+                        setTimeout(() => {
+                            i++;
+                            flashNext();
+                        }, 650);
+                    } else {
+                        setTimeout(() => {
+                            questionFlashArea.innerHTML = "";
+                            qNumEl.style.visibility = "";
+                            cb();
+                        }, 650);
+                    }
+                }
+                flashNext();
+            }
+            $("#startQuizBtn").onclick = () => {
+                hideStartPanel();
+                setTimeout(() => launchConfetti($("#confettiBox")), 130);
+                startQuiz(true);
+            };
+            $("#startSettingsBtn").onclick = () => {
+                settingsPanel.style.display = "flex";
+            };
+            // Settings panel setup
+            let updatingQuizNow = false;
+            settingsBtn.onclick = () => {
+                settingsPanel.style.display = "flex";
+                numQuestionsInput.value = numQuestions;
+                flashSpeedSec.value = flashSpeed;
+                flashToggle.checked = flashEnabled;
+                timerSelect.value = timerMinutes;
+                muteSoundInput.checked = mute;
+                updatingQuizNow = $("#quizPanel").style.display === "flex";
+            };
+            $("#cancelSettings").onclick = () => {
+                settingsPanel.style.display = "none";
+            };
+            $("#saveSettings").onclick = () => {
+                const prevNumQ = numQuestions,
+                    prevTimer = timerMinutes;
+                numQuestions = Math.max(1, Math.min(50, Number(numQuestionsInput.value)));
+                flashSpeed = Math.max(1, Math.min(5, Number(flashSpeedSec.value)));
+                flashEnabled = !!flashToggle.checked;
+                timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
+                mute = muteSoundInput.checked;
+                settingsPanel.style.display = "none";
+                if (updatingQuizNow && (numQuestions !== prevNumQ || timerMinutes !== prevTimer)) {
+                    startQuiz(true);
+                }
+            };
+            // ---- Tokenize logic for flash
+            function parseQuestionToTokens(q) {
+                let arr = q
+                    .split(/([+-])/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+                let tokens = [];
+                tokens.push({ type: "first", val: arr[0] });
+                for (let i = 1; i < arr.length; i += 2) {
+                    tokens.push({ type: "op", op: arr[i], val: arr[i + 1] });
+                }
+                return tokens;
+            }
+            function flashQuestionTokens(questionString, cb) {
+                if (flashTokenTimer) clearTimeout(flashTokenTimer);
+                let tokens = parseQuestionToTokens(questionString);
+                let idx = 0;
+                questionFlashArea.innerHTML = "";
+                let centerDiv = document.createElement("div");
+                centerDiv.className = "flash-center";
+                centerDiv.style.fontSize = "2.99rem";
+                questionFlashArea.appendChild(centerDiv);
+                inputLocked = true;
+                sendBtnEl.disabled = true;
+                function showNext() {
+                    centerDiv.innerHTML = "";
+                    if (idx < tokens.length) {
+                        let html = "";
+                        if (tokens[idx].type === "first") {
+                            html = tokens[idx].val;
+                        } else {
+                            html = `<span style="font-size:2.99rem">${tokens[idx].op}</span> <span style="font-size:2.99rem">${tokens[idx].val}</span>`;
+                            if (idx === tokens.length - 1) {
+                                html += `<span class="qmark" style="font-size:2.99rem">?</span>`;
+                            }
+                        }
+                        centerDiv.innerHTML = html;
+                        if (!mute) {
+                            $("#tickSound").currentTime = 0;
+                            $("#tickSound").play();
+                        }
+                        if (idx === tokens.length - 1) {
+                            flashTokenTimer = setTimeout(() => {
+                                questionFlashArea.innerHTML = `<span class="full-question-text">${questionString.replace(/\s*$/, "")} <span class="qmark">?</span></span>`;
+                                inputLocked = false;
+                                sendBtnEl.disabled = currentInput === "";
+                                cb && cb();
+                            }, flashSpeed * 1000);
+                            sendBtnEl.disabled = false;
+                        } else {
+                            flashTokenTimer = setTimeout(() => {
+                                idx++;
+                                showNext();
+                            }, flashSpeed * 1000);
+                        }
+                    }
+                }
+                showNext();
+            }
+            // ---- Quiz logic ----
+            function appendDigit(d) {
+                if (inputLocked) return;
+                if (d === "C") currentInput = "";
+                else if (d === "BACK") currentInput = currentInput.slice(0, -1);
+                else currentInput += d;
+                answerEl.textContent = currentInput || "0";
+                sendBtnEl.disabled = currentInput.length === 0;
+            }
+            function loadQuestion() {
+                const q = QUESTIONS[currentIndex];
+                qNumEl.textContent = "Q" + (currentIndex + 1);
+                qNumEl.style.fontSize = "2.19rem";
+                answerEl.textContent = "0";
+                currentInput = "";
+                inputLocked = true;
+                sendBtnEl.disabled = true;
+                if (flashEnabled) {
+                    flashQuestionTokens(q.q, () => {
+                        inputLocked = false;
+                        sendBtnEl.disabled = currentInput === "";
+                    });
+                } else {
+                    questionFlashArea.innerHTML = `<span class="full-question-text">${q.q} <span class="qmark">?</span></span>`;
+                    inputLocked = false;
+                    sendBtnEl.disabled = currentInput === "";
+                }
+                qNumEl.style.visibility = "";
+            }
+            function updateTimer() {
+                let m = String(Math.floor(timeLeft / 60)).padStart(2, "0"),
+                    s = String(timeLeft % 60).padStart(2, "0");
+                timerEl.textContent = "Time Left: " + m + ":" + s;
+            }
+            function submitAnswer() {
+                if (inputLocked || currentInput.length === 0) return;
+                inputLocked = true;
+                let correct = currentInput === QUESTIONS[currentIndex].a;
+                answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+                sendBtnEl.disabled = true;
+                clearBoard();
+                if (!mute) {
+                    if (correct) {
+                        $("#correctSound").currentTime = 0;
+                        $("#correctSound").play();
+                    } else {
+                        $("#wrongSound").currentTime = 0;
+                        $("#wrongSound").play();
+                    }
+                }
+                if (currentIndex < QUESTIONS.length - 1) {
+                    setTimeout(() => {
+                        currentIndex++;
+                        loadQuestion();
+                    }, 370);
+                } else {
+                    showResults();
+                }
+            }
+function startQuiz(showReadySetGoFlag) {
+    console.log('Generating for chapter:', currentChapter);
+
+    if (flashTokenTimer) clearTimeout(flashTokenTimer);
+    currentIndex = 0;
+    answers = [];
+    currentInput = "";
+    inputLocked = true;
+    timeLeft = timerMinutes * 60;
+    $("#quizPanel").style.display = "flex";
+    $("#resultsPanel").style.display = "none";
+    $("#timeUpPanel").style.display = "none";
+    $("#resultMascot").style.display = "none";
+    updateTimer();
+
+    // --- MOVE THIS BLOCK UP: GENERATE QUESTIONS FIRST! ---
+    if (currentChapter >= 20) {
+        QUESTIONS = randomChapter20(numQuestions);
+    } else if (currentChapter >= 19) {
+        QUESTIONS = randomChapter19(numQuestions);
+    } else if (currentChapter >= 18) {
+        QUESTIONS = randomChapter18(numQuestions);
+    } else if (currentChapter >= 17) {
+        QUESTIONS = randomChapter17(numQuestions);
+    } else if (currentChapter >= 16) {
+        QUESTIONS = randomChapter16(numQuestions);
+    } else if (currentChapter >= 15) {
+        QUESTIONS = randomChapter15(numQuestions);
+    } else if (currentChapter >= 14) {
+        QUESTIONS = randomChapter14(numQuestions);
+    } else if (currentChapter >= 13) {
+        QUESTIONS = randomChapter13(numQuestions);
+    } else if (currentChapter >= 12) {
+        QUESTIONS = randomChapter12(numQuestions);
+    } else if (currentChapter >= 11) {
+        QUESTIONS = randomChapter11(numQuestions);
+    } else if (currentChapter >= 10) {
+        QUESTIONS = randomChapter10(numQuestions);
+    } else if (currentChapter >= 9) {
+        QUESTIONS = randomChapter9(numQuestions);
+    } else if (currentChapter === 8) {
+        const half = Math.ceil(numQuestions / 2);
+        QUESTIONS = alternateQuestions1(randomChapter6(half), randomChapter7(numQuestions - half), numQuestions);
+    } else if (currentChapter >= 7) {
+        QUESTIONS = randomChapter7(numQuestions);
+    } else if (currentChapter >= 6) {
+        QUESTIONS = randomChapter6(numQuestions);
+    } else if (currentChapter === 5) {
+        const half = Math.ceil(numQuestions / 2);
+        QUESTIONS = alternateQuestions(randomChapter3(half), randomChapter4(numQuestions - half), numQuestions);
+    } else if (currentChapter >= 4) {
+        QUESTIONS = randomChapter4(numQuestions);
+    } else if (currentChapter >= 3) {
+        QUESTIONS = randomChapter3(numQuestions);
+    } else if (currentChapter >= 2) {
+        QUESTIONS = randomChapter2(numQuestions);
+    } else {
+        QUESTIONS = randomChapter1(numQuestions);
+    }
+
+    // ---- NOW log QUESTIONS, AFTER GENERATING ----
+    console.log('QUESTIONS GENERATED:', QUESTIONS);
+
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            showTimeUp();
         }
-      }
-      showNext();
-    }
-    // ---- Quiz logic ----
-    function appendDigit(d) {
-      if (inputLocked) return;
-      if (d === 'C') currentInput = '';
-      else if (d === 'BACK') currentInput = currentInput.slice(0, -1);
-      else currentInput += d;
-      answerEl.textContent = currentInput || '0';
-      sendBtnEl.disabled = (currentInput.length === 0);
-    }
-    function loadQuestion() {
-      const q = QUESTIONS[currentIndex];
-      qNumEl.textContent = 'Q'+(currentIndex + 1);
-      qNumEl.style.fontSize = "2.19rem";
-      answerEl.textContent = '0';
-      currentInput = ''; inputLocked=true; sendBtnEl.disabled=true;
-      if (flashEnabled) {
-        flashQuestionTokens(q.q, ()=>{
-          inputLocked=false;
-          sendBtnEl.disabled=(currentInput==='');
-        });
-      } else {
-        questionFlashArea.innerHTML = `<span class="full-question-text">${q.q} <span class="qmark">?</span></span>`;
-        inputLocked=false;
-        sendBtnEl.disabled=(currentInput==='');
-      }
-      qNumEl.style.visibility = '';
-    }
-    function updateTimer() {
-      let m = String(Math.floor(timeLeft / 60)).padStart(2, '0'),
-          s = String(timeLeft % 60).padStart(2, '0');
-      timerEl.textContent = "Time Left: " + m + ":" + s;
-    }
-    function submitAnswer() {
-      if (inputLocked || currentInput.length===0) return;
-      inputLocked=true;
-      let correct = (currentInput === QUESTIONS[currentIndex].a);
-      answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
-      sendBtnEl.disabled = true;
-      clearBoard();
-      if(!mute){
-        if(correct){
-          $('#correctSound').currentTime=0; $('#correctSound').play();
-        } else {
-          $('#wrongSound').currentTime=0; $('#wrongSound').play();
-        }
-      }
-      if(currentIndex < QUESTIONS.length - 1) {
-        setTimeout(()=>{
-          currentIndex++; loadQuestion();
-        }, 370);
-      } else {
-        showResults();
-      }
-    }
-    function startQuiz(showReadySetGoFlag) {
-      if (flashTokenTimer) clearTimeout(flashTokenTimer);
-      currentIndex=0; answers=[]; currentInput=''; inputLocked=true;
-      timeLeft = timerMinutes * 60;
-      $('#quizPanel').style.display='flex';
-      $('#resultsPanel').style.display='none';
-      $('#timeUpPanel').style.display='none';
-      $('#resultMascot').style.display='none';
-      QUESTIONS = randomChapter1(numQuestions);
-      updateTimer();
-      if(timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(()=>{
-        timeLeft--; updateTimer();
-        if(timeLeft<=0){
-          clearInterval(timerInterval);
-          showTimeUp();
-        }
-      },1000);
-      if(showReadySetGoFlag){
+    }, 1000);
+
+    if (showReadySetGoFlag) {
         showReadySetGo(loadQuestion);
-      } else {
+    } else {
         loadQuestion();
-      }
     }
-    sendBtnEl.onclick=submitAnswer;
-    answerEl.onclick=submitAnswer;
-    // --- Results panel
-    function showResults() {
-      $('#quizPanel').style.display='none';
-      $('#resultsPanel').style.display='flex';
-      $('#timeUpPanel').style.display='none';
-      clearInterval(timerInterval);
-      const rl = $('#resultsList'), rs = $('#resultScore');
-      rl.innerHTML=''; let sc=0;
-      answers.forEach((a,i)=>{
-        let cor = a.user===a.correct;
-        if (cor) sc++;
-        let di = document.createElement('div');
-        di.className='result-item';
-        di.innerHTML=`<div class='question-text'>Q${i+1}: ${a.question}</div><div class='your-answer'><span class='mark'>${cor?'✔️':'❌'}</span><span>Your: ${a.user}</span></div>${!cor?`<div class='correct-answer'>Correct: ${a.correct}</div>`:''}`;
-        rl.appendChild(di);
-     });
-rs.textContent=`You scored ${sc}/${answers.length}`;
-let resultsConfetti = $('#resultsConfetti');
-resultsConfetti.innerHTML = '';
-$('#rainSparkle').style.display='none';
-let pct = sc / answers.length;
-if (sc === answers.length || pct >= 0.7) {
-  $('#resultMascot').style.display = '';
-  $('#resultsTitle').innerHTML = `✨Results <span class="sparkle-emoji">✨</span>`;
-  let spark = document.createElement('div');
-  spark.className = 'sparkle-text';
-  spark.innerHTML = `🎉🌟Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
-  resultsConfetti.appendChild(spark);
-  rainSparkleBurst("happy");
-  if(!mute){ $('#applauseSound').currentTime=0; $('#applauseSound').play(); }
-} else if (pct < 0.5) {
-  $('#resultsTitle').innerHTML = `<span class="sad-emoji"></span> <span style="color:#fd90d7">Results</span>`;
-  let sad = document.createElement('div');
-  sad.className = 'sad-text';
-  
-  resultsConfetti.appendChild(sad);
-
-  let enc = document.createElement('div');
-  enc.className = 'encouragement';
-  enc.innerText = "You'll get better with practice. Give it another go!";
-  resultsConfetti.appendChild(enc);
-
-  // Insert the GIF
-  let gif = document.createElement('img');
-  gif.src = 'stay-strong-fist-pump.gif';
-  gif.alt = 'Stay Strong!';
-  gif.style.width = '110px';
-  gif.style.display = 'block';
-  gif.style.margin = '1.1em auto 0 auto';
-  gif.style.borderRadius = '1.2em';
-  resultsConfetti.appendChild(gif);
-
-  rainSparkleBurst("sad");
-  if(!mute){ $('#losingHorn').currentTime=0; $('#losingHorn').play(); }
-} else {
-  $('#resultsTitle').innerText = "Results";
-  let happyEmojis = [
-    '🎊','👏','🥳','🏆','🌸','👏','🎉','🍀','💎','🎈','🍭','🥳','👍','👌','😊','🙌','🎁','😉','🎉','💝','🏅','🚀','😁','🥰','🎊'
-  ];
-  let em = document.createElement('div');
-  em.className = 'emoji-pop';
-  em.innerText = happyEmojis[Math.floor(Math.random()*happyEmojis.length)];
-  resultsConfetti.appendChild(em);
-  rainSparkleBurst("happy");
 }
-    }
-    // ... [rest of JS unchanged]
-    // Try Again and fullscreen etc (unchanged)
-    $('#tryAgainBtn').onclick = ()=>startQuiz(true);
-    $('#fullscreenBtnResults').onclick = () => {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    };
-    $('#tryAgainTimeUpBtn').onclick = ()=>startQuiz(true);
-    $('#fullscreenBtnTimeUp').onclick = () => {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    };
-    $('#fullscreenBtn').onclick = () => {
-      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-      else document.exitFullscreen();
-    };
-    muteSoundInput.onchange = () => { mute = muteSoundInput.checked; };
-    showStartPanel();
-  </script>
-</body>
+            sendBtnEl.onclick = submitAnswer;
+            answerEl.onclick = submitAnswer;
+            // --- Results panel
+            function showResults() {
+                $("#quizPanel").style.display = "none";
+                $("#resultsPanel").style.display = "flex";
+                $("#timeUpPanel").style.display = "none";
+                clearInterval(timerInterval);
+                const rl = $("#resultsList"),
+                    rs = $("#resultScore");
+                rl.innerHTML = "";
+                let sc = 0;
+                answers.forEach((a, i) => {
+                    let cor = a.user === a.correct;
+                    if (cor) sc++;
+                    let di = document.createElement("div");
+                    di.className = "result-item";
+                    di.innerHTML = `<div class='question-text'>Q${i + 1}: ${a.question}</div><div class='your-answer'><span class='mark'>${cor ? "✔️" : "❌"}</span><span>Your: ${a.user}</span></div>${
+                        !cor ? `<div class='correct-answer'>Correct: ${a.correct}</div>` : ""
+                    }`;
+                    rl.appendChild(di);
+                });
+                rs.textContent = `You scored ${sc}/${answers.length}`;
+                let resultsConfetti = $("#resultsConfetti");
+                resultsConfetti.innerHTML = "";
+                $("#rainSparkle").style.display = "none";
+                let pct = sc / answers.length;
+                if (sc === answers.length || pct >= 0.7) {
+                    $("#resultMascot").style.display = "";
+                    $("#resultsTitle").innerHTML = `✨Results <span class="sparkle-emoji">✨</span>`;
+                    let spark = document.createElement("div");
+                    spark.className = "sparkle-text";
+                    spark.innerHTML = `🎉🌟Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
+                    resultsConfetti.appendChild(spark);
+                    rainSparkleBurst("happy");
+                    if (!mute) {
+                        $("#applauseSound").currentTime = 0;
+                        $("#applauseSound").play();
+                    }
+                } else if (pct < 0.5) {
+                    $("#resultsTitle").innerHTML = `<span class="sad-emoji"></span> <span style="color:#fd90d7">Results</span>`;
+                    let sad = document.createElement("div");
+                    sad.className = "sad-text";
+
+                    resultsConfetti.appendChild(sad);
+
+                    let enc = document.createElement("div");
+                    enc.className = "encouragement";
+                    enc.innerText = "You'll get better with practice. Give it another go!";
+                    resultsConfetti.appendChild(enc);
+
+                    // Insert the GIF
+                    let gif = document.createElement("img");
+                    gif.src = "stay-strong-fist-pump.gif";
+                    gif.alt = "Stay Strong!";
+                    gif.style.width = "110px";
+                    gif.style.display = "block";
+                    gif.style.margin = "1.1em auto 0 auto";
+                    gif.style.borderRadius = "1.2em";
+                    resultsConfetti.appendChild(gif);
+
+                    rainSparkleBurst("sad");
+                    if (!mute) {
+                        $("#losingHorn").currentTime = 0;
+                        $("#losingHorn").play();
+                    }
+                } else {
+                    $("#resultsTitle").innerText = "Results";
+                    let happyEmojis = ["🎊", "👏", "🥳", "🏆", "🌸", "👏", "🎉", "🍀", "💎", "🎈", "🍭", "🥳", "👍", "👌", "😊", "🙌", "🎁", "😉", "🎉", "💝", "🏅", "🚀", "😁", "🥰", "🎊"];
+                    let em = document.createElement("div");
+                    em.className = "emoji-pop";
+                    em.innerText = happyEmojis[Math.floor(Math.random() * happyEmojis.length)];
+                    resultsConfetti.appendChild(em);
+                    rainSparkleBurst("happy");
+                }
+            }
+            // ... [rest of JS unchanged]
+            // Try Again and fullscreen etc (unchanged)
+            $("#tryAgainBtn").onclick = () => startQuiz(true);
+            $("#fullscreenBtnResults").onclick = () => {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else document.exitFullscreen();
+            };
+            $("#tryAgainTimeUpBtn").onclick = () => startQuiz(true);
+            $("#fullscreenBtnTimeUp").onclick = () => {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else document.exitFullscreen();
+            };
+            $("#fullscreenBtn").onclick = () => {
+                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+                else document.exitFullscreen();
+            };
+            muteSoundInput.onchange = () => {
+                mute = muteSoundInput.checked;
+            };
+            showStartPanel();
+        </script>
+    </body>
 </html>
