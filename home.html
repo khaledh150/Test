@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,7 +85,7 @@
     body.dark .top-content-area { background: #363457;}
     .top-title {
       text-align: center;
-      font-size: 2.1rem;
+      font-size: 1.5rem;
       color: #8d79c9;
       font-weight: 700;
       margin-bottom: 8px;
@@ -199,6 +200,28 @@
       position: relative; user-select: none; min-height: 51px;
       background: transparent;
     }
+.video-frame-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
+  margin: 0 auto 24px auto;
+  border: 4px solid #c9aaff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(200,170,255,0.08);
+  max-width: 420px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
+}
+#videoFrame {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 20px;
+  border: none;
+}
+
     .level-card.open .level-header-row { color: #fff;}
     .level-icon { width: 27px; height: 27px; margin-right: 13px;
       border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 1.58em;
@@ -373,9 +396,127 @@
     </div>
   </div>
   <script>
+const youtubeVideoMap = {
+  1: ['dtVUEmzh_Lg',  //chapter 1 Lower & Upper
+      'F-uWqaW-lBw',  //chapter 2 Mix Lower & Upper 
+      'mhZlvpwSaU8',  //chapter 3 Five buddy (+)
+      'M5c7xTFECOM', //chapter 4 Five buddy (-)
+      'qKo-ezxqWwA',  //chapter 5 Mix Five buddy (+) & Five buddy (-) 
+      'JKV1gx_kOwo', //chapter 6 Ten buddy (+)
+      'emK7q94RBK4', //chapter 7 Ten buddy (-)
+      'qSoXpPqtvs8', //chapter 8 Mix Ten buddy(+)&Ten buddy(-)
+      'hSPpGcSBz8I', //chapter 9 Five & Ten buddy +9
+      'arZnPpKQp9E', //chapter 10 Five & Ten buddy +8
+      'AoOojScxcSY', //chapter 11 Five & Ten buddy +7
+      'Clixj0JD3ME', //chapter 12 Five & Ten buddy +6
+      'RPe-HnkY2gY', //chapter 13 Five & Ten buddy -9
+      'jIR0g1SuXzY', //chapter 14 Five & Ten buddy -8
+      '', //chapter 15 Five & Ten buddy -7
+      '', //chapter 16 Five & Ten buddy -6
+      '', //chapter 17 
+      '', //chapter 18
+      '', //chapter 19
+      ''  //chapter 20
+  ],
+  2: [ /* level-2 IDs */ ],
+  // …
+};
+
+ const titleMap = {
+      1: [
+        'Lower Upper',
+        'Mix Lower + Upper',
+        'Five buddy + ',
+        'Five buddy - ',
+        'Mix five buddy + Five buddy -',
+        'Ten buddy + ',
+        'Ten buddy -',
+        'Mix Ten + & Ten -',
+        'Five & Ten buddy +9',
+        'Five & Ten buddy +8',
+        'Five & Ten buddy +7',
+        'Five & Ten buddy +6',
+        'Five & Ten buddy -9',
+        'Five & Ten buddy -8',
+        'Five & Ten buddy -7',
+        'Five & Ten buddy -6',
+        'Simple addition and subtraction',
+        'Two-digit addition and subtraction',
+        'Three-digit addition and subtraction',
+        'Four-digit addition and subtraction'
+      ],
+     2:[
+      '',''
+  ],
+ }
+    // --- Top: Welcome or Chapter
+function renderTop() {
+  const tc = document.getElementById('topContent');
+  tc.innerHTML = '';
+
+  if (showingChapter) {
+    const lvl     = selected.level;    // 0-based
+    const chapIdx = selected.chapter;  // 0-based
+
+    const titles  = titleMap[lvl + 1] || [];
+    const customTitle = titles[chapIdx] || levelData[lvl].chapters[chapIdx].title;
+
+    const ids = youtubeVideoMap[lvl + 1] || [];
+    const youtubeId = ids[chapIdx];
+
+    const completed = levelData[lvl].chapters[chapIdx].exerciseCompleted;
+
+    // Build the chapter HTML first
+    tc.innerHTML = `
+      <div class="top-title">
+        ${levelData[lvl].name} – ${customTitle}
+      </div>
+<div class="video-frame-wrapper">
+   <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
+</div>
+
+      <div class="chapter-btns">
+        <button class="main-btn${completed ? ' completed' : ''}" onclick="doExercise(this)">
+          <span class="material-icons-outlined">play_arrow</span>
+          Exercise
+          ${completed ? `<span class="exercise-check">${checkSvg()}</span>` : ""}
+        </button>
+        <button class="main-btn" onclick="goNextChapter()">
+          <span class="material-icons-outlined">navigate_next</span>
+          Next
+        </button>
+      </div>
+    `;
+
+    // ✅ Set the iframe source AFTER the iframe is in the DOM
+    if (youtubeId) {
+      const iframe = document.getElementById("videoFrame");
+      iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
+    }
+
+  } else {
+    // Welcome screen
+    tc.innerHTML = `
+      <div class="top-title">Welcome to Wonder Kids!</div>
+      <div class="slideshow-img-area">
+        ${slides.map((src, i) => `
+          <img class="slideshow-img ${i === slideIdx ? 'active' : ''}" src="${src}">
+        `).join('')}
+      </div>
+      <div class="slideshow-dots">
+        ${slides.map((_, i) => `
+          <div class="slideshow-dot ${i === slideIdx ? 'active' : ''}" onclick="goSlide(${i})"></div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  addRippleToAllBtns();
+}
+
     // --- ICONS AND DATA ---
     const bookIcons = [
-      {color:'#5bb3ff',icon:'📘'},
+      {color:'#5bb3ff',icon:'📘'}, 
       {color:'#6ccc88',icon:'📗'},
       {color:'#ef7d67',icon:'📕'},
       {color:'#ffe066',icon:'📙'},
@@ -392,20 +533,21 @@
       "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
     ];
     const levelData = [];
-    for(let i=1;i<=10;i++) {
-      const nCh = i===1?20:10;
-      levelData.push({
-        name:'Level '+i,
-        chapters: Array.from({length:nCh},(_,j)=>({
-          title:'Chapter '+(j+1),
-          completed:false,
-          exerciseCompleted:false,
-          unlocked:true // All chapters unlocked!
-        })),
-        progress:0,
-        open:(i===1)
-      });
-    }
+for(let i=1;i<=10;i++) {
+  const nCh = i===1 ? 20 : 10;
+  levelData.push({
+    name:'Level '+i,
+    chapters: Array.from({length:nCh},(_,j)=>({
+      title: `Chapter ${j+1}${(titleMap[i] && titleMap[i][j]) ? ' – ' + titleMap[i][j] : ''}`,
+      completed:false,
+      exerciseCompleted:false,
+      unlocked:true // All chapters unlocked!
+    })),
+    progress:0,
+    open:(i===1)
+  });
+}
+
     // --- ICONS ---
     function checkSvg() {
       return `<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8.5" fill="#16c878" stroke="#16c878"/><path d="M5.5 9.5l2 2 5-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -448,41 +590,7 @@
         }
       }
     }
-    // --- Top: Welcome or Chapter
-    function renderTop() {
-      const tc=document.getElementById('topContent');
-      tc.innerHTML='';
-      if(!showingChapter) {
-        tc.innerHTML=`
-          <div class="top-title">Welcome to Wonder Kids!</div>
-          <div class="slideshow-img-area">
-            ${slides.map((src,i)=>`<img src="${src}" class="slideshow-img${i===slideIdx?' active':''}" id="slideImg${i}" />`).join('')}
-          </div>
-          <div class="slideshow-dots">
-            ${slides.map((_,i)=>`<span class="slideshow-dot${i===slideIdx?' active':''}" onclick="goSlide(${i})"></span>`).join('')}
-          </div>
-        `;
-      } else {
-        const lvl=levelData[selected.level], ch=lvl.chapters[selected.chapter];
-        tc.innerHTML=`
-          <div class="top-title">${lvl.name} - ${ch.title}</div>
-          <iframe class="chapter-video" id="chapterVideo" src="https://www.youtube.com/embed/K91CRNQg2dg" allowfullscreen></iframe>
-          <div class="chapter-btns">
-            <button class="main-btn${ch.exerciseCompleted?' completed':''}" onclick="doExercise(this)">
-              <span class="material-icons-outlined">sports_esports</span>
-              Exercise
-              ${ch.exerciseCompleted?`<span class="exercise-check">${checkSvg()}</span>`:""}
-            </button>
-            ${selected.chapter<lvl.chapters.length-1?`
-            <button class="main-btn" onclick="goNextChapter()">
-              <span class="material-icons-outlined">navigate_next</span>
-              Next
-            </button>`:""}
-          </div>
-        `;
-      }
-      addRippleToAllBtns();
-    }
+   
     // --- Levels/Chapters ---
     function renderLevels() {
       const area=document.getElementById('levelsScrollArea');
@@ -535,30 +643,44 @@
       }
     };
     // --- Chapter select ---
-    window.selectChapter=function(e,li,ci){
-      showingChapter=true;
-      selected={level:li,chapter:ci};
-      renderTop(); renderLevels();
-      haptic();
-      e.stopPropagation();
-    };
-    // --- Exercise ---
-    window.doExercise=function(btn){
-      // Mark exercise complete, show check
-      const {level:l,chapter:c}=selected;
-      levelData[l].chapters[c].exerciseCompleted=true;
-      levelData[l].chapters[c].completed=true;
-      saveProgress();
-      renderLevels(); renderTop();
-      haptic();
-      setTimeout(()=>{ window.location='sorobanquiz.html'; },400);
-    }
+window.selectChapter = function(e, li, ci) {
+  showingChapter = true;
+  selected = { level: li, chapter: ci };
+  // Save current open state of all levels
+  const openLevels = levelData.map(lvl => lvl.open);
+  renderTop();
+  renderLevels();
+  // Restore open state after render (in case renderLevels somehow resets it)
+  levelData.forEach((lvl, i) => lvl.open = openLevels[i]);
+  renderLevels(); // call again to apply correct open state
+  haptic();
+  e.stopPropagation();
+};
+// --- Exercise ---
+window.doExercise = function(btn){
+  // 1) mark complete exactly as before…
+  const {level: L, chapter: C} = selected;
+  levelData[L].chapters[C].exerciseCompleted = true;
+  levelData[L].chapters[C].completed = true;
+  saveProgress();
+  renderLevels();
+  renderTop();
+  haptic();
+
+  // 2) redirect to quiz page with params
+  const lvl = L + 1;      // because URL is 1-based
+  const chap = C + 1;
+  setTimeout(()=>{
+    window.location.href = `sorobanquiz.html?level=${lvl}&chapter=${chap}`;
+  }, 300);
+};
     // --- Next ---
     window.goNextChapter=function(){
       const {level:l,chapter:c}=selected;
       if(levelData[l].chapters[c+1]) {
         selected={level:l,chapter:c+1}; showingChapter=true;
-        renderTop(); renderLevels();
+        renderTop(); 
+        renderLevels();
         haptic();
         document.getElementById('chaptersList'+l).scrollTo({top:34*(c+1)-7,behavior:'smooth'});
       }
