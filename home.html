@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,7 +45,7 @@
     body.dark .fixed-top { background: #2b2547; }
     .topbar-btns {
       position: absolute;
-      top: 20px; right: 22px;
+      top: 10px; right: 22px;
       display: flex; align-items: center; z-index: 10; gap: 15px;
     }
     .icon-btn {
@@ -70,12 +69,12 @@
     body.dark .icon-btn svg, body.dark .icon-btn .material-icons-outlined { color: #ffe066; }
     .top-content-area {
       width: 100%;
-      max-width: 700px;
-      margin: 0 auto; margin-top: 38px;
+      max-width: 900px;
+      margin: 0 auto; margin-top: 0px;
       border-radius: 18px;
       background: #fff;
       box-shadow: 0 2px 16px #b993d644;
-      padding: 22px 2vw 25px 2vw;
+      padding: 12px 2vw 25px 2vw;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -84,12 +83,11 @@
     }
     body.dark .top-content-area { background: #363457;}
     .top-title {
-      text-align: center;
-      font-size: 1.5rem;
+      text-align: left;
+      font-size: 1.2rem;
       color: #8d79c9;
       font-weight: 700;
       margin-bottom: 8px;
-      letter-spacing: 0.03em;
     }
     body.dark .top-title { color: #ffe066;}
     .slideshow-img-area {
@@ -425,21 +423,21 @@ const youtubeVideoMap = {
  const titleMap = {
       1: [
         'Lower Upper',
-        'Mix Lower + Upper',
-        'Five buddy + ',
-        'Five buddy - ',
-        'Mix five buddy + Five buddy -',
-        'Ten buddy + ',
-        'Ten buddy -',
-        'Mix Ten + & Ten -',
-        'Five & Ten buddy +9',
-        'Five & Ten buddy +8',
-        'Five & Ten buddy +7',
-        'Five & Ten buddy +6',
-        'Five & Ten buddy -9',
-        'Five & Ten buddy -8',
-        'Five & Ten buddy -7',
-        'Five & Ten buddy -6',
+        'Mix Lower Upper',
+        'Five buddy (+) ',
+        'Five buddy (-) ',
+        'Mix five buddy(+) Five buddy (-)',
+        'Ten buddy (+) ',
+        'Ten buddy (-)',
+        'Mix Ten (+) Ten (-)',
+        'Five & Ten buddy (+9)',
+        'Five & Ten buddy (+8)',
+        'Five & Ten buddy (+7)',
+        'Five & Ten buddy (+6)',
+        'Five & Ten buddy (-9)',
+        'Five & Ten buddy (-8)',
+        'Five & Ten buddy (-7)',
+        'Five & Ten buddy (-6)',
         'Simple addition and subtraction',
         'Two-digit addition and subtraction',
         'Three-digit addition and subtraction',
