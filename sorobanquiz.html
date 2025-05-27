@@ -631,39 +631,52 @@ let timeLeft      = 600;
     b.classList.add('dragged');
     const rg = b.classList.contains('heaven') ? 'heaven' : 'earth';
     const startY = e.clientY;
-    // Remember initial state
-    let isActive = b.classList.contains('active');
+    let startTransform = b.style.transform || '';
+    let minY, maxY;
 
-    b.setPointerCapture(e.pointerId);
+    // Define movement limits in px (adjust if needed)
+    if (rg === 'heaven') {
+      minY = 0;
+      maxY = 50;  // bead can move down by up to 50px
+    } else {
+      minY = -70; // bead can move up by up to 70px
+      maxY = 0;
+    }
 
-    b.onpointermove = function(ev) {
+    function onPointerMove(ev) {
       let dy = ev.clientY - startY;
-      if (rg === 'heaven') {
-        // Heaven bead: activate if dragged down
-        if (dy > DEAD_ZONE && !isActive) {
-          setBead(b, true);
-          isActive = true;
-        } else if (dy < -DEAD_ZONE && isActive) {
-          setBead(b, false);
-          isActive = false;
-        }
-      } else {
-        // Earth bead: activate if dragged up
-        if (dy < -DEAD_ZONE && !isActive) {
-          setBead(b, true);
-          isActive = true;
-        } else if (dy > DEAD_ZONE && isActive) {
-          setBead(b, false);
-          isActive = false;
-        }
-      }
-    };
+      // Limit movement to range
+      if (dy < minY) dy = minY;
+      if (dy > maxY) dy = maxY;
+      // Move bead visually with transform
+      b.style.transform = `translateY(${dy}px)`;
+    }
 
-    b.onpointerup = b.onpointercancel = function() {
-      b.onpointermove = null;
+    function onPointerUp(ev) {
+      let dy = ev.clientY - startY;
+      // Heaven: if pulled down enough, activate; else deactivate
+      // Earth: if pushed up enough, activate; else deactivate
+      if (rg === 'heaven') {
+        setBead(b, dy > 20); // Snap threshold, adjust 20 as needed
+      } else {
+        setBead(b, dy < -30); // Snap threshold, adjust -30 as needed
+      }
       b.classList.remove('dragged');
-      b.releasePointerCapture(e.pointerId);
-    };
+      // Animate snap
+      b.style.transition = 'transform 0.17s cubic-bezier(.31,1.54,.41,.91)';
+      b.style.transform = '';
+      setTimeout(() => {
+        b.style.transition = '';
+      }, 180);
+
+      b.removeEventListener('pointermove', onPointerMove);
+      b.removeEventListener('pointerup', onPointerUp);
+      b.removeEventListener('pointercancel', onPointerUp);
+    }
+
+    b.addEventListener('pointermove', onPointerMove);
+    b.addEventListener('pointerup', onPointerUp);
+    b.addEventListener('pointercancel', onPointerUp);
   });
 });
             // Shake to reset soroban + app shake effect
