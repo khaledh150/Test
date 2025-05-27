@@ -448,23 +448,6 @@
     display: none !important;
   }
 }
-/* Overlay for landscape mode */
-.rotate-overlay {
-  display: none;
-  position: fixed;
-  top:0; left:0; width:100vw; height:100vh;
-  background: rgba(0,0,0,0.88);
-  color: #fff;
-  font-size: 2rem;
-  z-index: 9999;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: 24px;
-}
-body.landscape-locked .rotate-overlay {
-  display: flex;
-}
 
     /* Ripple effect */
     .ripple {
@@ -917,21 +900,6 @@ window.doExercise = function(btn){
     console.log('Orientation lock failed:', error);
   });
 }
-function checkOrientationLock() {
-  // Checks for landscape mode (width > height, and not desktop)
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const landscape = window.matchMedia("(orientation: landscape)").matches;
-  if (landscape && isMobile) {
-    document.body.classList.add("landscape-locked");
-  } else {
-    document.body.classList.remove("landscape-locked");
-  }
-}
-window.addEventListener('resize', checkOrientationLock);
-window.addEventListener('orientationchange', checkOrientationLock);
-window.addEventListener('DOMContentLoaded', checkOrientationLock);
-
   </script>
-  <div class="rotate-overlay"></div>
 </body>
 </html>
