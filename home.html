@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -281,58 +280,133 @@
       z-index: 2;
       box-shadow: 0 2px 18px #fd90d726;
     }
-    /* --- Responsive --- */
-@media (max-width: 900px) {
-  .top-content-area {
-    max-width: 98vw;
-    padding: 10px 2vw 16px 2vw;
-    border-radius: 14px;
-  }
-  .levels-scroll-area { max-width: 98vw; }
-  .level-card { max-width: 97vw; }
-  .chapter-video { height: unset; max-width: 97vw; border-radius: 15px; }
-  .fixed-top {
-    min-height: 55vw !important;
-    height: 55vw !important;
-    border-radius: 22px 22px 36px 36px;
-    padding: 0;
-  }
-}
-@media (max-width: 500px) {
+/* -------------- PHONE SIZE (<480px) -------------- */
+@media (max-width: 480px) {
   .top-content-area {
     max-width: 100vw;
+    min-height: 110px;
+    padding: 8px 4px 10px 4px;
     border-radius: 0 0 12px 12px;
-    padding: 6px 1vw 5px 1vw;
   }
-  .levels-scroll-area { max-width: 100vw; }
-  .level-card { max-width: 100vw; border-radius: 10px; }
-  .chapter-video { max-width: 100vw; border-radius: 9px; }
-  .fixed-top {
-    min-height: 48vw !important;
-    height: 48vw !important;
-    border-radius: 10px 10px 14px 14px;
-    padding: 0;
+  .top-title {
+    font-size: 1.06rem;
+    margin-bottom: 6px;
+  }
+  .slideshow-img-area {
+    width: 99vw;
+    min-height: 160px;
+    max-height: 160px;
+    margin: 5px 0 8px 0;
+    margin-left: 0;
+    border-radius: 15px;
+  }
+  .slideshow-img {
+    width: 100%;
+    height: 160px;
+    border-radius: 15px;
+  }
+  .video-frame-wrapper, .chapter-video {
+    max-width: 99vw !important;
+    border-radius: 14px;
+    min-width: 180px;
+  }
+  #videoFrame {
+    border-radius: 12px;
+  }
+  .chapter-btns {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .main-btn {
+    min-width: 7em;
+    min-height: 2.2em;
+    font-size: 1rem;
+    padding: 0.6em 1.2em 0.6em 1.6em;
+  }
+  .levels-scroll-area {
+    max-width: 100vw;
+    padding: 3px 0 7px 0;
+  }
+  .level-card {
+    max-width: 99vw;
+    border-radius: 11px;
+    margin: 7px 0;
+    padding: 0 0 4px 0;
+  }
+  .level-header-row {
+    font-size: 1.04rem;
+    padding: 0 10px;
+    min-height: 40px;
+    border-radius: 12px 12px 0 0;
+  }
+  .chapter-row {
+    font-size: 0.96rem;
+    min-height: 27px;
+    border-radius: 9px;
+    padding: 0.36em 0.7em;
+  }
+  .chapter-row .chapter-check {
+    width: 17px;
+    height: 17px;
+    margin-left: 7px;
   }
 }
+
+/* -------------- TABLET SIZE (480px - 800px) -------------- */
+@media (min-width: 481px) and (max-width: 800px) {
+  .top-content-area {
+    max-width: 96vw;
+    min-height: 180px;
+    padding: 10px 2vw 18px 2vw;
+    border-radius: 0 0 16px 16px;
+  }
+  .slideshow-img-area {
+    width: 96vw;
+    min-height: 240px;
+    max-height: 240px;
+    margin: 10px 0 12px 0;
+    margin-left: 0;
+    border-radius: 20px;
+  }
+  .slideshow-img {
+    width: 100%;
+    height: 240px;
+    border-radius: 20px;
+  }
+  .video-frame-wrapper, .chapter-video {
+    max-width: 96vw !important;
+    border-radius: 18px;
+  }
+  #videoFrame {
+    border-radius: 16px;
+  }
+  .levels-scroll-area {
+    max-width: 97vw;
+  }
+  .level-card {
+    max-width: 95vw;
+    border-radius: 18px;
+    margin: 10px 0;
+    padding: 0 0 6px 0;
+  }
+}
+
+/* -------------- LANDSCAPE MOBILE/TABLET -------------- */
 @media (orientation: landscape) and (max-width: 1000px) {
-  .fixed-top { 
+  .fixed-top {
     min-height: 99vh !important;
     height: 99vh !important;
     border-radius: 0;
   }
-  .top-content-area, .chapter-video { 
-    width: 100vw !important; 
-    max-width: 100vw !important; 
+  .top-content-area, .chapter-video {
+    width: 100vw !important;
+    max-width: 100vw !important;
     height: 98vh !important;
   }
-  .levels-area { 
+  .levels-area {
     display: none !important;
   }
-  .top-title { 
-    font-size: 1.13rem;
-  }
 }
-
     /* Ripple effect */
     .ripple {
       position: absolute; border-radius: 50%; transform: scale(0); animation: ripple .55s linear;
