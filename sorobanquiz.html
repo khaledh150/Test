@@ -630,21 +630,27 @@ let timeLeft      = 600;
   b.addEventListener('pointerdown', function(e) {
     b.classList.add('dragged');
     const rg = b.classList.contains('heaven') ? 'heaven' : 'earth';
-    const sy = e.clientY;
-    b.setPointerCapture(e.pointerId); // <--- allows this bead to track this pointer
+    const startY = e.clientY;
+    let moved = false;
+
+    b.setPointerCapture(e.pointerId);
 
     b.onpointermove = function(ev) {
-      let dy = ev.clientY - sy;
-      if (Math.abs(dy) > DEAD_ZONE) {
+      let dy = ev.clientY - startY;
+      // Only trigger bead movement if user has dragged past the threshold,
+      // and not already activated/deactivated it with this drag.
+      if (!moved && Math.abs(dy) > DEAD_ZONE) {
         setBead(b, rg === 'heaven' ? dy > 0 : dy < 0);
-        b.onpointermove = null; // stop after one drag
+        moved = true;
       }
+      // Optional: If you want "follow finger" (advanced, feels more like an abacus)
+      // you can update the bead position here based on dy, but that's more complex
     };
 
     b.onpointerup = b.onpointercancel = function() {
       b.onpointermove = null;
       b.classList.remove('dragged');
-      b.releasePointerCapture(e.pointerId); // <--- release this pointer
+      b.releasePointerCapture(e.pointerId);
     };
   });
 });
