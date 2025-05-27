@@ -626,46 +626,7 @@ let timeLeft      = 600;
                     if (!active && was) $("#soundOff").play();
                 }
             }
-            $$('.bead').forEach(b => {
-  b.addEventListener('pointerdown', function(e) {
-    b.classList.add('dragged');
-    const rg = b.classList.contains('heaven') ? 'heaven' : 'earth';
-    const startY = e.clientY;
-    // Remember initial state
-    let isActive = b.classList.contains('active');
-
-    b.setPointerCapture(e.pointerId);
-
-    b.onpointermove = function(ev) {
-      let dy = ev.clientY - startY;
-      if (rg === 'heaven') {
-        // Heaven bead: activate if dragged down
-        if (dy > DEAD_ZONE && !isActive) {
-          setBead(b, true);
-          isActive = true;
-        } else if (dy < -DEAD_ZONE && isActive) {
-          setBead(b, false);
-          isActive = false;
-        }
-      } else {
-        // Earth bead: activate if dragged up
-        if (dy < -DEAD_ZONE && !isActive) {
-          setBead(b, true);
-          isActive = true;
-        } else if (dy > DEAD_ZONE && isActive) {
-          setBead(b, false);
-          isActive = false;
-        }
-      }
-    };
-
-    b.onpointerup = b.onpointercancel = function() {
-      b.onpointermove = null;
-      b.classList.remove('dragged');
-      b.releasePointerCapture(e.pointerId);
-    };
-  });
-});
+            $$('.bead').forEach(b=>b.addEventListener('pointerdown',e=>{const rg=b.classList.contains('heaven')?'heaven':'earth',sy=e.clientY;b.setPointerCapture(e.pointerId);b.onpointermove=ev=>{let dy=ev.clientY-sy;if(Math.abs(dy)>DEAD_ZONE){setBead(b,rg==='heaven'?dy>0:dy<0);b.onpointermove=null;}};b.onpointerup=b.onpointercancel=()=>{b.onpointermove=null;b.releasePointerCapture(e.pointerId);} }));
             // Shake to reset soroban + app shake effect
             function shakeEffect() {
                 const abacusRoot = $("#abacusRoot");
