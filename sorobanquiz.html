@@ -1,953 +1,3198 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
-  <title>Wonder Kids</title>
-  <link href="https://fonts.googleapis.com/css?family=Nunito:700,400&display=swap" rel="stylesheet">
-  <!-- Material Icons (ripple, icons) -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" />
-  <style>
-    html,body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
-      font-family: 'Nunito', Arial, sans-serif;
-      background: #f6f7fa;
-      min-height: 100vh;
-      overflow: hidden;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-touch-callout: none;
-    }
-    input, select, textarea, button:focus, button:active {
-      -webkit-user-select: auto !important;
-      user-select: auto !important;
-    }
-    body.dark {
-      background: #23223a;
-    }
-    body {
-      display: flex; flex-direction: column; width: 100vw; height: 100vh;
-      min-height: 100vh;
-    }
-    .fixed-top {
-      width: 100vw; max-width: 100vw;
-      min-height: 50vh; height: 50vh; /* always 50% screen height */
-      background: #faf7fe;
-      box-shadow: 0 2px 18px #c7bae57a;
-      z-index: 3; position: relative;
-      padding: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-      transition: background .3s, min-height .3s, height .3s;
-      border-bottom-left-radius: 0px;
-      border-bottom-right-radius: 0px;
-    }
-    body.dark .fixed-top { background: #2b2547; }
-    .topbar-btns {
-      position: absolute;
-      top: 10px; right: 22px;
-      display: flex; align-items: center; z-index: 10; gap: 15px;
-    }
-    .icon-btn {
-      background: rgba(238,244,255,0.96);
-      border-radius: 50%;
-      width: 42px; height: 42px;
-      border: none;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 1px 7px #b993d62a;
-      cursor: pointer;
-      transition: background .18s, transform .12s;
-      position: relative;
-      overflow: hidden;
-    }
-    .icon-btn:active, .icon-btn.rippled { background: #fd90d7; color: #fff; }
-    .icon-btn svg, .icon-btn .material-icons-outlined {
-      width: 26px; height: 26px; display: block; font-size: 26px !important;
-      color: #8d79c9;
-      transition: color .2s;
-    }
-    body.dark .icon-btn svg, body.dark .icon-btn .material-icons-outlined { color: #ffe066; }
-    .top-content-area {
-      width: 100%;
-      max-width: 900px;
-      margin: 0 auto; margin-top: 0px;
-      border-radius: 18px;
-      background: #fff;
-      box-shadow: 0 2px 16px #b993d644;
-      padding: 20px 2vw 25px 2vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: height .35s, width .3s, background .3s;
-      min-height: 260px; height: calc(50vh - 45px);
-    }
-    body.dark .top-content-area { background: #363457;}
-    .top-title {
-      text-align: left;
-      font-size: 1.2rem;
-      color: #8d79c9;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    body.dark .top-title { color: #ffe066;}
-    .slideshow-img-area {
-      width: 510px; min-height: 320px; max-height: 320px;
-      display: flex; justify-content: center; align-items: center;
-      margin: 20px 0 16px 0;
-      position: relative; overflow: hidden;
-      margin-left: -50px;
-        border-radius: 30px;         /* <-- Softer, more rounded corners */
-    }
-    .slideshow-img {
-      width: 100%; height: 350px; object-fit: cover;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px #b993d624;
-      opacity: 0;
-      position: absolute;
-      transition: opacity .7s cubic-bezier(.61,1.2,.61,.95), transform .6s;
-      left: 1%; top: 0;
-      z-index: 1;
-    }
-    .slideshow-img.active { opacity: 1; z-index: 2; transform: scale(1.04);}
-    .slideshow-dots {
-      display: flex; gap: 9px;
-      justify-content: center; margin: 10px 0 0 0;
-    }
-    .slideshow-dot {
-      width: 13px; height: 13px; background: #b4d7ff;
-      border-radius: 7px; border: 2px solid #b993d6;
-      box-shadow: 0 2px 7px #b993d64a;
-      cursor: pointer; transition: background .16s;
-      opacity: 0.59;
-    }
-    .slideshow-dot.active { background: #fd90d7; opacity: 1; }
-    /* --- VIDEO + BUTTONS --- */
-    .chapter-video {
-      width: 100%; max-width: 900px;
-      aspect-ratio: 16/9;
-      background: #ddd;
-      border-radius: 17px;
-      box-shadow: 0 3px 13px #b993d63c;
-      border: 6px solid #b993d6;
-      margin: 0 auto 18px auto;
-      display: block;
-      transition: height .3s, width .3s;
-      background: #333;
-    }
-    body.dark .chapter-video { border-color:#ffe066; background:#191919; }
-    .chapter-btns {
-      display: flex; gap: 17px; margin: 8px auto 0 auto;
-      justify-content: center; align-items: center;
-    }
-    .main-btn {
-      background: #b4d7ff;
-      color: #4d528e;
-      border: none;
-      font-size: 1.14rem;
-      font-weight: 700;
-      border-radius: 17px;
-      box-shadow: 0 2px 11px #bdd6ff1c;
-      padding: 0.8em 2.3em 0.8em 2.9em;
-      margin: 0; outline: none;
-      cursor: pointer; position:relative;
-      transition: background .14s, color .14s, transform .11s;
-      letter-spacing: .01em; min-width: 8em; min-height: 2.8em;
-      overflow: hidden;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .main-btn .material-icons-outlined { margin-right: 0.4em; font-size: 22px !important;}
-    .main-btn:active, .main-btn.rippled { background: #fd90d7; color: #fff; }
-    .main-btn.completed .exercise-check {
-      position: absolute; right: 12px; top: 48%; transform: translateY(-50%);
-      width: 20px; height: 20px; z-index: 3;
-    }
-    /* --- LEVELS & CHAPTERS --- */
-    .levels-area {
-      flex: 1 1 0;
-      width: 100vw; max-width: 100vw; min-height: 0;
-      background: none;
-      display: flex; flex-direction: column; align-items: center;
-      overflow: hidden;
-      padding-top: 0;
-    }
-    .levels-scroll-area {
-      width: 99vw; max-width: 560px;
-      margin: 0 auto; padding: 8px 0 18px 0;
-      overflow-y: auto;
-      flex: 1; height: 100%;
-      scrollbar-width: thin; scrollbar-color: #b4d7ff33 #fff0;
-    }
-    .levels-scroll-area::-webkit-scrollbar { width: 7px; background: none;}
-    .levels-scroll-area::-webkit-scrollbar-thumb { background: #b4d7ff38; border-radius: 7px;}
-    .levels-scroll-area::-webkit-scrollbar-track { background: none;}
-    .levels-scroll-area.scrolling::-webkit-scrollbar-thumb { background: #69a3e7; }
-    .level-card {
-      border-radius: 24px; margin: 14px 0;
-      box-shadow: 0 2px 15px #f0c9fd32;
-      padding: 0 0 10px 0;
-      width: 97%; max-width: 520px;
-      transition: background .16s, box-shadow .15s;
-      position: relative;
-      background: #e3f0ff;
-    }
-    .level-card.closed { background: #e3f0ff;}
-    .level-card.open { background: #69a3e7;}
-    .level-header-row {
-      display: flex; align-items: center; height: 51px;
-      cursor: pointer; font-size: 1.27rem; font-weight: 800;
-      color: #668cff; padding: 0 19px; border-radius: 24px 24px 0 0;
-      transition: background .12s, color .13s;
-      position: relative; user-select: none; min-height: 51px;
-      background: transparent;
-    }
-/* --- VIDEO FRAME WRAPPER --- */
-.video-frame-wrapper {
-  position: relative;
-  padding-bottom: 56.25%;   /* 16:9 aspect ratio */
-  height: 0;
-  margin: 10px auto 22px auto;  /* More top/bottom space */
-  border: 2.5px solid #c9aaff;
-  border-radius: 28px;          /* Softer, more modern */
-  box-shadow: 0 6px 32px rgba(150,130,255,0.14), 0 2px 10px #e1d1ff42;
-  max-width: 500px;             /* Looks good on all screens */
-  width: 98vw;                  /* Responsive */
-  box-sizing: border-box;
-  overflow: hidden;
-  background: #fff;
-  transition: box-shadow .3s, border .2s;
-}
-#videoFrame {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  border-radius: 24px;
-  border: none;
-  background: #fff;
-  transition: border-radius .2s;
-}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Soroban Quiz</title>
+    <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-/* Space between title and video */
-.top-title {
-  margin-bottom: 10px !important;
-  padding-top: 10px;
-  text-align: left;
-}
-    .level-card.open .level-header-row { color: #fff;}
-    .level-icon { width: 27px; height: 27px; margin-right: 13px;
-      border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 1.58em;
-      box-shadow: 0 2px 7px #8ca6db2b;
-    }
-    .level-name { font-weight: 700; margin-right: 9px; letter-spacing: 0.01em; flex-shrink: 0;}
-    .level-progress {
-      flex: 1; margin: 0 0 0 10px; height: 10px;
-      background: #ede3ff; border-radius: 7px;
-      max-width: 110px; position: relative; display: flex; align-items: center;
-    }
-    .level-progress-bar {
-      background: linear-gradient(90deg,#ffe066 30%,#b4d7ff 100%);
-      height: 100%; border-radius: 7px;
-      transition: width .5s cubic-bezier(.71,1.14,.53,.93);
-      box-shadow: 0 1px 4px #ffd70036;
-    }
-    .level-arrow { margin-left: 14px; font-size: 1.6rem; color: #8ca6db; transition: transform .18s; user-select: none;}
-    .level-card.open .level-arrow { color: #fff;}
-    .level-card.closed .level-arrow { transform: rotate(90deg);}
-    .chapters-list {
-      width: 96%; margin: 0 auto 0 auto;
-      display: flex; flex-direction: column; gap: 9px;
-      max-height: 300px; overflow-y: auto;
-      transition: max-height .31s; padding: 4px 0 10px 0;
-      scrollbar-width: none;
-    }
-    .chapters-list::-webkit-scrollbar { display: none; }
-    .chapter-row {
-      display: flex; align-items: center; justify-content: space-between;
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 1px 7px #b993d629;
-      padding: 0.55em 1em;
-      font-size: 1.10rem;
-      font-weight: 700;
-      margin: 0;
-      border: 1.7px solid #b4d7ff;
-      color: #668cff;
-      transition: background .16s, color .13s, border .13s, transform .13s;
-      cursor: pointer; min-height: 34px; position: relative;
-      overflow: hidden;
-    }
-    .chapter-row .chapter-check {
-      margin-left: 13px;
-      width: 20px; height: 20px;
-      display: flex; align-items: center; justify-content: center;
-      color: #16c878;
-    }
-    .chapter-row.completed { color: #a5c7b3; border: 1.5px solid #16c878; }
-    .chapter-row.active, .chapter-row.unlocked:hover, .chapter-row.unlocked:focus {
-      background: #fff1f7;
-      color: #fd90d7;
-      border: 1.7px solid #fd90d7;
-      transform: scale(1.03);
-      z-index: 2;
-      box-shadow: 0 2px 18px #fd90d726;
-    }
-/* -------------- PHONE SIZE (<480px) -------------- */
-@media (max-width: 480px) {
-  .top-content-area {
-    max-width: 100vw;
-    min-height: 110px;
-    padding: 8px 4px 10px 4px;
-    border-radius: 0 0 12px 12px;
-  }
-  .top-title {
-    font-size: 1.06rem;
-    margin-bottom: 6px;
-  }
-  .slideshow-img-area {
-    width: 99vw;
- min-height: 220px;    /* Increase height for mobile */
-    max-height: 220px;
-    margin: 5px 0 8px 0;
-    margin-left: 0;
-    border-radius: 15px;
-  }
-  .slideshow-img {
-    width: 100%;
-    height: 220px;
-    border-radius: 15px;
-  }
-  .video-frame-wrapper, .chapter-video {
-    max-width: 99vw !important;
-    border-radius: 14px;
-    min-width: 180px;
-  }
-  #videoFrame {
-    border-radius: 12px;
-  }
- .chapter-btns {
-  display: flex;
-  flex-direction: row;  /* Always row, even on mobile */
-  gap: 17px;
-  margin: 8px auto 0 auto;
-  justify-content: center;
-  align-items: center;
-}
-  .main-btn {
-    min-width: 7em;
-    min-height: 2.2em;
-    font-size: 1rem;
-    padding: 0.6em 1.2em 0.6em 1.6em;
-  }
-  .levels-scroll-area {
-    max-width: 100vw;
-    padding: 3px 0 7px 0;
-  }
-  .level-card {
-    max-width: 99vw;
-    border-radius: 11px;
-    margin: 7px 0;
-    padding: 0 0 4px 0;
-  }
-  .level-header-row {
-    font-size: 1.04rem;
-    padding: 0 10px;
-    min-height: 40px;
-    border-radius: 12px 12px 0 0;
-  }
-  .chapter-row {
-    font-size: 0.96rem;
-    min-height: 27px;
-    border-radius: 9px;
-    padding: 0.36em 0.7em;
-  }
-  .chapter-row .chapter-check {
-    width: 17px;
-    height: 17px;
-    margin-left: 7px;
-  }
-}
+        #abacusRoot {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background: none;
+            overflow: hidden;
+            z-index: 1;
+        }
 
-/* -------------- TABLET SIZE (480px - 800px) -------------- */
-@media (min-width: 481px) and (max-width: 800px) {
-  .top-content-area {
-    max-width: 96vw;
-    min-height: 180px;
-    padding: 10px 2vw 18px 2vw;
-    border-radius: 0 0 16px 16px;
-  }
-  .slideshow-img-area {
-    width: 96vw;
-    min-height: 310px;
-    max-height: 310px;
-    margin: 10px 0 12px 0;
-    margin-left: 0;
-    border-radius: 20px;
-  }
-  .slideshow-img {
-    width: 100%;
-    height: 3100px;
-    border-radius: 20px;
-  }
-  .video-frame-wrapper, .chapter-video {
-    max-width: 96vw !important;
-    border-radius: 18px;
-  }
-  #videoFrame {
-    border-radius: 16px;
-  }
-  .levels-scroll-area {
-    max-width: 97vw;
-  }
-  .level-card {
-    max-width: 95vw;
-    border-radius: 18px;
-    margin: 10px 0;
-    padding: 0 0 6px 0;
-  }
-}
-/* --- Responsive for phone/tablet --- */
-@media (max-width: 600px) {
-  .video-frame-wrapper {
-    border-radius: 16px;
-    max-width: 98vw;
-    margin: 5px auto 14px auto;
-    border-width: 2px;
-    margin-left: 0 !important;
-    margin-right: auto !important;
-  }
-  #videoFrame {
-    border-radius: 12px;
-  }
-  .top-title {
-    font-size: 1.04rem;
-    margin-bottom: 7px !important;
-  }
-   .chapter-btns {
-    gap: 10px;   /* A little less gap on small screens */
-    margin-top: 6px;
-  }
-  .main-btn {
-    min-width: 6em;
-    font-size: 0.99rem;
-    padding: 0.62em 1.08em 0.62em 1.3em;
-  }
-}
-/* -------------- LANDSCAPE MOBILE/TABLET -------------- */
-@media (orientation: landscape) and (max-width: 1000px) {
-  .fixed-top {
-    min-height: 99vh !important;
-    height: 99vh !important;
-    border-radius: 0;
-  }
-  .top-content-area, .chapter-video {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 98vh !important;
-  }
-  .levels-area {
-    display: none !important;
-  }
-}
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100dvh;
+            max-width: 100vw;
+            max-height: 100dvh;
+            background: #d8e9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fullscreen-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+        }
+
+        .sidebar #fullscreenBtn,
+        .sidebar #exitFullscreenBtn {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            position: absolute;
+            bottom: 70px;
+            /* distance from bottom of sidebar */
+            left: 7px;
+            /* distance from left edge of sidebar */
+            z-index: 10002;
+            /* above sidebar */
+            display: none;
+            /* controlled by JS */
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 40px;
+            /* width of vertical bar */
+            height: 100vh;
+            /* full viewport height */
+            background: #99b3ff;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+            /* above fullscreen buttons */
+        }
+
+        #backBtn {
+            width: 40px;
+            height: 25px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.4));
+        }
+
+        #container {
+            width: 150%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .soroban {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #3586fe;
+            padding: 5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border-top: 30px solid #3586fe;
+            border-bottom: 30px solid #3586fe;
+
+            box-sizing: border-box;
+        }
+
+        .rod {
+            position: relative;
+            width: 95px;
+            height: 350px;
+            background: #3586fe;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rod-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #b7cefd;
+            z-index: 0;
+        }
+
+        .heaven {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            height: 14%;
+            gap: 2px;
+            z-index: 1;
+        }
+
+        .gap-space {
+            height: 2%;
+            z-index: 1;
+        }
+
+        .earth {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            height: 53%;
+            margin-top: 3px;
+            z-index: 1;
+            gap: 3px;
+        }
+
+        .bar {
+            position: absolute;
+            top: 27%;
+            width: 100%;
+            height: 3px;
+            background: #99b3ff;
+            z-index: 2;
+        }
+
+        .bead {
+            width: 90px;
+            height: 50px;
+            margin: 0;
+            background: linear-gradient(to bottom, #002db3, #002080);
+            clip-path: polygon(25% 0%,
+                    /* Point 1: x=25%, y=0%   (top)    */
+                    75% 0%,
+                    /* Point 2: x=75%, y=0%   (top)    */
+                    100% 50%,
+                    /* Point 3: x=100%, y=50% (middle) */
+                    75% 100%,
+                    /* Point 4: x=75%, y=100% (bottom) */
+                    25% 100%,
+                    /* Point 5: x=25%, y=100% (bottom) */
+                    0% 50%
+                    /* Point 6: x=0%, y=50%   (middle) */
+                );
+
+            box-shadow: inset -1px -1px 4px rgba(255, 255, 255, 0.3), inset 1px 1px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+            touch-action: none;
+            z-index: 3;
+        }
+
+        .bead.active {
+            background: radial-gradient(circle at 30% 30%, #ffd700, #ffa500);
+            box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.4), inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .bead.heaven.active {
+            transform: translateY(100%);
+        }
+
+        .bead.earth.active {
+            transform: translateY(-150%);
+        }
+
+        .quiz-topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.6em 1.1em 0.6em 1.1em;
+            /* Top and sides for spacing */
+            background: none;
+            /* Make parent background transparent */
+            /* Optionally: max-width, margin auto if you want it centered on large screens */
+        }
+
+        .back-btn {
+            background: #b4d7ff !important;
+            color: #3e366b !important;
+            border: none !important;
+            outline: none !important;
+            border-radius: 999px !important;
+            /* Pill shape */
+            box-shadow: 0 3px 14px #bdd6ff22 !important;
+            padding: 0 1.2em 0 0.8em !important;
+            /* Right/left padding for pill look */
+            min-width: 0;
+            height: 2.2em !important;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.38em;
+            font-size: 1.18em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .13s, color .13s, transform .13s cubic-bezier(.81, 1.28, .61, .95);
+        }
+
+        .arrow-icon {
+            width: 1.2em;
+            height: 1.2em;
+            margin-right: 0.09em;
+            object-fit: contain;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        .back-text {
+            font-size: 1em;
+            white-space: nowrap;
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        .top-btns {
+            display: flex;
+            align-items: center;
+            gap: 0.6em;
+            /* Spacing between icon buttons */
+        }
+
+        .top-btn {
+            background: #b4d7ff !important;
+            color: #3e366b !important;
+            border: none !important;
+            outline: none !important;
+            border-radius: 50% !important;
+            box-shadow: 0 3px 14px #bdd6ff22 !important;
+            width: 2.2em !important;
+            height: 2.2em !important;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25em !important;
+            cursor: pointer;
+            transition: background .13s, color .13s, transform .13s cubic-bezier(.81, 1.28, .61, .95);
+        }
+
+        .top-btn:active,
+        .back-btn:active {
+            background: #fd90d7 !important;
+            color: #fff !important;
+            transform: scale(1.09) !important;
+        }
+
+        /* Quiz panel card */
+        #quizPanel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: clamp(265px, 23vw, 390px);
+            height: 100vh;
+            background: linear-gradient(150deg, #fef5fa 65%, #f6f3fa 100%, #e6eaff 0%);
+            color: #444;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 1rem 1rem 1rem;
+            border-radius: 2.5rem 3.2rem 3.2rem 2.5rem;
+            box-shadow: 0 10px 48px #b993d628;
+            border: 2.6px solid #e7c9eb;
+            transition: background .3s, box-shadow .2s;
+            overflow-x: visible;
+            flex: 0 0 clamp(265px, 23vw, 390px);
+            height: 100%;
+        }
+
+        #quizPanel,
+        #abacusRoot {
+            position: relative !important;
+            /* cancel absolute */
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            flex: 0 0 clamp(265px, 23vw, 390px);
+            height: 100%;
+        }
+
+        /* give the quizPanel a fixed (or clamped) width, full height */
+        #quizPanel {
+            width: clamp(265px, 23vw, 390px);
+            height: 100%;
+        }
+
+        /* let abacusRoot fill the rest */
+        #abacusRoot {
+            flex: 1;
+            height: 100%;
+        }
+
+        @media (max-width: 900px) and (max-height: 500px) {
+            #quizPanel {
+                width: 80vw;
+                /* Less wide */
+                max-width: 80vw;
+                min-width: 0;
+                padding: 0.2rem;
+                border-radius: 1.4rem;
+                left: 10vw;
+                /* Center horizontally */
+                right: auto;
+                top: 2vh;
+                /* Margin from top */
+                height: calc(96vh - 4vh);
+                /* Margin from top and bottom */
+            }
+        }
+
+        @media (max-width: 600px) {
+            #quizPanel {
+                width: 85vw;
+                /* Smaller width */
+                max-width: 85vw;
+                min-width: 0;
+                padding: 0.15rem;
+                border-radius: 1.2rem;
+                left: 7.5vw;
+                /* Center horizontally */
+                right: auto;
+                top: 3vh;
+                /* Margin from top */
+                height: calc(94vh - 6vh);
+                /* Margin from top and bottom */
+            }
+
+            .results-card {
+                width: 90vw;
+            }
+
+            #startPanel .start-card {
+                width: 97vw;
+            }
+
+            .soroban {
+                width: 98vw;
+            }
+
+            .rod {
+                width: 34vw;
+                min-width: 50px;
+            }
+
+            .results-footer {
+                flex-direction: row;
+            }
+        }
+
+        @media (max-width: 380px) {
+            #quizPanel {
+                width: 95vw;
+                left: 2.5vw;
+                top: 2vh;
+                height: calc(96vh - 4vh);
+                padding: 0.08rem;
+                border-radius: 0.7rem;
+            }
+
+            .settings-card,
+            .results-card {
+                padding: 0.3rem;
+            }
+        }
+
+        #quizContent {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.0rem;
+            overflow-y: auto;
+        }
+
+        .question {
+            display: flex;
+            align-items: flex-end;
+            justify-content: left;
+            gap: 0.0rem;
+        }
+
+        #qNum {
+            background: #668cff;
+            border-radius: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            font-size: 2.25rem;
+            min-width: 3.6rem;
+            min-height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-right: 0.11rem;
+            box-shadow: 0 2px 8px #b993d622;
+            letter-spacing: .03em;
+            position: relative;
+            top: 1px;
+        }
+
+        /* Question flash tokens & full question text positioning above answer */
+        #questionFlashArea {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 3.7rem;
+            margin-bottom: 0.10rem;
+            margin-top: 0.10rem;
+        }
+
+        .flash-center {
+            width: 100%;
+            position: relative;
+            top: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+            font-size: 2.95rem;
+            font-weight: 900;
+            color: #4d79ff;
+            font-family: 'Nunito', Arial, sans-serif;
+            filter: drop-shadow(0 1px 3px #b993d6b2);
+            animation: fadein .6s cubic-bezier(.71, 1.31, .54, .96);
+        }
+
+        .flash-center .qmark {
+            color: #fd90d7;
+            font-size: 1em;
+            font-weight: bold;
+            margin-left: 0.18em;
+            vertical-align: middle;
+        }
+
+        .full-question-text {
+            font-size: 2.22rem;
+            color: #4d79ff;
+            font-weight: bold;
+            letter-spacing: 0.06em;
+            text-align: center;
+            width: 100%;
+            opacity: 1;
+            filter: drop-shadow(0 1px 2px #b993d6b1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 3.2rem;
+            margin-left: 0.0rem;
+            top: 1px;
+            position: relative;
+        }
+
+        .input-label {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: #9066ff;
+        }
+
+        .inputArea {
+            display: flex;
+            gap: 0.20rem;
+            align-items: center;
+        }
+
+        #answerDisplay {
+            flex: 1;
+            background: #fff;
+            color: #4d79ff;
+            text-align: right;
+            padding: 0.24rem 0.8rem;
+            border: 2.1px solid #fd90d7;
+            border-radius: 0.87rem;
+            font-size: 1.19rem;
+            font-weight: 700;
+            user-select: none;
+            margin-top: 0.13rem;
+            margin-bottom: 0.03rem;
+            box-shadow: 0 4px 16px #b993d63c;
+            outline: none;
+            min-width: 2rem;
+            max-width: 99%;
+            height: 1.6rem;
+            animation: fadein .19s;
+        }
+
+        #numpad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.2rem;
+            margin-top: .2rem;
+        }
+
+        #numpad button,
+        .btn,
+        .start-btn,
+        .start-settings-btn,
+        .settings-actions button,
+        #sendBtn,
+        .results-footer button,
+        .results-footer .btn,
+        #fullscreenBtn,
+        #fullscreenBtnResults,
+        #resultsBackBtn,
+        #fullscreenBtnTimeUp,
+        #resetBtn,
+        #settingsBtn {
+            background: #b4d7ff !important;
+            color: #3e366b !important;
+            font-size: 1.13rem !important;
+            border-radius: 2.2rem !important;
+            box-shadow: 0 3px 14px #bdd6ff14 !important;
+            font-weight: 700 !important;
+            outline: none !important;
+            border: none !important;
+            padding: 0.44rem 1.4em !important;
+            margin: 0 0.1em !important;
+            transition: background .13s, color .13s, transform .13s cubic-bezier(.81, 1.28, .61, .95) !important;
+            min-width: 2.7em;
+            min-height: 2.25em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #numpad button:active,
+        .btn:active,
+        .start-btn:active,
+        .start-settings-btn:active,
+        .settings-actions button:active,
+        #sendBtn:active,
+        .results-footer button:active,
+        .results-footer .btn:active,
+        #fullscreenBtn:active,
+        #fullscreenBtnResults:active,
+        #fullscreenBtnTimeUp:active,
+        #resetBtn:active,
+        #settingsBtn:active {
+            background: #fd90d7 !important;
+            color: #fff !important;
+            transform: scale(1.09) !important;
+        }
+
+        #sendBtn,
+        .settings-actions button {
+            min-width: 5.5em !important;
+            font-size: 1.18rem !important;
+            border-radius: 2.2rem !important;
+        }
+
+        .start-btn {
+            background: linear-gradient(90deg, #ae90fd 0%, #d492ff 100%) !important;
+            color: #fff !important;
+            border-radius: 2.6rem !important;
+            font-size: 1.45rem !important;
+            font-weight: 800 !important;
+            padding: 1.2rem 2.7rem !important;
+            min-width: 9.5em !important;
+            min-height: 2.7em;
+            margin-top: 0.95em;
+            box-shadow: 0 8px 32px #b993d6bb !important;
+            transition: background .15s;
+        }
+
+        .start-btn:active {
+            background: #fd90d7 !important;
+            color: #fff !important;
+        }
+
+        .start-settings-btn {
+            margin-top: 0.49rem;
+            font-size: 1.14rem !important;
+            color: #668cff !important;
+            background: #b4d7ff !important;
+            border: none !important;
+            border-radius: 2.2rem !important;
+            font-weight: 600 !important;
+            min-width: 6.4em !important;
+            min-height: 2.25em;
+            transition: opacity .14s;
+        }
+
+        .start-settings-btn:active {
+            background: #fd90d7 !important;
+            color: #fff !important;
+        }
+
+        /* Timer: centered below numpad */
+        #quizTimer {
+            text-align: center;
+            font-weight: bold;
+            margin: 5px 0 0 0;
+            align-self: center;
+            background: #b4d7ff;
+            color: #fff;
+            border-radius: 1.0rem;
+            font-size: 1.21rem;
+            box-shadow: 0 4px 14px #b993d66c;
+            letter-spacing: .04em;
+            min-height: 1.0rem;
+            height: 1.5rem;
+            padding: 0.02rem 0.23rem;
+            position: relative;
+            left: 0;
+            top: 0.00em;
+            width: fit-content;
+            display: block;
+            border: none;
+        }
+
+        #topBtns {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 0.00rem;
+            gap: 1.0rem;
+            width: 100%;
+            padding: 0;
+            padding-left: 50px;
+            box-sizing: border-box;
+        }
+
+        #topBtns button {
+            width: 1.55em !important;
+            height: 1.55em !important;
+            min-width: 1.55em !important;
+            min-height: 1.55em !important;
+            font-size: 1.37rem !important;
+            border-radius: 2.2rem !important;
+            padding: 0 !important;
+            box-shadow: 0 3px 14px #bdd6ff22 !important;
+            margin: 0 !important;
+            text-align: center !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #resultsList {
+            /* drop the grid stuff… */
+            display: block;
+
+            /* create 4 vertical columns */
+            column-count: 2;
+            column-gap: 1.2rem;
+
+            /* constrain height, scroll vertically */
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0.5rem;
+        }
+
+        /* make sure each “box” stays whole in a column */
+        .result-item {
+            display: inline-block;
+            /* allow column breaking */
+            break-inside: avoid;
+            /* don’t split an item */
+            white-space: nowrap;
+            margin-bottom: 0.4rem;
+        }
 
 
-    /* Ripple effect */
-    .ripple {
-      position: absolute; border-radius: 50%; transform: scale(0); animation: ripple .55s linear;
-      background-color: #fff8;
-      pointer-events: none; z-index: 2;
-    }
-    @keyframes ripple {
-      to { transform: scale(2.7); opacity: 0; }
-    }
-    /* Settings Modal */
-    #settingsModal {
-      display:none;position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:1000;background:#0005;
-    }
-    #settingsPanel {
-      background:#fff; padding:2.2em 2.6em 1.9em 2.6em;
-      max-width:340px; border-radius:22px;
-      box-shadow:0 4px 40px #b993d658;
-      position:absolute; top:50%;left:50%;transform:translate(-50%,-50%);
-      display: flex; flex-direction: column; align-items: center; gap: 1.5em;
-    }
-    body.dark #settingsPanel { background: #373457; color: #ffe066;}
-    #settingsPanel label { font-weight:700; margin-right: 1em;}
-    #settingsPanel input[type=range] { width: 120px; accent-color: #b993d6; }
-    #settingsPanel select, #settingsPanel button, #settingsPanel input[type="checkbox"] {
-      border-radius: 19px; border: none; font-size: 1.12em;
-      padding: 0.35em 1.2em;
-      margin-left: 0.8em; background: #e5e6fd;
-      box-shadow: 0 2px 7px #b993d611;
-      transition: background .13s, color .13s;
-      outline: none; color: #6a59b1;
-    }
-    #settingsPanel select:active, #settingsPanel button:active, #settingsPanel input[type="checkbox"]:active { background: #fd90d7; color: #fff;}
-    #settingsPanel .settings-row { display: flex; align-items: center; width:100%; margin-bottom: 0.4em;}
-    #settingsPanel .settings-close {
-      position:absolute;top:11px;right:13px;background: none;border: none;font-size:1.87em;cursor:pointer;color:#b993d6;
-      width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-      border-radius: 50%;
-      transition: background .13s;
-    }
-    #settingsPanel .settings-close:active { background: #fd90d7; color: #fff;}
-    #logoutBtn {
-      margin-top: 1.8em;
-      width: 89%;
-      background: #ff7388;
-      color: #fff;
-      border: none; border-radius: 14px; font-weight: 700;
-      font-size: 1.13em; padding: 0.81em 0; box-shadow: 0 2px 9px #fd90d726;
-      transition: background .15s, color .15s;
-    }
-    #logoutBtn:active { background: #fd90d7; color: #fff;}
-  </style>
+        .mark {
+            font-size: 1.2rem;
+            line-height: 1;
+        }
+
+        /* Panels (start/settings/results/timeup) background */
+        #startPanel,
+        #settingsPanel,
+        #resultsPanel,
+        #timeUpPanel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(225, 228, 255, 0.82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            animation: fadein-soft .51s cubic-bezier(.67, 1.71, .42, .89);
+            transition: opacity .34s cubic-bezier(.67, 1.51, .51, 1.1);
+            will-change: opacity, transform;
+        }
+
+        .settings-card,
+        .results-card,
+        .timeup-card,
+        .start-card {
+            background: #fff;
+            border-radius: 2.7rem;
+            width: 91vw;
+            max-width: 410px;
+            padding: 2.3rem 1.2rem 2.4rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.19rem;
+            box-shadow: 0 10px 46px #b993d6b3;
+            border: 2.5px solid #b4d7ff;
+            animation: fadein-soft .56s cubic-bezier(.51, 1.77, .62, .91);
+        }
+
+        .results-card {
+            display: flex;
+            flex-direction: column;
+            /* stack its header / list / footer vertically */
+            max-height: 90vh;
+            /* never taller than the viewport */
+            overflow-y: auto;
+            /* scroll its own contents when it overflows */
+            /* you can tweak the 90vh up or down to taste — the point is “<100vh” */
+        }
+
+
+        /* if you want a bit more breathing room on very small phones: */
+        @media (max-width: 500px) {
+            .results-card {
+                max-height: 95vh;
+                padding: 0.8rem;
+            }
+
+            #resultsList {
+                column-count: 1;
+            }
+
+        }
+
+        .timeup-card {
+            width: 90vw;
+            max-width: 360px;
+            text-align: top-center;
+        }
+
+        .results-footer {
+            display: flex;
+            justify-content: center;
+            gap: 0.2rem;
+            width: 100%;
+            flex-wrap: wrap;
+            margin-top: 0.0rem;
+        }
+
+        .results-footer button,
+        .results-footer .btn {
+            margin-bottom: 0 !important;
+        }
+
+        /* Settings panel: flex, label left, control right, round toggles/inputs */
+        .settings-card label {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 1.15rem;
+            color: #4d79ff;
+            margin-bottom: 0.23em;
+        }
+
+        .settings-card input[type="number"],
+        .settings-card select {
+            font-family: 'Nunito', Arial, sans-serif;
+            border-radius: 1.5rem;
+            border: 2px solid #b4d7ff;
+            padding: 0.32em 1em;
+            font-size: 1.15rem;
+            color: #4d79ff;
+            background: #e9f3ff;
+            font-weight: 700;
+            width: 4.6em;
+            box-shadow: 0 2px 8px #bdd6ff22;
+            transition: border .17s;
+            outline: none;
+        }
+
+        .settings-card input[type="number"]:focus,
+        .settings-card select:focus {
+            border-color: #fd90d7;
+            background: #fff6fa;
+            color: #fd90d7;
+        }
+
+        /* Cute round toggle switches */
+        .settings-card input[type="checkbox"] {
+            appearance: none;
+            width: 2.2em;
+            height: 2.2em;
+            border-radius: 50%;
+            border: 2px solid #b4d7ff;
+            background: #e9f3ff;
+            position: relative;
+            vertical-align: middle;
+            transition: border .12s, background .13s;
+            cursor: pointer;
+            box-shadow: 0 2px 8px #bdd6ff22;
+            outline: none;
+        }
+
+        .settings-card input[type="checkbox"]:checked {
+            background: #fd90d7;
+            border-color: #fd90d7;
+        }
+
+        .settings-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 1.19rem;
+            width: 100%;
+            margin-top: 0.7em;
+        }
+
+        .rain-sparkle {
+            pointer-events: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 4999;
+            overflow: hidden;
+            animation: fadein .11s;
+        }
+
+        .rain-sparkle span {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2.4rem;
+            opacity: 0.77;
+            animation: sparkle-rain 1.95s cubic-bezier(.61, 1.47, .72, .91) forwards;
+            filter: drop-shadow(0 1px 11px #ffd7ef77);
+            user-select: none;
+            will-change: transform, opacity;
+        }
+
+        @keyframes sparkle-rain {
+            0% {
+                opacity: 0.3;
+                transform: translateY(-30px) scale(.95) rotate(-6deg);
+            }
+
+            75% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(99vh) scale(1.2) rotate(11deg);
+            }
+        }
+
+        /* Panel mascot and confetti */
+        .mascot-bounce-in {
+            animation: mascotpop .71s cubic-bezier(.51, 1.77, .62, .91) 1;
+        }
+
+        @keyframes mascotpop {
+            0% {
+                transform: translateY(-60px) scale(0.78);
+            }
+
+            60% {
+                transform: translateY(16px) scale(1.09);
+            }
+
+            85% {
+                transform: translateY(-8px) scale(.93);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .abacus-mascot {
+            width: 125px;
+            height: 150px;
+            margin-bottom: 0.2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 12;
+            filter: drop-shadow(0 2px 12px #b993d6a1);
+            background: none;
+        }
+
+        .mascot-face {
+            position: absolute;
+            left: 50%;
+            top: 52%;
+            transform: translate(-50%, 0);
+            width: 45px;
+            height: 38px;
+            background: #ffe680;
+            border-radius: 50% 50% 58% 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 18px #fff8, 0 0 0 3px #fff3;
+            border: 2.2px solid #ffd70088;
+        }
+
+        .mascot-face .eyes {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-top: 13px;
+            margin-left: 6px;
+        }
+
+        .mascot-face .eye {
+            width: 7px;
+            height: 7px;
+            background: #333;
+            border-radius: 50%;
+            margin-right: 6px;
+            margin-left: 3px;
+            box-shadow: 9px 0 0 0 #333;
+        }
+
+        .mascot-face .smile {
+            position: absolute;
+            left: 49%;
+            top: 68%;
+            transform: translate(-50%, -50%);
+            width: 23px;
+            height: 11px;
+            border-bottom: 3.3px solid #ff7e7e;
+            border-radius: 0 0 19px 19px;
+            background: none;
+            z-index: 1;
+        }
+
+        .mascot-face .cheek {
+            position: absolute;
+            width: 8px;
+            height: 4px;
+            border-radius: 50%;
+            background: #fd90d7bb;
+            top: 80%;
+            left: 18%;
+        }
+
+        .mascot-face .cheek.right {
+            left: 66%;
+        }
+
+        .abacus-body {
+            width: 100%;
+            height: 90px;
+            position: relative;
+            background: #4761b8;
+            border-radius: 30px;
+            border: 3px solid #4761b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px #b993d644;
+        }
+
+        .abacus-rod {
+            width: 90px;
+            height: 7px;
+            background: #ffd700;
+            border-radius: 6px;
+            margin: 13px auto 0 auto;
+            position: relative;
+            box-shadow: 0 1px 4px #fff5;
+        }
+
+        .abacus-beads {
+            display: flex;
+            flex-direction: row;
+            gap: 13px;
+            margin-top: -12px;
+            margin-bottom: -5px;
+            justify-content: center;
+        }
+
+        .abacus-bead {
+            width: 21px;
+            height: 21px;
+            background: #ffd700;
+            border-radius: 50%;
+            border: 2px solid #ffd700;
+            margin-top: 5px;
+            margin-bottom: 2px;
+            box-shadow: 0 2px 8px #ffd700, 0 0 0 2px #ffd700;
+            animation: beadbounce 1s infinite alternate cubic-bezier(.71, 1.64, .51, .88);
+        }
+
+        .abacus-bead:nth-child(2) {
+            animation-delay: .17s;
+        }
+
+        .abacus-bead:nth-child(3) {
+            animation-delay: .31s;
+        }
+
+        .abacus-bead:nth-child(4) {
+            animation-delay: .46s;
+        }
+
+        .layout {
+            display: flex;
+            flex-direction: row;
+            /* always side-by-side */
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @media (orientation: landscape) {
+            .layout {
+                flex-direction: row;
+                /* sit side-by-side in landscape */
+            }
+
+            #quizPanel {
+                position: relative !important;
+                /* override any absolute */
+                width: clamp(265px, 23vw, 390px);
+                height: 100%;
+                order: 1;
+            }
+
+            #abacusRoot {
+                position: relative !important;
+                flex: 1;
+                /* fill the rest of the row */
+                height: 100%;
+                order: 2;
+            }
+        }
+
+
+        @keyframes beadbounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        .start-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #4d79ff;
+            text-shadow: 0 2px 0 #fff6, 0 0 12px #fff8;
+            letter-spacing: 0.09em;
+            text-align: center;
+            margin: 0;
+            font-family: 'Nunito', Arial, sans-serif;
+        }
+
+        .confetti {
+            pointer-events: none;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 12;
+            overflow: visible;
+        }
+
+        .confetti span {
+            position: absolute;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            opacity: 0.76;
+            animation: confetti-fall 1.4s linear forwards;
+            will-change: transform;
+        }
+
+        @keyframes confetti-fall {
+            from {
+                transform: translateY(-40px);
+            }
+
+            to {
+                transform: translateY(370px);
+            }
+        }
+
+        .shake {
+            animation: shake .21s cubic-bezier(.62, 1.75, .52, .91);
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-8px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        @keyframes fadein {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        #resultsTitle {
+            color: #fd90d7 !important;
+            font-size: 2.1rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .sad-emoji {
+            font-size: 2.6rem;
+            filter: drop-shadow(0 2px 10px #aaa5);
+            margin-bottom: 0.5em;
+        }
+
+        .sad-text {
+            color: #668cff;
+            font-weight: 700;
+            font-size: 1.34rem;
+            margin: .3em 0;
+        }
+
+        .encouragement {
+            color: #fd90d7;
+            font-size: 1.12rem;
+            margin: .6em 0;
+        }
+
+        /* Make scrollbars cute/round on panels */
+        ::-webkit-scrollbar {
+            width: 8px;
+            border-radius: 9px;
+            background: #4761b8;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4761b8;
+            border-radius: 9px;
+        }
+
+        @media (max-width: 600px) {
+            .results-card {
+                max-height: 85vh;
+                height: auto;
+                padding-top: 0.7em;
+                /* Reduce padding for smaller screens */
+                overflow-y: auto;
+
+            }
+
+            #resultsPanel {
+                align-items: flex-start;
+                overflow-y: auto;
+                padding: 1rem 0;
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="fixed-top">
-    <div class="topbar-btns">
-      <button class="icon-btn" id="settingsBtn" title="Settings">
-        <span class="material-icons-outlined">settings</span>
-      </button>
-      <button class="icon-btn" id="fullscreenBtn" title="Fullscreen">
-        <span class="material-icons-outlined">fullscreen</span>
-      </button>
+    <!-- Start Panel -->
+    <div id="startPanel">
+        <div class="start-card">
+            <div class="abacus-mascot mascot-bounce-in" id="mainMascot">
+                <div class="abacus-body">
+                    <div class="abacus-rod"></div>
+                    <div class="abacus-beads">
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                    </div>
+                    <div class="abacus-rod"></div>
+                </div>
+                <div class="mascot-face">
+                    <div class="eyes">
+                        <div class="eye"></div>
+                    </div>
+                    <div class="smile"></div>
+                    <div class="cheek"></div>
+                    <div class="cheek right"></div>
+                </div>
+            </div>
+            <div class="start-title">Soroban Quiz!</div>
+            <button class="start-btn" id="startQuizBtn">Start Quiz!</button>
+            <button class="start-settings-btn" id="startSettingsBtn">Settings ⚙️</button>
+            <div class="confetti" id="confettiBox"></div>
+        </div>
     </div>
-    <div class="top-content-area" id="topContentArea">
-      <div id="topContent"></div>
+    <div class="layout">
+        <div id="abacusRoot">
+            <div class="soroban" id="sorobanBoard"></div>
+        </div>
+        <div id="quizPanel" style="display:none;">
+            <div class="quiz-topbar">
+                <button id="quizBackBtn" class="back-btn" title="Back">
+                    <img src="arrow.png" alt="Back" class="arrow-icon" />
+                    <span class="back-text">Back</span>
+                </button>
+                <div class="top-btns">
+                    <button id="settingsBtn" class="top-btn">⚙️</button>
+                    <button id="resetBtn" class="top-btn">↻</button>
+                    <button id="fullscreenBtn" class="top-btn">⛶</button>
+                </div>
+            </div>
+            <div id="quizContent">
+                <div class="question">
+                    <div id="qNum">Q1</div>
+                </div>
+                <div id="questionFlashArea"></div>
+                <div>
+                    <div class="input-label">Your Answer</div>
+                    <div class="inputArea">
+                        <div id="answerDisplay"></div>
+                        <button id="sendBtn" disabled>Send</button>
+                    </div>
+                </div>
+                <div id="numpad"></div>
+                <div id="quizTimer">Time Left: 10:00</div>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="levels-area">
-    <div class="levels-scroll-area" id="levelsScrollArea"></div>
-  </div>
-  <!-- Settings Modal -->
-  <div id="settingsModal">
     <div id="settingsPanel">
-      <button class="settings-close" onclick="closeSettings()">&times;</button>
-      <div class="settings-row">
-        <label for="themeToggle">Mode</label>
-        <select id="themeToggle">
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
-      <div class="settings-row">
-        <label for="langToggle">Language</label>
-        <select id="langToggle">
-          <option value="en">English</option>
-          <option value="th">ไทย</option>
-        </select>
-      </div>
-      <div class="settings-row">
-        <label for="fontSizeSlider">Font Size</label>
-        <input id="fontSizeSlider" type="range" min="0.92" max="1.22" step="0.01" value="1"/>
-      </div>
-      <button id="logoutBtn">Log Out</button>
+        <div class="settings-card">
+            <label>Questions per set:
+                <input type="number" id="numQuestions" min="1" max="50" value="20">
+            </label>
+            <label>Flash speed (sec):
+                <select id="flashSpeedSec">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </label>
+            <label>Flash tokens:
+                <input type="checkbox" id="flashToggle" checked>
+            </label>
+            <label>Timer (min):
+                <select id="timerSelect"></select>
+            </label>
+            <label>Mute:
+                <input type="checkbox" id="muteSound">
+            </label>
+            <div class="settings-actions">
+                <button id="cancelSettings">Cancel</button>
+                <button id="saveSettings">Save</button>
+            </div>
+        </div>
     </div>
-  </div>
-  <script>
-const youtubeVideoMap = {
-  1: ['dtVUEmzh_Lg',  //chapter 1 Lower & Upper
-      'F-uWqaW-lBw',  //chapter 2 Mix Lower & Upper 
-      'mhZlvpwSaU8',  //chapter 3 Five buddy (+)
-      'M5c7xTFECOM', //chapter 4 Five buddy (-)
-      'qKo-ezxqWwA',  //chapter 5 Mix Five buddy (+) & Five buddy (-) 
-      'JKV1gx_kOwo', //chapter 6 Ten buddy (+)
-      'emK7q94RBK4', //chapter 7 Ten buddy (-)
-      'qSoXpPqtvs8', //chapter 8 Mix Ten buddy(+)&Ten buddy(-)
-      'hSPpGcSBz8I', //chapter 9 Five & Ten buddy +9
-      'arZnPpKQp9E', //chapter 10 Five & Ten buddy +8
-      'AoOojScxcSY', //chapter 11 Five & Ten buddy +7
-      'Clixj0JD3ME', //chapter 12 Five & Ten buddy +6
-      'RPe-HnkY2gY', //chapter 13 Five & Ten buddy -9
-      'jIR0g1SuXzY', //chapter 14 Five & Ten buddy -8
-      '', //chapter 15 Five & Ten buddy -7
-      '', //chapter 16 Five & Ten buddy -6
-      '', //chapter 17 
-      '', //chapter 18
-      '', //chapter 19
-      ''  //chapter 20
-  ],
-  2: [ /* level-2 IDs */ ],
-  // …
-};
-
- const titleMap = {
-      1: [
-        'Lower Upper',
-        'Mix Lower Upper',
-        'Five buddy (+) ',
-        'Five buddy (-) ',
-        'Mix five buddy(+)Five buddy(-)',
-        'Ten buddy (+) ',
-        'Ten buddy (-)',
-        'Mix Ten (+) Ten (-)',
-        'Five & Ten buddy (+9)',
-        'Five & Ten buddy (+8)',
-        'Five & Ten buddy (+7)',
-        'Five & Ten buddy (+6)',
-        'Five & Ten buddy (-9)',
-        'Five & Ten buddy (-8)',
-        'Five & Ten buddy (-7)',
-        'Five & Ten buddy (-6)',
-        'Simple addition & sub',
-        'Two digit add & sub',
-        'Three digit add & sub',
-        'Four digit add & sub'
-      ],
-     2:[
-      '',''
-  ],
- }
-    // --- Top: Welcome or Chapter
-function renderTop() {
-  const tc = document.getElementById('topContent');
-  tc.innerHTML = '';
-
-  if (showingChapter) {
-    const lvl     = selected.level;    // 0-based
-    const chapIdx = selected.chapter;  // 0-based
-
-    const titles  = titleMap[lvl + 1] || [];
-    const customTitle = titles[chapIdx] || levelData[lvl].chapters[chapIdx].title;
-
-    const ids = youtubeVideoMap[lvl + 1] || [];
-    const youtubeId = ids[chapIdx];
-
-    const completed = levelData[lvl].chapters[chapIdx].exerciseCompleted;
-
-    // Build the chapter HTML first
-    tc.innerHTML = `
-      <div class="top-title">
-    Ch.${chapIdx + 1} ${customTitle}
-      </div>
-<div class="video-frame-wrapper">
-   <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
-</div>
-
-      <div class="chapter-btns">
-        <button class="main-btn${completed ? ' completed' : ''}" onclick="doExercise(this)">
-          <span class="material-icons-outlined">play_arrow</span>
-          Exercise
-          ${completed ? `<span class="exercise-check">${checkSvg()}</span>` : ""}
-        </button>
-        <button class="main-btn" onclick="goNextChapter()">
-          <span class="material-icons-outlined">navigate_next</span>
-          Next
-        </button>
-      </div>
-    `;
-
-    // ✅ Set the iframe source AFTER the iframe is in the DOM
-    if (youtubeId) {
-      const iframe = document.getElementById("videoFrame");
-      iframe.src = `https://www.youtube.com/embed/${youtubeId}`;
-    }
-
-  } else {
-    // Welcome screen
-    tc.innerHTML = `
-      <div class="top-title">Welcome to Wonder Kids!</div>
-      <div class="slideshow-img-area">
-        ${slides.map((src, i) => `
-          <img class="slideshow-img ${i === slideIdx ? 'active' : ''}" src="${src}">
-        `).join('')}
-      </div>
-      <div class="slideshow-dots">
-        ${slides.map((_, i) => `
-          <div class="slideshow-dot ${i === slideIdx ? 'active' : ''}" onclick="goSlide(${i})"></div>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  addRippleToAllBtns();
-}
-
-    // --- ICONS AND DATA ---
-    const bookIcons = [
-      {color:'#5bb3ff',icon:'📘'}, 
-      {color:'#6ccc88',icon:'📗'},
-      {color:'#ef7d67',icon:'📕'},
-      {color:'#ffe066',icon:'📙'},
-      {color:'#fd90d7',icon:'📒'},
-      {color:'#b993d6',icon:'📚'},
-      {color:'#f0af54',icon:'📔'},
-      {color:'#70d8eb',icon:'📖'},
-      {color:'#a685e2',icon:'📓'},
-      {color:'#f7c873',icon:'📙'}
-    ];
-    // example slideshow setup
-const slides = ["1.jpg","2.jpg","3.jpg","4.jpg"];
-let idx = 0;
-const img = document.querySelector("#slider img");
-
-function nextSlide(){
-  idx = (idx + 1) % slides.length;
-  img.src = slides[idx];
-}
-
-// here’s the “speed” knob:
-setInterval(nextSlide, 500);  // currently every 3 seconds
-
-    const levelData = [];
-for(let i=1;i<=10;i++) {
-  const nCh = i===1 ? 20 : 10;
-  levelData.push({
-    name:'Level '+i,
-    chapters: Array.from({length:nCh},(_,j)=>({
-      title: `Ch. ${j+1}${(titleMap[i] && titleMap[i][j]) ? ' – ' + titleMap[i][j] : ''}`,
-      completed:false,
-      exerciseCompleted:false,
-      unlocked:true // All chapters unlocked!
-    })),
-    progress:0,
-    open:(i===1)
-  });
-}
-
-    // --- ICONS ---
-    function checkSvg() {
-      return `<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8.5" fill="#16c878" stroke="#16c878"/><path d="M5.5 9.5l2 2 5-5" stroke="#fff" stroke-width="2.1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    }
-    // --- Ripple Effect ---
-    function ripple(e){
-      const btn = e.currentTarget;
-      let circle = document.createElement("span");
-      circle.className = "ripple";
-      let rect = btn.getBoundingClientRect();
-      let d = Math.max(rect.width,rect.height);
-      circle.style.width = circle.style.height = d+"px";
-      circle.style.left = (e.clientX-rect.left-d/2)+"px";
-      circle.style.top = (e.clientY-rect.top-d/2)+"px";
-      btn.appendChild(circle);
-      setTimeout(()=>circle.remove(),430);
-      btn.classList.add("rippled");
-      setTimeout(()=>btn.classList.remove("rippled"),220);
-    }
-    function addRippleToAllBtns() {
-      document.querySelectorAll('button').forEach(btn=>{
-        if(!btn._hasRipple) {
-          btn.addEventListener('click',ripple);
-          btn._hasRipple = true;
-        }
-      });
-    }
-    // --- Haptic ---
-    function haptic() {
-      if(window.navigator.vibrate) window.navigator.vibrate(20);
-    }
-    // --- State ---
-    let selected={level:0,chapter:0}, showingChapter=false, slideIdx=0;
-    let sessionProgress = JSON.parse(sessionStorage.getItem("wk_progress")||"null")||null;
-    if(sessionProgress) {
-      for(let i=0;i<levelData.length;i++) {
-        for(let j=0;j<levelData[i].chapters.length;j++) {
-          levelData[i].chapters[j].completed = !!sessionProgress[i]?.[j]?.completed;
-          levelData[i].chapters[j].exerciseCompleted = !!sessionProgress[i]?.[j]?.exerciseCompleted;
-        }
-      }
-    }
-   
-    // --- Levels/Chapters ---
-    function renderLevels() {
-      const area=document.getElementById('levelsScrollArea');
-      area.innerHTML='';
-      for(let i=0;i<levelData.length;i++) {
-        const lvl=levelData[i],book=bookIcons[i%bookIcons.length];
-        const n= lvl.chapters.length, nDone=lvl.chapters.filter(c=>c.exerciseCompleted).length;
-        lvl.progress = nDone/n;
-        area.innerHTML+=`
-          <div class="level-card${lvl.open?' open':' closed'}" id="levelCard${i}">
-            <div class="level-header-row" onclick="toggleLevel(${i})" style="background:${lvl.open?'#69a3e7':'#e3f0ff'};color:${lvl.open?'#fff':'#668cff'};">
-              <span class="level-icon" style="background:${book.color};">${book.icon}</span>
-              <span class="level-name">${lvl.name}</span>
-              <span class="level-progress">
-                <span class="level-progress-bar" style="width:${Math.round(lvl.progress*100)}%;"></span>
-              </span>
-              <span class="level-arrow" id="levelArrow${i}">${lvl.open?'▴':'▾'}</span>
+    <div id="resultsPanel">
+        <div class="results-card">
+            <div class="abacus-mascot" id="resultMascot" style="display:none;">
+                <div class="abacus-body">
+                    <div class="abacus-rod"></div>
+                    <div class="abacus-beads">
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                        <div class="abacus-bead"></div>
+                    </div>
+                    <div class="abacus-rod"></div>
+                </div>
+                <div class="mascot-face">
+                    <div class="eyes">
+                        <div class="eye"></div>
+                    </div>
+                    <div class="smile"></div>
+                    <div class="cheek"></div>
+                    <div class="cheek right"></div>
+                </div>
             </div>
-            <div class="chapters-list" id="chaptersList${i}" style="display:${lvl.open?'flex':'none'};">
-              ${lvl.chapters.map((ch,j)=>{
-                let classes="chapter-row";
-                if(ch.exerciseCompleted) classes+=' completed';
-                else classes+=' unlocked';
-                if(showingChapter&&selected.level===i&&selected.chapter===j) classes+=' active';
-                return `<div class="${classes}" onclick="selectChapter(event,${i},${j})">
-                  <span>${ch.title}</span>
-                  ${ch.exerciseCompleted?`<span class="chapter-check">${checkSvg()}</span>`:""}
-                </div>`;
-              }).join('')}
+            <h2 id="resultsTitle">Results</h2>
+            <div class="results-row" id="resultsList" overflow-y:auto;width:100%"></div>
+            <div id="resultScore"></div>
+            <div id="resultsConfetti"></div>
+            <div class="results-footer">
+                <button id="tryAgainBtn">↺ Try Again</button>
+                <button id="resultsBackBtn" class="back-btn" title="Back">
+                    <img src="arrow.png" alt="Back" class="arrow-icon" />
+                    <span class="back-text">Back</span>
+                </button>
+                <button id="fullscreenBtnResults">⛶</button>
             </div>
-          </div>
-        `;
-      }
-// You might need to write getYoutubeUrl(level, chapter) or similar
-      // Hide scrollbar unless scrolling
-      const scroll = document.getElementById('levelsScrollArea');
-      scroll.onscroll = ()=>{
-        scroll.classList.add('scrolling');
-        clearTimeout(scroll._scrollTO);
-        scroll._scrollTO = setTimeout(()=>scroll.classList.remove('scrolling'),600);
-      };
-      addRippleToAllBtns();
-    }
-    // --- Level toggle ---
-    window.toggleLevel=function(i){
-      for(let j=0;j<levelData.length;j++){
-        levelData[j].open=(j===i)?!levelData[j].open:false;
-        document.getElementById('chaptersList'+j).style.display=levelData[j].open?'flex':'none';
-        document.getElementById('levelCard'+j).className='level-card'+(levelData[j].open?' open':' closed');
-        document.getElementById('levelArrow'+j).textContent=levelData[j].open?'▴':'▾';
-      }
-    };
-    // --- Chapter select ---
-window.selectChapter = function(e, li, ci) {
-  showingChapter = true;
-  selected = { level: li, chapter: ci };
-  // Save current open state of all levels
-  const openLevels = levelData.map(lvl => lvl.open);
-  renderTop();
-  renderLevels();
-  // Restore open state after render (in case renderLevels somehow resets it)
-  levelData.forEach((lvl, i) => lvl.open = openLevels[i]);
-  renderLevels(); // call again to apply correct open state
-  haptic();
-  e.stopPropagation();
-};
-// --- Exercise ---
-window.doExercise = function(btn){
-  // 1) mark complete exactly as before…
-  const {level: L, chapter: C} = selected;
-  levelData[L].chapters[C].exerciseCompleted = true;
-  levelData[L].chapters[C].completed = true;
-  saveProgress();
-  renderLevels();
-  renderTop();
-  haptic();
+        </div>
+    </div>
+    <div id="timeUpPanel">
+        <div class="timeup-card">
+            <div style="font-size:2.2rem;color:#fd90d7;font-weight:800;margin-bottom:.6em;">Time's Up!</div>
+            <div class="results-footer"><button id="tryAgainTimeUpBtn">↺ Try Again</button>
+                <button id="fullscreenBtnTimeUp">⛶</button>
+            </div>
+        </div>
+    </div>
+    <div id="rainSparkle" class="rain-sparkle" style="display:none"></div>
+    <audio id="soundOn" src="abacus sound effect 1.wav"></audio>
+    <audio id="soundOff" src="abacus sound effect 2.wav"></audio>
+    <audio id="tickSound" src="tick.wav"></audio>
+    <audio id="goSound" src="go.wav"></audio>
+    <audio id="correctSound" src="correctanswersound.mp3"></audio>
+    <audio id="wrongSound" src="WrongAnswer.wav"></audio>
+    <audio id="applauseSound" src="applause.mp3"></audio>
+    <audio id="losingHorn" src="losing-horn.mp3"></audio>
+    <script>
 
-  // 2) redirect to quiz page with params
-  const lvl = L + 1;      // because URL is 1-based
-  const chap = C + 1;
-  setTimeout(()=>{
-    window.location.href = `sorobanquiz.html?level=${lvl}&chapter=${chap}`;
-  }, 300);
-};
-    // --- Next ---
-    window.goNextChapter=function(){
-      const {level:l,chapter:c}=selected;
-      if(levelData[l].chapters[c+1]) {
-        selected={level:l,chapter:c+1}; showingChapter=true;
-        renderTop(); 
-        renderLevels();
-        haptic();
-        document.getElementById('chaptersList'+l).scrollTo({top:34*(c+1)-7,behavior:'smooth'});
-      }
-    }
-    // --- Slideshow ---
-    window.goSlide=function(i){ slideIdx=i; renderTop();}
-    setInterval(()=>{if(!showingChapter){slideIdx=(slideIdx+1)%slides.length;renderTop();}},5200);
-    // --- Fullscreen (entire app) ---
-    document.getElementById('fullscreenBtn').onclick = ()=>{
-      let el=document.documentElement;
-      if(document.fullscreenElement) document.exitFullscreen();
-      else if(el.requestFullscreen) el.requestFullscreen();
-      else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-      else if(el.msRequestFullscreen) el.msRequestFullscreen();
-      haptic();
-    };
-    // --- Responsive (fullscreen on phone/tablet landscape) ---
-    function updateLayout() {
-      if(window.matchMedia("(orientation: landscape)").matches && window.innerWidth<1000){
-        document.querySelector(".levels-area").style.display="none";
-        document.querySelector(".fixed-top").style.height="99vh";
-        document.querySelector(".top-content-area").style.width="100vw";
-      } else {
-        document.querySelector(".levels-area").style.display="flex";
-        document.querySelector(".fixed-top").style.height="50vh";
-        document.querySelector(".top-content-area").style.width="";
-      }
-    }
-    window.addEventListener("resize",updateLayout);
-    // --- Settings panel ---
-    function closeSettings(){document.getElementById('settingsModal').style.display='none';}
-    document.getElementById('settingsBtn').onclick=()=>{
-      document.getElementById('settingsModal').style.display='block';
-      haptic();
-    };
-    document.getElementById('fontSizeSlider').oninput=(e)=>{
-      document.documentElement.style.fontSize = e.target.value+'rem';
-    };
-    document.getElementById('themeToggle').onchange=(e)=>{
-      if(e.target.value=="dark") document.body.classList.add("dark");
-      else document.body.classList.remove("dark");
-    };
-    document.getElementById('langToggle').onchange=(e)=>{
-      // Add language switching logic here if needed
-    }
-    document.getElementById('logoutBtn').onclick=()=>{
-      sessionStorage.removeItem("wk_progress");
-      window.location='login.html';
-    }
-    // --- Save/load session progress ---
-    function saveProgress(){
-      let arr=[];
-      for(let i=0;i<levelData.length;i++){
-        arr[i]=[];
-        for(let j=0;j<levelData[i].chapters.length;j++)
-          arr[i][j]={completed:!!levelData[i].chapters[j].completed,exerciseCompleted:!!levelData[i].chapters[j].exerciseCompleted};
-      }
-      sessionStorage.setItem("wk_progress",JSON.stringify(arr));
-    }
-    // --- Init ---
-    window.onload=()=>{
-      renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
-    }
-    // --- Allow user selection in input/select only ---
-    document.addEventListener('selectstart',function(e){
-      if(["input","textarea","select"].indexOf(e.target.tagName.toLowerCase())>=0) return true;
-      e.preventDefault();
-      return false;
-    });
-    if (screen.orientation && screen.orientation.lock) {
-  screen.orientation.lock('portrait').catch(function(error) {
-    // Most browsers will not allow this unless PWA/fullscreen
-    console.log('Orientation lock failed:', error);
-  });
-}
-function checkOrientationLock() {
-  // Checks for landscape mode (width > height, and not desktop)
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const landscape = window.matchMedia("(orientation: landscape)").matches;
-  if (landscape && isMobile) {
-    document.body.classList.add("landscape-locked");
-  } else {
-    document.body.classList.remove("landscape-locked");
-  }
-}
-window.addEventListener('resize', checkOrientationLock);
-window.addEventListener('orientationchange', checkOrientationLock);
-window.addEventListener('DOMContentLoaded', checkOrientationLock);
+        // ― QUIZ STATE (must be declared before use) ―
+        let QUESTIONS = [];
+        let currentIndex = 0;
+        let answers = [];
+        let currentInput = "";
+        let inputLocked = false;
+        let timerInterval = null;
+        let timeLeft = 600;
 
-// --- Parse URL to show chapter if present ---
-(function checkChapterFromUrl() {
-  const url = new URL(window.location.href);
-  const lvl = parseInt(url.searchParams.get("level"), 10);
-  const chap = parseInt(url.searchParams.get("chapter"), 10);
+        // ― URL parameters ―
+        const url = new URL(window.location.href);
+        const currentLevel = Math.max(1, Math.min(10, parseInt(url.searchParams.get("level")) || 1));
+        const currentChapter = Math.max(1, Math.min(20, parseInt(url.searchParams.get("chapter")) || 1));
+        // Utility selectors
+        const $ = (s) => document.querySelector(s),
+            $$ = (s) => [...document.querySelectorAll(s)];
 
-  if (
-    lvl && chap &&
-    lvl >= 1 && lvl <= levelData.length &&
-    chap >= 1 && chap <= levelData[lvl - 1].chapters.length
-  ) {
-    selected = { level: lvl - 1, chapter: chap - 1 };
-    showingChapter = true;
-    levelData[lvl - 1].open = true;
-  }
-})();
+        const backBtn = document.getElementById('quizBackBtn');
+        if (backBtn) {
+            backBtn.onclick = () => {
+                window.location.href = `home.html?level=${currentLevel}&chapter=${currentChapter}`;
+            };
+        }
 
-window.onload=()=>{
-  renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
-};
-  </script>
+        // Confetti fun
+        function launchConfetti(node) {
+            node = node || $("#confettiBox");
+            node.innerHTML = "";
+            const colors = ["#ffd700", "#b993d6", "#4d79ff", "#66e6ff", "#ffb3e6", "#fd90d7", "#c8ffb0"];
+            for (let i = 0; i < 36; i++) {
+                const el = document.createElement("span");
+                el.style.left = Math.random() * 96 + 2 + "%";
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.animationDuration = 1.1 + Math.random() * 0.5 + "s";
+                el.style.opacity = 0.82 + Math.random() * 0.18;
+                el.style.transform = `rotate(${Math.random() * 360}deg)`;
+                node.appendChild(el);
+            }
+            setTimeout(() => {
+                node.innerHTML = "";
+            }, 1600);
+        }
+        // RAIN sparkle/stars/emoji (like rain, not freeze!)
+        function rainSparkleBurst(style = "happy") {
+            const rain = $("#rainSparkle");
+            rain.innerHTML = "";
+            rain.style.display = "";
+            let stars;
+            if (style === "sad") {
+                stars = ["💫", "💪", "💪", "💪", "💪", "💪", "💪", "👏"];
+            } else {
+                stars = ["✨", "⭐", "🌟", "✦", "✺", "✧", "🟡", "💫", "🎊", "🎉", "🦄", "🍭", "🎈", "👏", "😺"];
+            }
+            const N = 34 + Math.floor(Math.random() * 8);
+            for (let i = 0; i < N; i++) {
+                const el = document.createElement("span");
+                el.innerText = stars[Math.floor(Math.random() * stars.length)];
+                el.style.left = Math.random() * 97 + "vw";
+                el.style.top = -40 + Math.random() * 12 + "px";
+                el.style.fontSize = 1.6 + Math.random() * 2.1 + "rem";
+                el.style.opacity = 0.47 + Math.random() * 0.53;
+                el.style.animationDelay = Math.random() * 0.5 + "s";
+                rain.appendChild(el);
+            }
+            setTimeout(() => {
+                rain.style.display = "none";
+            }, 2300);
+        }
+        // Soroban abacus logic (unchanged, only color via CSS)
+        const DEAD_ZONE = 2,
+            SHAKE_G = 20,
+            HAPTIC_MS = 12;
+        let mute = false;
+        const board = $("#sorobanBoard");
+        function createRod() {
+            const r = document.createElement("div");
+            r.className = "rod";
+            r.innerHTML =
+                "<div class='rod-line'></div><div class='heaven'><div class='bead heaven'></div></div><div class='gap-space'></div><div class='earth'>" + '<div class="bead earth"></div>'.repeat(4) + "</div><div class='bar'></div>";
+            return r;
+        }
+        for (let i = 0; i < 8; i++) board.appendChild(createRod());
+        function clearBoard() {
+            $$(".bead.active").forEach((b) => b.classList.remove("active"));
+        }
+        $("#resetBtn").onclick = () => {
+            clearBoard();
+            shakeEffect();
+        };
+        function setBead(b, active) {
+            const hv = b.classList.contains("heaven"),
+                was = b.classList.contains("active");
+            if (hv) b.classList.toggle("active", active);
+            else {
+                const cs = [...b.parentElement.children],
+                    idx = cs.indexOf(b);
+                cs.forEach((e, i) => e.classList.toggle("active", active ? i <= idx : i < idx));
+            }
+            if (HAPTIC_MS) navigator.vibrate(HAPTIC_MS);
+            if (!mute) {
+                if (active && !was) $("#soundOn").play();
+                if (!active && was) $("#soundOff").play();
+            }
+        }
+        $$('.bead').forEach(b => b.addEventListener('pointerdown', e => { const rg = b.classList.contains('heaven') ? 'heaven' : 'earth', sy = e.clientY; b.setPointerCapture(e.pointerId); b.onpointermove = ev => { let dy = ev.clientY - sy; if (Math.abs(dy) > DEAD_ZONE) { setBead(b, rg === 'heaven' ? dy > 0 : dy < 0); b.onpointermove = null; } }; b.onpointerup = b.onpointercancel = () => { b.onpointermove = null; b.releasePointerCapture(e.pointerId); } }));
+        // Shake to reset soroban + app shake effect
+        function shakeEffect() {
+            const abacusRoot = $("#abacusRoot");
+            abacusRoot.classList.remove("shake");
+            void abacusRoot.offsetWidth;
+            abacusRoot.classList.add("shake");
+            setTimeout(() => abacusRoot.classList.remove("shake"), 220);
+        }
+        if (window.DeviceMotionEvent) {
+            let last = 0;
+            window.addEventListener("devicemotion", (e) => {
+                const { x, y, z } = e.accelerationIncludingGravity,
+                    mag = Math.hypot(x, y, z),
+                    now = performance.now();
+                if (mag > SHAKE_G && now - last > 800) {
+                    clearBoard();
+                    shakeEffect();
+                    last = now;
+                }
+            });
+        }
+        function randomChapter1(numQuestions = 10, numNumbers = 4) {
+            const out = [];
+
+            while (out.length < numQuestions) {
+                const A = r15(),
+                    B = r15(),
+                    C = r15(),
+                    op1 = rOp();
+
+                if (A === 5 && op1 === "-" && B !== 5) continue; // 5 − B rule
+                if (A === 5 && op1 === "+" && B === 5) continue; // forbid 5 + 5
+                if (A === 4 && op1 === "-" && !(B >= 1 && B <= 4)) continue;
+                if (A === 4 && op1 === "+" && B !== 5) continue;
+                if (A <= 4 && Math.abs(evalOp(A, op1, B)) > 4) continue;
+
+                const AB = evalOp(A, op1, B); // first stage
+
+                /* NEW guard: first-stage must be 0–9 */
+                if (AB < 0 || AB > 9) continue;
+
+                if (AB === 5) continue; // no stage total may be 5
+
+                let op2 = AB === 0 ? "+" : rOp(); // 0 → force '+'
+
+                if (AB === 4 && C !== 5) continue;
+                if (A === 5 && op2 === "+" && !(AB + C >= 5 && AB + C <= 9)) continue;
+                if (A === 5 && op2 === "-" && !(B > C)) continue;
+
+                const D = evalOp(AB, op2, C); // final result
+
+                if (D < 0 || D > 9 || D === 5) continue;
+                if (AB < 4 && !(D < 4 || C === 5)) continue;
+                if (A + B === 5 || A + C === 5 || B + C === 5) continue;
+
+                out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+            }
+            return out;
+
+            function r15() {
+                return Math.floor(Math.random() * 5) + 1;
+            }
+            function rOp() {
+                return Math.random() < 0.5 ? "+" : "-";
+            }
+            function evalOp(x, o, y) {
+                return o === "+" ? x + y : x - y;
+            }
+        }
+
+        /**
+         * Generate arithmetic questions for Chapter 2.
+         *  - A, B, C ∈ 1‥9
+         *  - Two operators (op1, op2) ∈ {+ ,-}
+         *  - Result D ∈ 0‥9
+         *  - All selection rules in the prompt are enforced.
+         */
+        function randomChapter2(numQuestions = 10) {
+            const out = [];
+
+            while (out.length < numQuestions) {
+                const A = r19();
+                const op1 = rOp();
+
+                /* -------- FIRST STAGE : choose B that satisfies op1-rules -------- */
+                let B = choose(r19, (b) => (op1 === "+" ? validB_plus(A, b) : validB_minus(A, b)));
+                if (B == null) continue; // give up and retry
+
+                const stage1 = evalOp(A, op1, B); // S = A ± B
+                if (stage1 < 0 || stage1 > 9) continue; // keep D in 0-9 range later
+
+                /* -------- SECOND STAGE : choose op2 and C that satisfy combo-rules -------- */
+                const op2 = rOp();
+                let C = choose(r19, (c) => {
+                    if (op1 === "+" && op2 === "+") return validC_plusplus(stage1, c);
+                    if (op1 === "+" && op2 === "-") return validC_plusminus(stage1, c);
+                    if (op1 === "-" && op2 === "+") return validC_minusplus(stage1, c);
+                    return validC_minusminus(stage1, c); // - -
+                });
+                if (C == null) continue;
+
+                const D = evalOp(stage1, op2, C); // final answer
+                if (D < 0 || D > 9) continue;
+
+                out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+            }
+            return out;
+
+            /* ---------- helpers ---------- */
+            function r19() {
+                return Math.floor(Math.random() * 9) + 1;
+            }
+            function rOp() {
+                return Math.random() < 0.5 ? "+" : "-";
+            }
+            function evalOp(x, o, y) {
+                return o === "+" ? x + y : x - y;
+            }
+
+            /** repeatedly pick a random value until the predicate is true, or give up */
+            function choose(generator, ok, tries = 60) {
+                while (tries--) {
+                    const v = generator();
+                    if (ok(v)) return v;
+                }
+                return null; // give up after N attempts
+            }
+
+            /* ---------- rule predicates ---------- */
+
+            /* op1 = '+' ----------------------------------------------------------------*/
+            function validB_plus(A, B) {
+                if (A <= 4) return !(B >= 10 - A || (B >= 5 - A && B < 5));
+                if (A === 5) return B < 5;
+                    /* A = 6-9 */ return B < 10 - A;
+            }
+
+            /* op1 = '-' ----------------------------------------------------------------*/
+            function validB_minus(A, B) {
+                if (A <= 4) return B <= A;
+                if (A === 5) return B === 5;
+                    /* A = 6-9 */ return B <= A - 5 || B === 5;
+            }
+
+            /*  op1 '+'  , op2 '+' ------------------------------------------------------*/
+            function validC_plusplus(S, C) {
+                if (S <= 4) return !(C >= 10 - S || (C >= 5 - S && C < 5));
+                if (S === 5) return C < 5;
+                    /* S = 6-9 */ return C < 10 - S;
+            }
+
+            /*  op1 '+'  , op2 '-' ------------------------------------------------------*/
+            function validC_plusminus(S, C) {
+                if (2 <= S && S <= 4) return C < S;
+                if (S === 5) return C === 5;
+                    /* S = 6-9 */ return C <= S - 5 || C === 5;
+            }
+
+            /*  op1 '-'  , op2 '+' ------------------------------------------------------*/
+            function validC_minusplus(S, C) {
+                if (S <= 4) return !(C >= 10 - S || (C >= 5 - S && C < 5));
+                if (S === 5) return C < 5;
+                    /* S = 6-9 */ return C < 10 - S;
+            }
+
+            /*  op1 '-'  , op2 '-' ------------------------------------------------------*/
+            function validC_minusminus(S, C) {
+                if (S <= 4) return C < S; // note: S = 0 gives no valid C
+                if (S === 5) return C === 5;
+                    /* S = 6-9 */ return C <= S - 5 || C === 5;
+            }
+        }
+
+        function randomChapter3(numQuestions = 10) {
+            const out = [];
+            while (out.length < numQuestions) {
+                const op1 = Math.random() < 0.5 ? "+" : "-";
+                const op2 = Math.random() < 0.5 ? "+" : "-";
+                let A, B, C;
+
+                if (op1 === "+") {
+                    // A ∈ 1–4
+                    A = Math.floor(Math.random() * 4) + 1;
+                    const pivot = 5 - A;
+
+                    // exactly one of these six sub-cases:
+                    switch (Math.floor(Math.random() * 6) + 1) {
+                        case 1:
+                            B = pivot;
+                            C = op2 === "+" ? Math.floor(Math.random() * 4) + 1 : 5;
+                            break;
+                        case 2:
+                            if (pivot <= 1 || op2 !== "+") continue;
+                            B = Math.floor(Math.random() * (pivot - 1)) + 1;
+                            C = 5 - (A + B);
+                            break;
+                        case 3:
+                            if (pivot >= 5 || op2 !== "+") continue;
+                            B = Math.floor(Math.random() * (5 - pivot)) + (pivot + 1);
+                            C = Math.floor(Math.random() * (A + B - 1)) + 1;
+                            break;
+                        case 4:
+                            if (op2 !== "-") continue;
+                            B = pivot;
+                            C = 5;
+                            break;
+                        case 5:
+                            if (pivot <= 1 || op2 !== "-") continue;
+                            B = Math.floor(Math.random() * (pivot - 1)) + 1;
+                            C = Math.floor(Math.random() * (A + B)) + 1;
+                            break;
+                        case 6:
+                            if (pivot >= 5 || op2 !== "-") continue;
+                            B = Math.floor(Math.random() * (5 - pivot)) + (pivot + 1);
+                            C = [A + B - 5, 5][Math.random() < 0.5 ? 0 : 1];
+                            break;
+                    }
+                } else {
+                    // op1 = "-"
+                    A = Math.floor(Math.random() * 9) + 1;
+                    if (A >= 1 && A <= 4) {
+                        if (A <= 1 || op2 !== "+") continue;
+                        B = Math.floor(Math.random() * (A - 1)) + 1;
+                        C = 5 - (A - B);
+                    } else if (A >= 6 && A <= 9) {
+                        if (op2 !== "+") continue;
+                        if (Math.random() < 0.5 && A - 5 >= 1) {
+                            B = Math.floor(Math.random() * (A - 5)) + 1;
+                            C = Math.floor(Math.random() * 4) + 1;
+                        } else {
+                            B = 5;
+                            C = 5 - (A - B);
+                        }
+                    } else {
+                        continue;
+                    }
+                }
+
+                const stage1 = op1 === "+" ? A + B : A - B;
+                const D = op2 === "+" ? stage1 + C : stage1 - C;
+                if (D < 0 || D > 9) continue;
+
+                out.push({ q: `${A} ${op1} ${B} ${op2} ${C}`, a: D.toString() });
+            }
+            return out;
+        }
+
+        function randomChapter4(numQuestions = 10) {
+            let A, B, C, op2, D, expr;
+            const questions = [];
+            while (questions.length < numQuestions) {
+                let caseType = Math.random() < 0.5 ? 1 : 2;
+
+                if (caseType === 1) {
+                    A = 5;
+                    B = [1, 2, 3, 4][Math.floor(Math.random() * 4)];
+                    let AB = A - B;
+                    op2 = Math.random() < 0.5 ? "+" : "-";
+
+                    if (op2 === "+") {
+                        if (AB === 4) {
+                            C = Math.floor(Math.random() * 5) + 1; // 1–5
+                        } else if (AB < 4) {
+                            let cMin = 5,
+                                cMax = 10 - AB;
+                            let cOptions = [];
+                            for (let x = cMin; x < cMax; x++) cOptions.push(x);
+                            if (cOptions.length === 0) continue;
+                            C = cOptions[Math.floor(Math.random() * cOptions.length)];
+                        } else {
+                            C = Math.floor(Math.random() * 5) + 1;
+                        }
+                        D = AB + C;
+                    } else {
+                        if (AB < 1) continue;
+                        C = Math.floor(Math.random() * AB) + 1;
+                        D = AB - C;
+                    }
+                    expr = `${A} - ${B} ${op2} ${C}`;
+                } else {
+                    A = [6, 7, 8][Math.floor(Math.random() * 3)];
+                    let bMin = A - 5 + 1,
+                        bMax = 4;
+                    let bOptions = [];
+                    for (let x = bMin; x < bMax; x++) bOptions.push(x);
+                    if (bOptions.length === 0) continue;
+                    B = bOptions[Math.floor(Math.random() * bOptions.length)];
+                    let AB = A - B;
+                    op2 = Math.random() < 0.5 ? "+" : "-";
+
+                    if (op2 === "+") {
+                        C = Math.floor(Math.random() * 5) + 1;
+                        D = AB + C;
+                    } else {
+                        if (AB < 1) continue;
+                        C = Math.floor(Math.random() * AB) + 1;
+                        D = AB - C;
+                    }
+                    expr = `${A} - ${B} ${op2} ${C}`;
+                }
+
+                if ([A, B, C].every((v) => v >= 1 && v <= 9) && D >= 0 && D <= 9) {
+                    questions.push({ q: expr, a: D.toString() });
+                }
+            }
+            return questions;
+        }
+
+        function alternateQuestions(arr1, arr2, total) {
+            const mixed = [];
+            let i = 0;
+            while (mixed.length < total) {
+                if (i < arr1.length) mixed.push(arr1[i]);
+                if (mixed.length < total && i < arr2.length) mixed.push(arr2[i]);
+                i++;
+            }
+            return mixed;
+        }
+
+        function randomChapter6(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 3000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, D;
+
+                // Pick a rule at random (0: Rule 1, 1: Rule 2, 2: Rule 3, 3: Rule 4)
+                const ruleType = Math.floor(Math.random() * 4);
+
+                if (ruleType === 0) {
+                    // Rule 1: op1 = '+', A = 1-9, B = 10-A, op2 = '+', C = 1-9
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 9) + 1;
+                    B = 10 - A;
+                    if (B < 1 || B > 9) continue;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // Rule 2: op1 = '+', A = 1-9, B = 1..(9-A), op2 = '+', C = 10-(A+B)
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 9) + 1;
+                    let maxB = 10 - A - 1; // x < (10-A), x >= 1
+                    if (maxB < 1) continue;
+                    B = Math.floor(Math.random() * maxB) + 1; // 1..maxB
+                    let sumAB = A + B;
+                    C = 10 - sumAB;
+                    if (C < 1 || C > 9) continue;
+                } else if (ruleType === 2) {
+                    // Rule 3: op1 = '+', A = 1-9, B = 1..(9-A), op2 = '-', C <= (A+B)
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 9) + 1;
+                    let maxB = 10 - A - 1; // x < (10-A)
+                    if (maxB < 1) continue;
+                    B = Math.floor(Math.random() * maxB) + 1; // 1..maxB
+                    let sumAB = A + B;
+                    let maxC = Math.min(sumAB, 9);
+                    if (maxC < 1) continue;
+                    C = Math.floor(Math.random() * maxC) + 1; // 1..maxC
+                } else if (ruleType === 3) {
+                    // Rule 4: op1 = '-', A = 1-9, B < A, op2 = '+', C = 10-(A+B)
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 9) + 1;
+                    if (A === 1) continue; // B must be < A
+                    B = Math.floor(Math.random() * (A - 1)) + 1; // 1..A-1
+                    let sumAB = A + B;
+                    C = 10 - sumAB;
+                    if (C < 1 || C > 9) continue;
+                }
+
+                // Build the expression and compute D left-to-right
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                let result = A;
+                result = op1 === "+" ? result + B : result - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                // Only accept if all values in range and D in 0..30
+                if ([A, B, C].every((n) => n >= 1 && n <= 9) && result >= 0 && result <= 30) {
+                    questions.push({ q: expr, a: result.toString() });
+                }
+            }
+
+            // Warning if unable to generate enough questions
+            if (questions.length < numQuestions) {
+                alert("Warning: Could not generate enough questions.");
+            }
+
+            return questions;
+        }
+
+        function randomChapter7(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 5000) {
+                attempts++;
+                let A, B, C, D, expr;
+                let possibleCs = [];
+
+                // Randomly select which case for A
+                let caseType = Math.random();
+
+                // --- CASE 1: A = 1..4, B >= 10-A, op2 = '-'
+                if (caseType < 0.38) {
+                    A = Math.floor(Math.random() * 4) + 1; // 1-4
+                    let minB = 10 - A;
+                    if (minB > 9) continue;
+                    B = Math.floor(Math.random() * (10 - minB)) + minB; // minB..9
+
+                    const sum = A + B;
+
+                    if (sum <= 10) {
+                        possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    } else if (sum === 11) {
+                        possibleCs = [2, 3, 4, 5, 7, 8, 9];
+                    } else if (sum === 12) {
+                        possibleCs = [3, 4, 5, 8, 9];
+                    } else if (sum === 13) {
+                        possibleCs = [4, 5, 9];
+                    } else if (sum === 14) {
+                        possibleCs = [5];
+                    } else {
+                        continue;
+                    }
+                    if (possibleCs.length === 0) continue;
+                    C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+
+                    // --- CASE 2: A = 5, B = 5, op2 = '-', C = 1..9
+                } else if (caseType < 0.54) {
+                    A = 5;
+                    B = 5;
+                    possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+
+                    // --- CASE 3: A = 6..9, B in [(10-A), 5], op2 = '-'
+                } else {
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    let minB = 10 - A;
+                    let maxB = 5;
+                    if (minB > 5 || minB > 9) continue;
+                    // B in [minB, 5] and 1-9
+                    let possibleBs = [];
+                    for (let b = minB; b <= maxB; b++) {
+                        if (b >= 1 && b <= 9) possibleBs.push(b);
+                    }
+                    if (possibleBs.length === 0) continue;
+                    B = possibleBs[Math.floor(Math.random() * possibleBs.length)];
+
+                    const sum = A + B;
+
+                    if (sum === 10) {
+                        possibleCs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                    } else if (sum === 11) {
+                        possibleCs = [2, 3, 4, 5, 7, 8, 9];
+                    } else if (sum === 12) {
+                        possibleCs = [3, 4, 5, 8, 9];
+                    } else if (sum === 13) {
+                        possibleCs = [4, 5, 9];
+                    } else if (sum === 14) {
+                        possibleCs = [5];
+                    } else {
+                        continue;
+                    }
+                    if (possibleCs.length === 0) continue;
+                    C = possibleCs[Math.floor(Math.random() * possibleCs.length)];
+                }
+
+                expr = `${A} + ${B} - ${C}`;
+                D = A + B - C;
+
+                if ([A, B, C].every((n) => n >= 1 && n <= 9) && D >= 0 && D <= 100) {
+                    questions.push({ q: expr, a: D.toString() });
+                }
+            }
+
+            if (questions.length < numQuestions) {
+                alert("Warning: Could not generate enough questions.");
+            }
+
+            return questions;
+        }
+
+        function alternateQuestions1(arr1, arr2, total) {
+            const mixed = [];
+            let i = 0;
+            while (mixed.length < total) {
+                if (i < arr1.length) mixed.push(arr1[i]);
+                if (mixed.length < total && i < arr2.length) mixed.push(arr2[i]);
+                i++;
+            }
+            return mixed;
+        }
+
+        function randomChapter9(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 2000) {
+                attempts++;
+                let A, B, C, D, op1, op2, expr;
+
+                // Randomly select which rule to use
+                let ruleType = Math.floor(Math.random() * 4);
+
+                if (ruleType === 0) {
+                    // Rule 1: op1 = '+', A = 5, B = 9, op2 = '+', C = 1-9
+                    op1 = "+";
+                    op2 = "+";
+                    A = 5;
+                    B = 9;
+                    C = Math.floor(Math.random() * 9) + 1; // 1-9
+                } else if (ruleType === 1) {
+                    // Rule 2: op1 = '+', A = 1-4, B = 5-A, op2 = '+', C = 9
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1; // 1-4
+                    B = 5 - A;
+                    C = 9;
+                } else if (ruleType === 2) {
+                    // Rule 3: op1 = '+', A = 6-9, B = 15-A, op2 = '+', C = 9
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 15 - A;
+                    C = 9;
+                } else if (ruleType === 3) {
+                    // Rule 4: op1 = '-', A = 6-9, B = A-5, op2 = '+', C = 9
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = A - 5;
+                    C = 9;
+                }
+
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                // Compute D left-to-right
+                let result = A;
+                result = op1 === "+" ? result + B : result - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                if ([A, B, C].every((n) => n >= 1 && n <= 9) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                    questions.push({ q: expr, a: result.toString() });
+                    seen.add(expr);
+                }
+            }
+            return questions;
+        }
+
+        function randomChapter10(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 4000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // Pick one of the 7 rules randomly
+                let ruleType = Math.floor(Math.random() * 7);
+
+                if (ruleType === 0) {
+                    // Rule 1: op1 = '+', A = 5 or 6, B = 8, op2 = '+', C = 1-9
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.random() < 0.5 ? 5 : 6;
+                    B = 8;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // Rule 2: op1 = '+', A = 1-4, B = 5-A, op2 = '+', C = 8
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 5 - A;
+                    C = 8;
+                } else if (ruleType === 2) {
+                    // Rule 3: op1 = '+', A = 1-4, B = 6-A, op2 = '+', C = 8
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 6 - A;
+                    C = 8;
+                } else if (ruleType === 3) {
+                    // Rule 4: op1 = '+', A = 6-9, B = 15-A, op2 = '+', C = 8
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 15 - A;
+                    C = 8;
+                } else if (ruleType === 4) {
+                    // Rule 5: op1 = '+', A = 6-9, B = 16-A, op2 = '+', C = 8
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 16 - A;
+                    C = 8;
+                } else if (ruleType === 5) {
+                    // Rule 6: op1 = '-', A = 6-9, B = A-5, op2 = '+', C = 8
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 5;
+                    C = 8;
+                } else if (ruleType === 6) {
+                    // Rule 7: op1 = '-', A = 6-9, B = A-6, op2 = '+', C = 8
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 6;
+                    C = 8;
+                }
+
+                // Make sure all values are in 1-9
+                if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = A;
+                    result = op1 === "+" ? result + B : result - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter11(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 6000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // Randomly pick a rule (there are 10)
+                let ruleType = Math.floor(Math.random() * 10);
+
+                if (ruleType === 0) {
+                    // 1: op1 = '+', A=5/6/7, B=7, op2='+', C=1-9
+                    op1 = "+";
+                    op2 = "+";
+                    A = [5, 6, 7][Math.floor(Math.random() * 3)];
+                    B = 7;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // 2: op1='+', A=1-4, B=5-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 5 - A;
+                    C = 7;
+                } else if (ruleType === 2) {
+                    // 3: op1='+', A=1-4, B=6-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 6 - A;
+                    C = 7;
+                } else if (ruleType === 3) {
+                    // 4: op1='+', A=1-4, B=7-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 7 - A;
+                    C = 7;
+                } else if (ruleType === 4) {
+                    // 5: op1='+', A=6-9, B=15-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 15 - A;
+                    C = 7;
+                } else if (ruleType === 5) {
+                    // 6: op1='+', A=6-9, B=16-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 16 - A;
+                    C = 7;
+                } else if (ruleType === 6) {
+                    // 7: op1='+', A=6-9, B=17-A, op2='+', C=7
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 17 - A;
+                    C = 7;
+                } else if (ruleType === 7) {
+                    // 8: op1='-', A=6-9, B=A-5, op2='+', C=7
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 5;
+                    C = 7;
+                } else if (ruleType === 8) {
+                    // 9: op1='-', A=6-9, B=A-6, op2='+', C=7
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 6;
+                    C = 7;
+                } else if (ruleType === 9) {
+                    // 10: op1='-', A=7-9, B=A-7, op2='+', C=7
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 3) + 7;
+                    B = A - 7;
+                    C = 7;
+                }
+
+                // Check all are 1-9
+                if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter12(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 8000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // 14 total rules
+                let ruleType = Math.floor(Math.random() * 14);
+
+                if (ruleType === 0) {
+                    // 1: op1 = '+', A=5/6/7/8, B=6, op2='+', C=1-9
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 5; // 5-8
+                    B = 6;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // 2: op1='+', A=1-4, B=5-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 5 - A;
+                    C = 6;
+                } else if (ruleType === 2) {
+                    // 3: op1='+', A=1-4, B=6-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 6 - A;
+                    C = 6;
+                } else if (ruleType === 3) {
+                    // 4: op1='+', A=1-4, B=7-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 7 - A;
+                    C = 6;
+                } else if (ruleType === 4) {
+                    // 5: op1='+', A=1-4, B=8-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 1;
+                    B = 8 - A;
+                    C = 6;
+                } else if (ruleType === 5) {
+                    // 6: op1='+', A=6-9, B=15-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 15 - A;
+                    C = 6;
+                } else if (ruleType === 6) {
+                    // 7: op1='+', A=6-9, B=16-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 16 - A;
+                    C = 6;
+                } else if (ruleType === 7) {
+                    // 8: op1='+', A=6-9, B=17-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 17 - A;
+                    C = 6;
+                } else if (ruleType === 8) {
+                    // 9: op1='+', A=6-9, B=18-A, op2='+', C=6
+                    op1 = "+";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = 18 - A;
+                    C = 6;
+                } else if (ruleType === 9) {
+                    // 10: op1='-', A=6-9, B=A-5, op2='+', C=6
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 5;
+                    C = 6;
+                } else if (ruleType === 10) {
+                    // 11: op1='-', A=6-9, B=A-6, op2='+', C=6
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 6;
+                    B = A - 6;
+                    C = 6;
+                } else if (ruleType === 11) {
+                    // 12: op1='-', A=7-9, B=A-7, op2='+', C=6
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 3) + 7;
+                    B = A - 7;
+                    C = 6;
+                } else if (ruleType === 12) {
+                    // 13: op1='-', A=8-9, B=A-8, op2='+', C=6
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 2) + 8;
+                    B = A - 8;
+                    C = 6;
+                }
+
+                // Only allow A, B, C in 1-9
+                if ([A, B, C].every((n) => n >= 1 && n <= 9)) {
+                    expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                    result = op1 === "+" ? A + B : A - B;
+                    result = op2 === "+" ? result + C : result - C;
+
+                    if (result >= 0 && result <= 100 && !seen.has(expr)) {
+                        questions.push({ q: expr, a: result.toString() });
+                        seen.add(expr);
+                    }
+                }
+            }
+            return questions;
+        }
+
+        function randomChapter13(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 2000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // Randomly choose one of the three rules
+                const ruleType = Math.floor(Math.random() * 3);
+
+                if (ruleType === 0) {
+                    // Rule 1: '-'  A=14, B=9, op2='+', C=1-9
+                    op1 = "-";
+                    op2 = "+";
+                    A = 14;
+                    B = 9;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // Rule 2: '-'  A=14, B=9, op2='-', C=1-5
+                    op1 = "-";
+                    op2 = "-";
+                    A = 14;
+                    B = 9;
+                    C = Math.floor(Math.random() * 5) + 1;
+                } else if (ruleType === 2) {
+                    // Rule 3: '+'  A=6-9, B=14-A, op2='-', C=9
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 14 - A;
+                    C = 9;
+                    // Make sure B is in 1-9 range
+                    if (B < 1 || B > 9) continue;
+                }
+
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                result = op1 === "+" ? A + B : A - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                // Make sure everything is within bounds and not duplicate
+                if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                    questions.push({ q: expr, a: result.toString() });
+                    seen.add(expr);
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter14(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 2000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // Randomly choose one of the four rules
+                const ruleType = Math.floor(Math.random() * 4);
+
+                if (ruleType === 0) {
+                    // Rule 1: '-'  A=13 or 14, B=8, op2='+', C=1-9
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.random() < 0.5 ? 13 : 14;
+                    B = 8;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // Rule 2: '-'  A=13 or 14, B=8, op2='-', C=1-5
+                    op1 = "-";
+                    op2 = "-";
+                    A = Math.random() < 0.5 ? 13 : 14;
+                    B = 8;
+                    C = Math.floor(Math.random() * 5) + 1;
+                } else if (ruleType === 2) {
+                    // Rule 3: '+'  A=6-9, B=14-A, op2='-', C=8
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 14 - A;
+                    C = 8;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 3) {
+                    // Rule 4: '+'  A=6-9, B=13-A, op2='-', C=8
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 13 - A;
+                    C = 8;
+                    if (B < 1 || B > 9) continue;
+                }
+
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                result = op1 === "+" ? A + B : A - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                // Check values and uniqueness
+                if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                    questions.push({ q: expr, a: result.toString() });
+                    seen.add(expr);
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter15(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 2000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // Randomly pick a rule (there are 6 rules)
+                let ruleType = Math.floor(Math.random() * 6);
+
+                if (ruleType === 0) {
+                    // Rule 1: '-' A=12,13,14 B=7 op2='+' C=1-9
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 3) + 12; // 12-14
+                    B = 7;
+                    C = Math.floor(Math.random() * 9) + 1;
+                } else if (ruleType === 1) {
+                    // Rule 2: '-' A=12,13,14 B=7 op2='-' C=1-5
+                    op1 = "-";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 3) + 12; // 12-14
+                    B = 7;
+                    C = Math.floor(Math.random() * 5) + 1;
+                } else if (ruleType === 2) {
+                    // Rule 3: '+' A=6-9 B=14-A op2='-' C=7
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 14 - A;
+                    C = 7;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 3) {
+                    // Rule 4: '+' A=6-9 B=13-A op2='-' C=7
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 13 - A;
+                    C = 7;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 4) {
+                    // Rule 5: '+' A=6-9 B=12-A op2='-' C=7
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 12 - A;
+                    C = 7;
+                    if (B < 1 || B > 9) continue;
+                }
+
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                result = op1 === "+" ? A + B : A - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                // All values in allowed range, uniqueness check
+                if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                    questions.push({ q: expr, a: result.toString() });
+                    seen.add(expr);
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter16(numQuestions = 10) {
+            const questions = [];
+            const seen = new Set();
+            let attempts = 0;
+
+            while (questions.length < numQuestions && attempts < 3000) {
+                attempts++;
+                let A, B, C, op1, op2, expr, result;
+
+                // There are 6 rules
+                let ruleType = Math.floor(Math.random() * 6);
+
+                if (ruleType === 0) {
+                    // Rule 1: '-' A=11,12,13,14 B=6 op2='+' C=1-9
+                    op1 = "-";
+                    op2 = "+";
+                    A = Math.floor(Math.random() * 4) + 11; // 11-14
+                    B = 6;
+                    C = Math.floor(Math.random() * 9) + 1; // 1-9
+                } else if (ruleType === 1) {
+                    // Rule 2: '-' A=11,12,13,14 B=6 op2='-' C=1-5
+                    op1 = "-";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 11; // 11-14
+                    B = 6;
+                    C = Math.floor(Math.random() * 5) + 1; // 1-5
+                } else if (ruleType === 2) {
+                    // Rule 3: '+' A=6-9 B=14-A op2='-' C=6
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 14 - A;
+                    C = 6;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 3) {
+                    // Rule 4: '+' A=6-9 B=13-A op2='-' C=6
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 13 - A;
+                    C = 6;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 4) {
+                    // Rule 5: '+' A=6-9 B=12-A op2='-' C=6
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 12 - A;
+                    C = 6;
+                    if (B < 1 || B > 9) continue;
+                } else if (ruleType === 5) {
+                    // Rule 6: '+' A=6-9 B=11-A op2='-' C=6
+                    op1 = "+";
+                    op2 = "-";
+                    A = Math.floor(Math.random() * 4) + 6; // 6-9
+                    B = 11 - A;
+                    C = 6;
+                    if (B < 1 || B > 9) continue;
+                }
+
+                expr = `${A} ${op1} ${B} ${op2} ${C}`;
+                result = op1 === "+" ? A + B : A - B;
+                result = op2 === "+" ? result + C : result - C;
+
+                // All values in allowed range, uniqueness check
+                if ([A, B, C].every((x) => x >= 1 && x <= 14) && result >= 0 && result <= 100 && !seen.has(expr)) {
+                    questions.push({ q: expr, a: result.toString() });
+                    seen.add(expr);
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter17(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+            const ops = ["+", "-"];
+
+            while (questions.length < numQuestions && attempts < 3000) {
+                attempts++;
+                const A = Math.floor(Math.random() * 9) + 1;
+                const B = Math.floor(Math.random() * 9) + 1;
+                const C = Math.floor(Math.random() * 9) + 1;
+                const op1 = ops[Math.floor(Math.random() * 2)];
+                const op2 = ops[Math.floor(Math.random() * 2)];
+
+                // If op1 is '-', ensure A >= B (A-B not negative)
+                if (op1 === "-" && A < B) continue;
+
+                // Calculate intermediate step
+                let step1 = op1 === "+" ? A + B : A - B;
+
+                // If op2 is '-' ensure step1 >= C ((A+-B)-C not negative)
+                if (op2 === "-" && step1 < C) continue;
+
+                // Calculate final result
+                let D = op2 === "+" ? step1 + C : step1 - C;
+
+                // D must be in 0-9
+                if (D >= 0 && D <= 9) {
+                    questions.push({
+                        q: `${A} ${op1} ${B} ${op2} ${C}`,
+                        a: D.toString(),
+                    });
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter18(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+            const ops = ["+", "-"];
+
+            while (questions.length < numQuestions && attempts < 3000) {
+                attempts++;
+                const A = Math.floor(Math.random() * 59) + 1;
+                const B = Math.floor(Math.random() * 59) + 1;
+                const C = Math.floor(Math.random() * 59) + 1;
+                const op1 = ops[Math.floor(Math.random() * 2)];
+                const op2 = ops[Math.floor(Math.random() * 2)];
+
+                // If op1 is '-', ensure A >= B (A-B not negative)
+                if (op1 === "-" && A < B) continue;
+
+                // Calculate intermediate step
+                let step1 = op1 === "+" ? A + B : A - B;
+
+                // If op2 is '-', ensure step1 >= C
+                if (op2 === "-" && step1 < C) continue;
+
+                // Calculate final result
+                let D = op2 === "+" ? step1 + C : step1 - C;
+
+                // D must be in 10–99
+                if (D >= 10 && D <= 99) {
+                    questions.push({
+                        q: `${A} ${op1} ${B} ${op2} ${C}`,
+                        a: D.toString(),
+                    });
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter19(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+            const ops = ["+", "-"];
+
+            while (questions.length < numQuestions && attempts < 3000) {
+                attempts++;
+                const A = Math.floor(Math.random() * 99) + 1;
+                const B = Math.floor(Math.random() * 99) + 1;
+                const C = Math.floor(Math.random() * 99) + 1;
+                const op1 = ops[Math.floor(Math.random() * 2)];
+                const op2 = ops[Math.floor(Math.random() * 2)];
+
+                // Ensure no negatives after first op
+                if (op1 === "-" && A < B) continue;
+
+                let step1 = op1 === "+" ? A + B : A - B;
+
+                // Ensure no negatives after second op
+                if (op2 === "-" && step1 < C) continue;
+
+                let D = op2 === "+" ? step1 + C : step1 - C;
+
+                // D must be 100–999
+                if (D >= 100 && D <= 999) {
+                    questions.push({
+                        q: `${A} ${op1} ${B} ${op2} ${C}`,
+                        a: D.toString(),
+                    });
+                }
+            }
+
+            return questions;
+        }
+
+        function randomChapter20(numQuestions = 10) {
+            const questions = [];
+            let attempts = 0;
+            const ops = ["+", "-"];
+
+            while (questions.length < numQuestions && attempts < 4000) {
+                attempts++;
+
+                const A = Math.floor(Math.random() * 999) + 1;
+                const B = Math.floor(Math.random() * 999) + 1;
+                const C = Math.floor(Math.random() * 999) + 1;
+                const op1 = ops[Math.floor(Math.random() * 2)];
+                const op2 = ops[Math.floor(Math.random() * 2)];
+
+                // A-B must not be negative
+                if (op1 === "-" && A < B) continue;
+
+                let step1 = op1 === "+" ? A + B : A - B;
+
+                // (A+-B)-C must not be negative
+                if (op2 === "-" && step1 < C) continue;
+
+                let D = op2 === "+" ? step1 + C : step1 - C;
+
+                // D must be 1000–9999
+                if (D >= 1000 && D <= 9999) {
+                    questions.push({
+                        q: `${A} ${op1} ${B} ${op2} ${C}`,
+                        a: D.toString(),
+                    });
+                }
+            }
+
+            return questions;
+        }
+        // Settings & state
+        let numQuestions = 20,
+            flashSpeed = 1,
+            flashEnabled = true,
+            timerMinutes = 10;
+        let flashTokenTimer = null;
+        const qNumEl = $("#qNum"),
+            answerEl = $("#answerDisplay"),
+            sendBtnEl = $("#sendBtn");
+        const timerEl = $("#quizTimer"),
+            padContainer = $("#numpad");
+        const settingsBtn = $("#settingsBtn"),
+            settingsPanel = $("#settingsPanel");
+        const flashSpeedSec = $("#flashSpeedSec"),
+            flashToggle = $("#flashToggle");
+        const numQuestionsInput = $("#numQuestions");
+        const timerSelect = $("#timerSelect"),
+            muteSoundInput = $("#muteSound");
+        const questionFlashArea = $("#questionFlashArea");
+        for (let i = 1; i <= 10; i++) {
+            let opt = document.createElement("option");
+            opt.value = i;
+            opt.textContent = i;
+            if (i === 10) opt.selected = true;
+            timerSelect.appendChild(opt);
+        }
+        padContainer.innerHTML = "";
+        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "BACK"].forEach((d) => {
+            const b = document.createElement("button");
+            b.innerHTML = d === "BACK" ? "⌫" : d;
+            b.onclick = () => appendDigit(d);
+            padContainer.appendChild(b);
+        });
+        // Start Panel logic
+        function showStartPanel() {
+            $("#startPanel").style.display = "flex";
+            $("#quizPanel").style.display = "none";
+            $("#resultsPanel").style.display = "none";
+            $("#timeUpPanel").style.display = "none";
+            $("#mainMascot").classList.add("mascot-bounce-in");
+        }
+        function hideStartPanel() {
+            $("#startPanel").style.display = "none";
+            $("#mainMascot").classList.remove("mascot-bounce-in");
+        }
+        // Ready-Set-Go flash sequence
+        function showReadySetGo(cb) {
+            questionFlashArea.innerHTML = "";
+            const seq = ["Ready", "Set", "Go!"];
+            let i = 0;
+            function flashNext() {
+                qNumEl.style.visibility = "hidden";
+                questionFlashArea.innerHTML = `<div class="flash-center">${seq[i]}</div>`;
+                if (i === 2) {
+                    $("#goSound").currentTime = 0;
+                    $("#goSound").play();
+                }
+                if (i < 2) {
+                    setTimeout(() => {
+                        i++;
+                        flashNext();
+                    }, 650);
+                } else {
+                    setTimeout(() => {
+                        questionFlashArea.innerHTML = "";
+                        qNumEl.style.visibility = "";
+                        cb();
+                    }, 650);
+                }
+            }
+            flashNext();
+        }
+        $("#startQuizBtn").onclick = () => {
+            // Fullscreen first (works on all)
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => { });
+            }
+            // Try to lock orientation (works only on some Android)
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => { });
+            }
+            hideStartPanel();
+            setTimeout(() => launchConfetti($("#confettiBox")), 130);
+            startQuiz(true);
+        };
+
+        function checkOrientation() {
+            if (window.innerWidth < window.innerHeight) {
+                // Show a custom overlay or message
+                alert("For the best experience, please rotate your device to landscape.");
+            }
+        }
+
+        $("#startQuizBtn").onclick = () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => { });
+            }
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {
+                    checkOrientation();
+                });
+            } else {
+                checkOrientation();
+            }
+            hideStartPanel();
+            setTimeout(() => launchConfetti($("#confettiBox")), 130);
+            startQuiz(true);
+        };
+
+        $("#startSettingsBtn").onclick = () => {
+            settingsPanel.style.display = "flex";
+        };
+        // Settings panel setup
+        let updatingQuizNow = false;
+        settingsBtn.onclick = () => {
+            settingsPanel.style.display = "flex";
+            numQuestionsInput.value = numQuestions;
+            flashSpeedSec.value = flashSpeed;
+            flashToggle.checked = flashEnabled;
+            timerSelect.value = timerMinutes;
+            muteSoundInput.checked = mute;
+            updatingQuizNow = $("#quizPanel").style.display === "flex";
+        };
+        $("#cancelSettings").onclick = () => {
+            settingsPanel.style.display = "none";
+        };
+        $("#saveSettings").onclick = () => {
+            const prevNumQ = numQuestions,
+                prevTimer = timerMinutes;
+            numQuestions = Math.max(1, Math.min(50, Number(numQuestionsInput.value)));
+            flashSpeed = Math.max(1, Math.min(5, Number(flashSpeedSec.value)));
+            flashEnabled = !!flashToggle.checked;
+            timerMinutes = Math.max(1, Math.min(10, Number(timerSelect.value)));
+            mute = muteSoundInput.checked;
+            settingsPanel.style.display = "none";
+            if (updatingQuizNow && (numQuestions !== prevNumQ || timerMinutes !== prevTimer)) {
+                startQuiz(true);
+            }
+        };
+        // ---- Tokenize logic for flash
+        function parseQuestionToTokens(q) {
+            let arr = q
+                .split(/([+-])/)
+                .map((s) => s.trim())
+                .filter(Boolean);
+            let tokens = [];
+            tokens.push({ type: "first", val: arr[0] });
+            for (let i = 1; i < arr.length; i += 2) {
+                tokens.push({ type: "op", op: arr[i], val: arr[i + 1] });
+            }
+            return tokens;
+        }
+        function flashQuestionTokens(questionString, cb) {
+            if (flashTokenTimer) clearTimeout(flashTokenTimer);
+            let tokens = parseQuestionToTokens(questionString);
+            let idx = 0;
+            questionFlashArea.innerHTML = "";
+            let centerDiv = document.createElement("div");
+            centerDiv.className = "flash-center";
+            centerDiv.style.fontSize = "2.99rem";
+            questionFlashArea.appendChild(centerDiv);
+            inputLocked = true;
+            sendBtnEl.disabled = true;
+            function showNext() {
+                centerDiv.innerHTML = "";
+                if (idx < tokens.length) {
+                    let html = "";
+                    if (tokens[idx].type === "first") {
+                        html = tokens[idx].val;
+                    } else {
+                        html = `<span style="font-size:2.99rem">${tokens[idx].op}</span> <span style="font-size:2.99rem">${tokens[idx].val}</span>`;
+                        if (idx === tokens.length - 1) {
+                            html += `<span class="qmark" style="font-size:2.99rem">?</span>`;
+                        }
+                    }
+                    centerDiv.innerHTML = html;
+                    if (!mute) {
+                        $("#tickSound").currentTime = 0;
+                        $("#tickSound").play();
+                    }
+                    if (idx === tokens.length - 1) {
+                        flashTokenTimer = setTimeout(() => {
+                            questionFlashArea.innerHTML = `<span class="full-question-text">${questionString.replace(/\s*$/, "")} <span class="qmark">?</span></span>`;
+                            inputLocked = false;
+                            sendBtnEl.disabled = currentInput === "";
+                            cb && cb();
+                        }, flashSpeed * 1000);
+                        sendBtnEl.disabled = false;
+                    } else {
+                        flashTokenTimer = setTimeout(() => {
+                            idx++;
+                            showNext();
+                        }, flashSpeed * 1000);
+                    }
+                }
+            }
+            showNext();
+        }
+        // ---- Quiz logic ----
+        function appendDigit(d) {
+            if (inputLocked) return;
+            if (d === "C") currentInput = "";
+            else if (d === "BACK") currentInput = currentInput.slice(0, -1);
+            else currentInput += d;
+            answerEl.textContent = currentInput;
+            sendBtnEl.disabled = currentInput.length === 0;
+        }
+        function loadQuestion() {
+            const q = QUESTIONS[currentIndex];
+            qNumEl.textContent = "Q" + (currentIndex + 1);
+            qNumEl.style.fontSize = "2.19rem";
+            answerEl.textContent = "";
+            currentInput = "";
+            inputLocked = true;
+            sendBtnEl.disabled = true;
+            if (flashEnabled) {
+                flashQuestionTokens(q.q, () => {
+                    inputLocked = false;
+                    sendBtnEl.disabled = currentInput === "";
+                });
+            } else {
+                questionFlashArea.innerHTML = `<span class="full-question-text">${q.q} <span class="qmark">?</span></span>`;
+                inputLocked = false;
+                sendBtnEl.disabled = currentInput === "";
+            }
+            qNumEl.style.visibility = "";
+        }
+        function updateTimer() {
+            let m = String(Math.floor(timeLeft / 60)).padStart(2, "0"),
+                s = String(timeLeft % 60).padStart(2, "0");
+            timerEl.textContent = "Time Left: " + m + ":" + s;
+        }
+        function submitAnswer() {
+            if (inputLocked || currentInput.length === 0) return;
+            inputLocked = true;
+            let correct = currentInput === QUESTIONS[currentIndex].a;
+            answers.push({ question: QUESTIONS[currentIndex].q, correct: QUESTIONS[currentIndex].a, user: currentInput });
+            sendBtnEl.disabled = true;
+            clearBoard();
+            if (!mute) {
+                if (correct) {
+                    $("#correctSound").currentTime = 0;
+                    $("#correctSound").play();
+                } else {
+                    setTimeout(() => {
+                        $("#wrongSound").currentTime = 0;
+                        $("#wrongSound").play();
+                    }, 350);
+                }
+            }
+            if (currentIndex < QUESTIONS.length - 1) {
+                setTimeout(() => {
+                    currentIndex++;
+                    loadQuestion();
+                }, 500);
+            } else {
+                showResults();
+            }
+        }
+        function startQuiz(showReadySetGoFlag) {
+            console.log('Generating for chapter:', currentChapter);
+
+            if (flashTokenTimer) clearTimeout(flashTokenTimer);
+            currentIndex = 0;
+            answers = [];
+            currentInput = "";
+            inputLocked = true;
+            timeLeft = timerMinutes * 60;
+            $("#quizPanel").style.display = "flex";
+            $("#resultsPanel").style.display = "none";
+            $("#timeUpPanel").style.display = "none";
+            $("#resultMascot").style.display = "none";
+            updateTimer();
+            // --- MOVE THIS BLOCK UP: GENERATE QUESTIONS FIRST! ---
+            if (currentChapter >= 20) {
+                QUESTIONS = randomChapter20(numQuestions);
+            } else if (currentChapter >= 19) {
+                QUESTIONS = randomChapter19(numQuestions);
+            } else if (currentChapter >= 18) {
+                QUESTIONS = randomChapter18(numQuestions);
+            } else if (currentChapter >= 17) {
+                QUESTIONS = randomChapter17(numQuestions);
+            } else if (currentChapter >= 16) {
+                QUESTIONS = randomChapter16(numQuestions);
+            } else if (currentChapter >= 15) {
+                QUESTIONS = randomChapter15(numQuestions);
+            } else if (currentChapter >= 14) {
+                QUESTIONS = randomChapter14(numQuestions);
+            } else if (currentChapter >= 13) {
+                QUESTIONS = randomChapter13(numQuestions);
+            } else if (currentChapter >= 12) {
+                QUESTIONS = randomChapter12(numQuestions);
+            } else if (currentChapter >= 11) {
+                QUESTIONS = randomChapter11(numQuestions);
+            } else if (currentChapter >= 10) {
+                QUESTIONS = randomChapter10(numQuestions);
+            } else if (currentChapter >= 9) {
+                QUESTIONS = randomChapter9(numQuestions);
+            } else if (currentChapter === 8) {
+                const half = Math.ceil(numQuestions / 2);
+                QUESTIONS = alternateQuestions1(randomChapter6(half), randomChapter7(numQuestions - half), numQuestions);
+            } else if (currentChapter >= 7) {
+                QUESTIONS = randomChapter7(numQuestions);
+            } else if (currentChapter >= 6) {
+                QUESTIONS = randomChapter6(numQuestions);
+            } else if (currentChapter === 5) {
+                const half = Math.ceil(numQuestions / 2);
+                QUESTIONS = alternateQuestions(randomChapter3(half), randomChapter4(numQuestions - half), numQuestions);
+            } else if (currentChapter >= 4) {
+                QUESTIONS = randomChapter4(numQuestions);
+            } else if (currentChapter >= 3) {
+                QUESTIONS = randomChapter3(numQuestions);
+            } else if (currentChapter >= 2) {
+                QUESTIONS = randomChapter2(numQuestions);
+            } else {
+                QUESTIONS = randomChapter1(numQuestions);
+            }
+
+            // ---- NOW log QUESTIONS, AFTER GENERATING ----
+            console.log('QUESTIONS GENERATED:', QUESTIONS);
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    showTimeUp();
+                }
+            }, 1000);
+
+            if (showReadySetGoFlag) {
+                showReadySetGo(loadQuestion);
+            } else {
+                loadQuestion();
+            }
+        }
+        sendBtnEl.onclick = submitAnswer;
+        answerEl.onclick = submitAnswer;
+        // --- Results panel
+        function showResults() {
+            $("#quizPanel").style.display = "none";
+            $("#resultsPanel").style.display = "flex";
+            $("#timeUpPanel").style.display = "none";
+            clearInterval(timerInterval);
+            // clear out old results + reset score
+            const rl = $("#resultsList"),
+                rs = $("#resultScore");
+            rl.innerHTML = "";
+            let sc = 0;
+
+            // build a 4-column grid of single-line items
+            answers.forEach((a, i) => {
+                const correct = (a.user === a.correct);
+                if (correct) sc++;
+                const mark = correct ? "✔️" : "❌";
+
+                const di = document.createElement("div");
+                di.className = "result-item";
+                di.innerHTML = `
+    <div class="question-text">
+      <span class="mark">${mark}</span>
+      Q${i + 1}: ${a.question}
+    </div>
+  `;
+                rl.appendChild(di);
+            });
+
+            // update the “You scored…” text
+            rs.textContent = `You scored ${sc}/${answers.length}`;
+
+            rs.textContent = `You scored ${sc}/${answers.length}`;
+            let resultsConfetti = $("#resultsConfetti");
+            resultsConfetti.innerHTML = "";
+            $("#rainSparkle").style.display = "none";
+            let pct = sc / answers.length;
+            if (sc === answers.length || pct >= 0.7) {
+                $("#resultMascot").style.display = "";
+                $("#resultsTitle").innerHTML = `✨Results <span class="sparkle-emoji">✨</span>`;
+                let spark = document.createElement("div");
+                spark.className = "sparkle-text";
+                spark.innerHTML = `🎉🌟Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
+                resultsConfetti.appendChild(spark);
+                rainSparkleBurst("happy");
+                if (!mute) {
+                    $("#applauseSound").currentTime = 0;
+                    $("#applauseSound").play();
+                }
+            } else if (pct < 0.5) {
+                $("#resultsTitle").innerHTML = `<span class="sad-emoji"></span> <span style="color:#fd90d7">Results</span>`;
+                let sad = document.createElement("div");
+                sad.className = "sad-text";
+
+                resultsConfetti.appendChild(sad);
+
+                let enc = document.createElement("div");
+                enc.className = "encouragement";
+                enc.innerText = "You'll get better with practice. Give it another go!";
+                resultsConfetti.appendChild(enc);
+
+                // Insert the GIF
+                let gif = document.createElement("img");
+                gif.src = "stay-strong-fist-pump.gif";
+                gif.alt = "Stay Strong!";
+                gif.style.width = "110px";
+                gif.style.display = "block";
+                gif.style.margin = "1.1em auto 0 auto";
+                gif.style.borderRadius = "1.2em";
+                resultsConfetti.appendChild(gif);
+
+                rainSparkleBurst("sad");
+                if (!mute) {
+                    $("#losingHorn").currentTime = 0;
+                    $("#losingHorn").play();
+                }
+            } else {
+                $("#resultsTitle").innerText = "Results";
+                let happyEmojis = ["🎊", "👏", "🥳", "🏆", "🌸", "👏", "🎉", "🍀", "💎", "🎈", "🍭", "🥳", "👍", "👌", "😊", "🙌", "🎁", "😉", "🎉", "💝", "🏅", "🚀", "😁", "🥰", "🎊"];
+                let em = document.createElement("div");
+                em.className = "emoji-pop";
+                em.innerText = happyEmojis[Math.floor(Math.random() * happyEmojis.length)];
+                resultsConfetti.appendChild(em);
+                rainSparkleBurst("happy");
+            }
+        }
+        // ... [rest of JS unchanged]
+        // Try Again and fullscreen etc (unchanged)
+        $("#tryAgainBtn").onclick = () => startQuiz(true);
+        $("#fullscreenBtnResults").onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+        $("#tryAgainTimeUpBtn").onclick = () => startQuiz(true);
+        $("#fullscreenBtnTimeUp").onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+        $("#fullscreenBtn").onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        };
+        muteSoundInput.onchange = () => {
+            mute = muteSoundInput.checked;
+        };
+        showStartPanel();
+
+        window.onload = function () {
+            const resultsBackBtn = document.getElementById('resultsBackBtn');
+            if (resultsBackBtn) {
+                resultsBackBtn.onclick = function () {
+                    window.location.href = `home.html?level=${currentLevel}&chapter=${currentChapter}`;
+                };
+            }
+        };
+
+    </script>
 </body>
+
 </html>
