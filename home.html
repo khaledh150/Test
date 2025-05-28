@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,8 +39,8 @@
       padding: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
       transition: background .3s, min-height .3s, height .3s;
-      border-bottom-left-radius: 0px;
-      border-bottom-right-radius: 0px;
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
     }
     body.dark .fixed-top { background: #2b2547; }
     .topbar-btns {
@@ -75,7 +74,7 @@
       border-radius: 18px;
       background: #fff;
       box-shadow: 0 2px 16px #b993d644;
-      padding: 20px 2vw 25px 2vw;
+      padding: 12px 2vw 25px 2vw;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -92,15 +91,13 @@
     }
     body.dark .top-title { color: #ffe066;}
     .slideshow-img-area {
-      width: 510px; min-height: 320px; max-height: 320px;
+      width: 99%; min-height: 220px; max-height: 350px;
       display: flex; justify-content: center; align-items: center;
-      margin: 20px 0 16px 0;
+      margin: 0 0 16px 0;
       position: relative; overflow: hidden;
-      margin-left: -50px;
-        border-radius: 30px;         /* <-- Softer, more rounded corners */
     }
     .slideshow-img {
-      width: 100%; height: 350px; object-fit: cover;
+      width: 98%; height: 238px; object-fit: cover;
       border-radius: 16px;
       box-shadow: 0 2px 16px #b993d624;
       opacity: 0;
@@ -201,38 +198,28 @@
       position: relative; user-select: none; min-height: 51px;
       background: transparent;
     }
-/* --- VIDEO FRAME WRAPPER --- */
 .video-frame-wrapper {
   position: relative;
-  padding-bottom: 56.25%;   /* 16:9 aspect ratio */
+  padding-bottom: 56.25%; /* 16:9 */
   height: 0;
-  margin: 10px auto 22px auto;  /* More top/bottom space */
-  border: 2.5px solid #c9aaff;
-  border-radius: 28px;          /* Softer, more modern */
-  box-shadow: 0 6px 32px rgba(150,130,255,0.14), 0 2px 10px #e1d1ff42;
-  max-width: 500px;             /* Looks good on all screens */
-  width: 98vw;                  /* Responsive */
+  margin: 0 auto 24px auto;
+  border: 4px solid #c9aaff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(200,170,255,0.08);
+  max-width: 420px;
+  width: 100%;
   box-sizing: border-box;
   overflow: hidden;
   background: #fff;
-  transition: box-shadow .3s, border .2s;
 }
 #videoFrame {
   position: absolute;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  border-radius: 24px;
+  border-radius: 20px;
   border: none;
-  background: #fff;
-  transition: border-radius .2s;
 }
 
-/* Space between title and video */
-.top-title {
-  margin-bottom: 10px !important;
-  padding-top: 10px;
-  text-align: left;
-}
     .level-card.open .level-header-row { color: #fff;}
     .level-icon { width: 27px; height: 27px; margin-right: 13px;
       border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 1.58em;
@@ -291,165 +278,27 @@
       z-index: 2;
       box-shadow: 0 2px 18px #fd90d726;
     }
-/* -------------- PHONE SIZE (<480px) -------------- */
-@media (max-width: 480px) {
-  .top-content-area {
-    max-width: 100vw;
-    min-height: 110px;
-    padding: 8px 4px 10px 4px;
-    border-radius: 0 0 12px 12px;
-  }
-  .top-title {
-    font-size: 1.06rem;
-    margin-bottom: 6px;
-  }
-  .slideshow-img-area {
-    width: 99vw;
- min-height: 220px;    /* Increase height for mobile */
-    max-height: 220px;
-    margin: 5px 0 8px 0;
-    margin-left: 0;
-    border-radius: 15px;
-  }
-  .slideshow-img {
-    width: 100%;
-    height: 220px;
-    border-radius: 15px;
-  }
-  .video-frame-wrapper, .chapter-video {
-    max-width: 99vw !important;
-    border-radius: 14px;
-    min-width: 180px;
-  }
-  #videoFrame {
-    border-radius: 12px;
-  }
- .chapter-btns {
-  display: flex;
-  flex-direction: row;  /* Always row, even on mobile */
-  gap: 17px;
-  margin: 8px auto 0 auto;
-  justify-content: center;
-  align-items: center;
-}
-  .main-btn {
-    min-width: 7em;
-    min-height: 2.2em;
-    font-size: 1rem;
-    padding: 0.6em 1.2em 0.6em 1.6em;
-  }
-  .levels-scroll-area {
-    max-width: 100vw;
-    padding: 3px 0 7px 0;
-  }
-  .level-card {
-    max-width: 99vw;
-    border-radius: 11px;
-    margin: 7px 0;
-    padding: 0 0 4px 0;
-  }
-  .level-header-row {
-    font-size: 1.04rem;
-    padding: 0 10px;
-    min-height: 40px;
-    border-radius: 12px 12px 0 0;
-  }
-  .chapter-row {
-    font-size: 0.96rem;
-    min-height: 27px;
-    border-radius: 9px;
-    padding: 0.36em 0.7em;
-  }
-  .chapter-row .chapter-check {
-    width: 17px;
-    height: 17px;
-    margin-left: 7px;
-  }
-}
-
-/* -------------- TABLET SIZE (480px - 800px) -------------- */
-@media (min-width: 481px) and (max-width: 800px) {
-  .top-content-area {
-    max-width: 96vw;
-    min-height: 180px;
-    padding: 10px 2vw 18px 2vw;
-    border-radius: 0 0 16px 16px;
-  }
-  .slideshow-img-area {
-    width: 96vw;
-    min-height: 310px;
-    max-height: 310px;
-    margin: 10px 0 12px 0;
-    margin-left: 0;
-    border-radius: 20px;
-  }
-  .slideshow-img {
-    width: 100%;
-    height: 3100px;
-    border-radius: 20px;
-  }
-  .video-frame-wrapper, .chapter-video {
-    max-width: 96vw !important;
-    border-radius: 18px;
-  }
-  #videoFrame {
-    border-radius: 16px;
-  }
-  .levels-scroll-area {
-    max-width: 97vw;
-  }
-  .level-card {
-    max-width: 95vw;
-    border-radius: 18px;
-    margin: 10px 0;
-    padding: 0 0 6px 0;
-  }
-}
-/* --- Responsive for phone/tablet --- */
-@media (max-width: 600px) {
-  .video-frame-wrapper {
-    border-radius: 16px;
-    max-width: 98vw;
-    margin: 5px auto 14px auto;
-    border-width: 2px;
-    margin-left: 0 !important;
-    margin-right: auto !important;
-  }
-  #videoFrame {
-    border-radius: 12px;
-  }
-  .top-title {
-    font-size: 1.04rem;
-    margin-bottom: 7px !important;
-  }
-   .chapter-btns {
-    gap: 10px;   /* A little less gap on small screens */
-    margin-top: 6px;
-  }
-  .main-btn {
-    min-width: 6em;
-    font-size: 0.99rem;
-    padding: 0.62em 1.08em 0.62em 1.3em;
-  }
-}
-/* -------------- LANDSCAPE MOBILE/TABLET -------------- */
-@media (orientation: landscape) and (max-width: 1000px) {
-  .fixed-top {
-    min-height: 99vh !important;
-    height: 99vh !important;
-    border-radius: 0;
-  }
-  .top-content-area, .chapter-video {
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 98vh !important;
-  }
-  .levels-area {
-    display: none !important;
-  }
-}
-
-
+    /* --- Responsive --- */
+    @media (max-width: 750px) {
+      .top-content-area { max-width: 99vw;}
+      .levels-scroll-area { max-width: 99vw;}
+      .level-card { max-width: 97vw;}
+      .chapter-video { height: unset; }
+      .fixed-top { min-height: 50vh !important; height: 50vh !important;}
+    }
+    @media (max-width: 480px) {
+      .top-content-area { border-radius: 0 0 16px 16px; padding: 10px 1vw 8px 1vw;}
+      .fixed-top { padding-bottom: 2px; min-height: 50vh !important; height: 50vh !important;}
+      .levels-scroll-area { max-width: 100vw;}
+      .level-card { max-width: 100vw;}
+    }
+    /* Fullscreen video landscape on mobile/tablet */
+    @media (orientation: landscape) and (max-width: 1000px) {
+      .fixed-top { min-height: 99vh !important; height: 99vh !important; border-radius: 0;}
+      .top-content-area, .chapter-video { width: 100vw !important; max-width: 100vw !important; height: 98vh !important; }
+      .levels-area { display: none !important;}
+      .top-title { font-size: 1.13rem;}
+    }
     /* Ripple effect */
     .ripple {
       position: absolute; border-radius: 50%; transform: scale(0); animation: ripple .55s linear;
@@ -577,7 +426,7 @@ const youtubeVideoMap = {
         'Mix Lower Upper',
         'Five buddy (+) ',
         'Five buddy (-) ',
-        'Mix five buddy(+)Five buddy(-)',
+        'Mix five buddy(+) Five buddy (-)',
         'Ten buddy (+) ',
         'Ten buddy (-)',
         'Mix Ten (+) Ten (-)',
@@ -589,10 +438,10 @@ const youtubeVideoMap = {
         'Five & Ten buddy (-8)',
         'Five & Ten buddy (-7)',
         'Five & Ten buddy (-6)',
-        'Simple addition & sub',
-        'Two digit add & sub',
-        'Three digit add & sub',
-        'Four digit add & sub'
+        'Simple addition and subtraction',
+        'Two-digit addition and subtraction',
+        'Three-digit addition and subtraction',
+        'Four-digit addition and subtraction'
       ],
      2:[
       '',''
@@ -618,7 +467,7 @@ function renderTop() {
     // Build the chapter HTML first
     tc.innerHTML = `
       <div class="top-title">
-    Ch.${chapIdx + 1} ${customTitle}
+        ${levelData[lvl].name} – ${customTitle}
       </div>
 <div class="video-frame-wrapper">
    <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
@@ -676,14 +525,18 @@ function renderTop() {
       {color:'#a685e2',icon:'📓'},
       {color:'#f7c873',icon:'📙'}
     ];
-    const slides=["1.jpg","2.jpg","3.jpg","4.jpg"];
+    const slides=[
+      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=600&q=80"
+    ];
     const levelData = [];
 for(let i=1;i<=10;i++) {
   const nCh = i===1 ? 20 : 10;
   levelData.push({
     name:'Level '+i,
     chapters: Array.from({length:nCh},(_,j)=>({
-      title: `Ch. ${j+1}${(titleMap[i] && titleMap[i][j]) ? ' – ' + titleMap[i][j] : ''}`,
+      title: `Chapter ${j+1}${(titleMap[i] && titleMap[i][j]) ? ' – ' + titleMap[i][j] : ''}`,
       completed:false,
       exerciseCompleted:false,
       unlocked:true // All chapters unlocked!
@@ -769,7 +622,6 @@ for(let i=1;i<=10;i++) {
           </div>
         `;
       }
-// You might need to write getYoutubeUrl(level, chapter) or similar
       // Hide scrollbar unless scrolling
       const scroll = document.getElementById('levelsScrollArea');
       scroll.onscroll = ()=>{
@@ -896,46 +748,6 @@ window.doExercise = function(btn){
       e.preventDefault();
       return false;
     });
-    if (screen.orientation && screen.orientation.lock) {
-  screen.orientation.lock('portrait').catch(function(error) {
-    // Most browsers will not allow this unless PWA/fullscreen
-    console.log('Orientation lock failed:', error);
-  });
-}
-function checkOrientationLock() {
-  // Checks for landscape mode (width > height, and not desktop)
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const landscape = window.matchMedia("(orientation: landscape)").matches;
-  if (landscape && isMobile) {
-    document.body.classList.add("landscape-locked");
-  } else {
-    document.body.classList.remove("landscape-locked");
-  }
-}
-window.addEventListener('resize', checkOrientationLock);
-window.addEventListener('orientationchange', checkOrientationLock);
-window.addEventListener('DOMContentLoaded', checkOrientationLock);
-
-// --- Parse URL to show chapter if present ---
-(function checkChapterFromUrl() {
-  const url = new URL(window.location.href);
-  const lvl = parseInt(url.searchParams.get("level"), 10);
-  const chap = parseInt(url.searchParams.get("chapter"), 10);
-
-  if (
-    lvl && chap &&
-    lvl >= 1 && lvl <= levelData.length &&
-    chap >= 1 && chap <= levelData[lvl - 1].chapters.length
-  ) {
-    selected = { level: lvl - 1, chapter: chap - 1 };
-    showingChapter = true;
-    levelData[lvl - 1].open = true;
-  }
-})();
-
-window.onload=()=>{
-  renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
-};
   </script>
 </body>
 </html>
