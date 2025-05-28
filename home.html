@@ -449,6 +449,7 @@
   }
 }
 
+
     /* Ripple effect */
     .ripple {
       position: absolute; border-radius: 50%; transform: scale(0); animation: ripple .55s linear;
@@ -768,6 +769,7 @@ for(let i=1;i<=10;i++) {
           </div>
         `;
       }
+// You might need to write getYoutubeUrl(level, chapter) or similar
       // Hide scrollbar unless scrolling
       const scroll = document.getElementById('levelsScrollArea');
       scroll.onscroll = ()=>{
@@ -900,7 +902,40 @@ window.doExercise = function(btn){
     console.log('Orientation lock failed:', error);
   });
 }
+function checkOrientationLock() {
+  // Checks for landscape mode (width > height, and not desktop)
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const landscape = window.matchMedia("(orientation: landscape)").matches;
+  if (landscape && isMobile) {
+    document.body.classList.add("landscape-locked");
+  } else {
+    document.body.classList.remove("landscape-locked");
+  }
+}
+window.addEventListener('resize', checkOrientationLock);
+window.addEventListener('orientationchange', checkOrientationLock);
+window.addEventListener('DOMContentLoaded', checkOrientationLock);
 
+// --- Parse URL to show chapter if present ---
+(function checkChapterFromUrl() {
+  const url = new URL(window.location.href);
+  const lvl = parseInt(url.searchParams.get("level"), 10);
+  const chap = parseInt(url.searchParams.get("chapter"), 10);
+
+  if (
+    lvl && chap &&
+    lvl >= 1 && lvl <= levelData.length &&
+    chap >= 1 && chap <= levelData[lvl - 1].chapters.length
+  ) {
+    selected = { level: lvl - 1, chapter: chap - 1 };
+    showingChapter = true;
+    levelData[lvl - 1].open = true;
+  }
+})();
+
+window.onload=()=>{
+  renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
+};
   </script>
 </body>
 </html>
