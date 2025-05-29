@@ -702,16 +702,15 @@
 
         #resultsList {
             column-count: 2;
-            /* was 2 columns */
             column-gap: 1rem;
-            /* space between cols */
-            max-height: 75vh;
-            /* increase from 60vh to 75vh (adjust as needed) */
             overflow-y: auto;
-            /* keep vertical scroll */
             overflow-x: hidden;
             padding: 0.5rem;
-            /* match your card’s padding */
+            flex: 1 1 auto;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+                        
         }
 
         /* make sure each “box” stays whole in a column */
@@ -775,6 +774,7 @@
             flex-direction: column;
             /* stack its header / list / footer vertically */
             max-height: 95vh;
+            min-height: 0;
             padding: 1rem;
             /* never taller than the viewport */
             overflow-y: auto;
@@ -3210,5 +3210,4 @@
 
     </script>
 </body>
-
-</html==>
+</html>
