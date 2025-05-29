@@ -499,6 +499,7 @@
         .full-question-text {
             font-size: 2.22rem;
             color: #4d79ff;
+            font-family: 'Nunito', Arial, sans-serif;
             font-weight: bold;
             letter-spacing: 0.06em;
             text-align: center;
@@ -1368,7 +1369,7 @@
                 </div>
             </div>
             <h2 id="resultsTitle">Results</h2>
-            <div class="results-row" id="resultsList" overflow-y:auto;width:100%"></div>
+            <div id="resultsList" class="results-row" style="overflow-y:auto; width:100%;"></div>
             <div id="resultScore"></div>
             <div id="resultsConfetti"></div>
             <div class="results-footer">
@@ -2822,19 +2823,47 @@
             }
             flashNext();
         }
-        $("#startQuizBtn").onclick = () => {
-            // Fullscreen first (works on all)
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => { });
-            }
-            // Try to lock orientation (works only on some Android)
-            if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => { });
-            }
-            hideStartPanel();
-            setTimeout(() => launchConfetti($("#confettiBox")), 130);
-            startQuiz(true);
-        };
+       // 1) popstate handler: on the *second* back-press, navigate home
+function onQuizBack(e) {
+  if (!e.state || !e.state.quizOpen) {
+    window.removeEventListener("popstate", onQuizBack);
+    window.location.href = `home.html?level=${currentLevel}&chapter=${currentChapter}`;
+  }
+}
+
+// 2) re-enter fullscreen & landscape if they back out of fullscreen
+document.addEventListener("fullscreenchange", () => {
+  if (!document.fullscreenElement && history.state && history.state.quizOpen) {
+    document.documentElement
+      .requestFullscreen()
+      .then(() => {
+        if (screen.orientation && screen.orientation.lock) {
+          return screen.orientation.lock("landscape");
+        }
+      })
+      .catch(() => {});
+  }
+});
+
+// 3) new Start-Quiz click handler
+$("#startQuizBtn").onclick = () => {
+  // enter fullscreen + lock landscape
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock("landscape").catch(() => {});
+  }
+
+  hideStartPanel();
+  setTimeout(() => launchConfetti($("#confettiBox")), 130);
+  startQuiz(true);
+
+  // push our dummy state so the first back-press doesn’t leave the quiz
+  history.pushState({ quizOpen: true }, "");
+  window.addEventListener("popstate", onQuizBack);
+};
+
         $("#startQuizBtn").onclick = () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => { });
@@ -3087,32 +3116,20 @@
             $("#resultsPanel").style.display = "flex";
             $("#timeUpPanel").style.display = "none";
             clearInterval(timerInterval);
-            // clear out old results + reset score
             const rl = $("#resultsList"),
                 rs = $("#resultScore");
             rl.innerHTML = "";
             let sc = 0;
 
-            // build a 4-column grid of single-line items
             answers.forEach((a, i) => {
-                const correct = (a.user === a.correct);
-                if (correct) sc++;
-                const mark = correct ? "✔️" : "❌";
-
-                const di = document.createElement("div");
+                let cor = a.user === a.correct;
+                if (cor) sc++;
+                let di = document.createElement("div");
                 di.className = "result-item";
-                di.innerHTML = `
-    <div class="question-text">
-      <span class="mark">${mark}</span>
-      Q${i + 1}: ${a.question}
-    </div>
-  `;
+                di.innerHTML = `<div class='question-text'>Q${i + 1}: ${a.question}</div><div class='your-answer'><span class='mark'>${cor ? "✔️" : "❌"}</span>
+                        <span>Your: ${a.user}</span></div>`;
                 rl.appendChild(di);
             });
-
-            // update the “You scored…” text
-            rs.textContent = `You scored ${sc}/${answers.length}`;
-
             rs.textContent = `You scored ${sc}/${answers.length}`;
             let resultsConfetti = $("#resultsConfetti");
             resultsConfetti.innerHTML = "";
@@ -3134,7 +3151,6 @@
                 let sad = document.createElement("div");
                 sad.className = "sad-text";
 
-
                 let enc = document.createElement("div");
                 enc.className = "encouragement";
                 enc.innerText = "You'll get better with practice. Give it another go!";
@@ -3147,7 +3163,6 @@
                 gif.style.display = "block";
                 gif.style.margin = "1.1em auto 0 auto";
                 gif.style.borderRadius = "1.2em";
-
                 rainSparkleBurst("sad");
                 if (!mute) {
                     $("#losingHorn").currentTime = 0;
@@ -3159,6 +3174,7 @@
                 let em = document.createElement("div");
                 em.className = "emoji-pop";
                 em.innerText = happyEmojis[Math.floor(Math.random() * happyEmojis.length)];
+                resultsConfetti.appendChild(em);
                 rainSparkleBurst("happy");
             }
         }
