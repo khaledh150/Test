@@ -990,10 +990,6 @@
           Exercise
           ${completed ? `<span class="exercise-check">${checkSvg()}</span>` : ""}
         </button>
-        <button class="main-btn" onclick="goNextChapter()">
-          <span class="material-icons-outlined">navigate_next</span>
-          Next
-        </button>
       </div>
     `;
 
@@ -1187,18 +1183,7 @@
       setTimeout(() => {
         window.location.href = `sorobanquiz.html?level=${lvl}&chapter=${chap}`;
       }, 300);
-    };
-    // --- Next ---
-    window.goNextChapter = function () {
-      const { level: l, chapter: c } = selected;
-      if (levelData[l].chapters[c + 1]) {
-        selected = { level: l, chapter: c + 1 }; showingChapter = true;
-        renderTop();
-        renderLevels();
-        haptic();
-        document.getElementById('chaptersList' + l).scrollTo({ top: 34 * (c + 1) - 7, behavior: 'smooth' });
-      }
-    }
+    };   
     // --- Slideshow ---
     window.goSlide = function (i) { slideIdx = i; renderTop(); }
     setInterval(() => { if (!showingChapter) { slideIdx = (slideIdx + 1) % slides.length; renderTop(); } }, 1000);
