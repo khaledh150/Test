@@ -983,16 +983,18 @@
 <div class="video-frame-wrapper">
    <iframe id="videoFrame" frameborder="0" allowfullscreen></iframe>
 </div>
-
       <div class="chapter-btns">
         <button class="main-btn${completed ? ' completed' : ''}" onclick="doExercise(this)">
           <span class="material-icons-outlined">play_arrow</span>
           Exercise
           ${completed ? `<span class="exercise-check">${checkSvg()}</span>` : ""}
         </button>
+        <button class="main-btn" onclick="goNextChapter()">
+          <span class="material-icons-outlined">navigate_next</span>
+          Next
+        </button>
       </div>
     `;
-
         // ✅ Set the iframe source AFTER the iframe is in the DOM
         if (youtubeId) {
           const iframe = document.getElementById("videoFrame");
@@ -1055,6 +1057,17 @@
         progress: 0,
         open: (i === 1)
       });
+    }
+     // --- Next ---
+    window.goNextChapter=function(){
+      const {level:l,chapter:c}=selected;
+      if(levelData[l].chapters[c+1]) {
+        selected={level:l,chapter:c+1}; showingChapter=true;
+        renderTop(); 
+        renderLevels();
+        haptic();
+        document.getElementById('chaptersList'+l).scrollTo({top:34*(c+1)-7,behavior:'smooth'});
+      }
     }
 
     // --- ICONS ---
