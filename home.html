@@ -68,6 +68,7 @@
       transition: background .3s, min-height .3s, height .3s;
       border-bottom-left-radius: 0px;
       border-bottom-right-radius: 0px;
+      background: none;
     }
 
     body.dark .fixed-top {
@@ -296,24 +297,32 @@
       flex-direction: column;
       align-items: center;
       overflow: hidden;
-      padding-top: 0;
+      padding-top: 100px;
       display: block;
       /* don’t force it into a flex-1 height */
       height: auto;
     }
 
     .levels-scroll-area {
-      width: 99vw;
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 8px 0 18px 0;
-      overflow-y: visible;
+      width: 100vw;            /* span the full viewport width */
+  max-width: none;         /* cancel the old 520px cap */
+  margin: 0;               /* kill the 8px top / auto side margins */
+  padding: 0;              /* kill any leftover padding */
+  overflow-y: auto;        /* keep vertical scroll */
+  overflow-x: hidden;
       flex: 1;
       height: 100%;
       scrollbar-width: thin;
       scrollbar-color: #b4d7ff33 #fff0;
       max-height: none;
     }
+
+    .levels-scroll-area .level-card {
+  width: 100%;             /* full width of its parent */
+  max-width: none;         /* nix any old caps */
+  margin: 8px 0;           /* just vertical spacing between cards */
+  box-sizing: border-box;  /* so borders/padding don’t bust the width */
+}
 
     .levels-scroll-area::-webkit-scrollbar {
       width: 7px;
@@ -701,6 +710,7 @@
         font-size: 0.99rem;
         padding: 0.62em 1.08em 0.62em 1.3em;
       }
+      
     }
 
     /* -------------- LANDSCAPE MOBILE/TABLET -------------- */
