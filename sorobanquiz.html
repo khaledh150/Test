@@ -236,7 +236,7 @@
             border-radius: 999px !important;
             /* Pill shape */
             box-shadow: 0 3px 14px #bdd6ff22 !important;
-            padding: 0 1.2em 0 0.8em !important;
+            padding: 0 1.0em 0 0.8em !important;
             /* Right/left padding for pill look */
             min-width: 0;
             height: 2.2em !important;
@@ -250,8 +250,8 @@
         }
 
         .arrow-icon {
-            width: 1.2em;
-            height: 1.2em;
+            width: 1.7em;
+            height: 1.5em;
             margin-right: 0.09em;
             object-fit: contain;
             vertical-align: middle;
@@ -359,7 +359,13 @@
                 /* Margin from top and bottom */
             }
         }
-
+@media (max-width: 480px) {
+  .start-card {
+    width: 87vw;      /* 80% of screen width */
+    max-width: 280px; /* up to 280px */
+    padding: 1rem;    /* compact padding */
+  }
+}
         @media (max-width: 600px) {
             #quizPanel {
                 width: 85vw;
@@ -694,7 +700,7 @@
 
             /* create 4 vertical columns */
             column-count: 2;
-            column-gap: 1.2rem;
+            column-gap: 3.0rem;
 
             /* constrain height, scroll vertically */
             max-height: 60vh;
@@ -745,9 +751,9 @@
         .start-card {
             background: #fff;
             border-radius: 2.7rem;
-            width: 91vw;
-            max-width: 410px;
-            padding: 2.3rem 1.2rem 2.4rem 1.2rem;
+             width: clamp(280px, 60vw, 320px);  /* never wider than 320px, but will shrink on small screens */
+  max-width: 400px;                  /* cap the largest size */
+  padding: 1.5rem 1rem;  
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -777,7 +783,7 @@
             }
 
             #resultsList {
-                column-count: 1;
+                column-count: 2;
             }
 
         }
@@ -1278,7 +1284,7 @@
             <div class="quiz-topbar">
                 <button id="quizBackBtn" class="back-btn" title="Back">
                     <img src="arrow.png" alt="Back" class="arrow-icon" />
-                    <span class="back-text">Back</span>
+                    <span class="back-text"></span>
                 </button>
                 <div class="top-btns">
                     <button id="settingsBtn" class="top-btn">⚙️</button>
@@ -2822,14 +2828,6 @@
             setTimeout(() => launchConfetti($("#confettiBox")), 130);
             startQuiz(true);
         };
-
-        function checkOrientation() {
-            if (window.innerWidth < window.innerHeight) {
-                // Show a custom overlay or message
-                alert("For the best experience, please rotate your device to landscape.");
-            }
-        }
-
         $("#startQuizBtn").onclick = () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => { });
@@ -3119,7 +3117,6 @@
                 let spark = document.createElement("div");
                 spark.className = "sparkle-text";
                 spark.innerHTML = `🎉🌟Perfect! All correct! <span class="sparkle-emoji">🌟🎉</span>`;
-                resultsConfetti.appendChild(spark);
                 rainSparkleBurst("happy");
                 if (!mute) {
                     $("#applauseSound").currentTime = 0;
@@ -3130,12 +3127,10 @@
                 let sad = document.createElement("div");
                 sad.className = "sad-text";
 
-                resultsConfetti.appendChild(sad);
 
                 let enc = document.createElement("div");
                 enc.className = "encouragement";
                 enc.innerText = "You'll get better with practice. Give it another go!";
-                resultsConfetti.appendChild(enc);
 
                 // Insert the GIF
                 let gif = document.createElement("img");
@@ -3145,7 +3140,6 @@
                 gif.style.display = "block";
                 gif.style.margin = "1.1em auto 0 auto";
                 gif.style.borderRadius = "1.2em";
-                resultsConfetti.appendChild(gif);
 
                 rainSparkleBurst("sad");
                 if (!mute) {
@@ -3158,7 +3152,6 @@
                 let em = document.createElement("div");
                 em.className = "emoji-pop";
                 em.innerText = happyEmojis[Math.floor(Math.random() * happyEmojis.length)];
-                resultsConfetti.appendChild(em);
                 rainSparkleBurst("happy");
             }
         }
