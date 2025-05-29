@@ -2823,47 +2823,47 @@
             }
             flashNext();
         }
-       // 1) popstate handler: on the *second* back-press, navigate home
-function onQuizBack(e) {
-  if (!e.state || !e.state.quizOpen) {
-    window.removeEventListener("popstate", onQuizBack);
-    window.location.href = `home.html?level=${currentLevel}&chapter=${currentChapter}`;
-  }
-}
-
-// 2) re-enter fullscreen & landscape if they back out of fullscreen
-document.addEventListener("fullscreenchange", () => {
-  if (!document.fullscreenElement && history.state && history.state.quizOpen) {
-    document.documentElement
-      .requestFullscreen()
-      .then(() => {
-        if (screen.orientation && screen.orientation.lock) {
-          return screen.orientation.lock("landscape");
+        // 1) popstate handler: on the *second* back-press, navigate home
+        function onQuizBack(e) {
+            if (!e.state || !e.state.quizOpen) {
+                window.removeEventListener("popstate", onQuizBack);
+                window.location.href = `home.html?level=${currentLevel}&chapter=${currentChapter}`;
+            }
         }
-      })
-      .catch(() => {});
-  }
-});
 
-// 3) new Start-Quiz click handler
-$("#startQuizBtn").onclick = () => {
-  // enter fullscreen + lock landscape
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  }
-  if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock("landscape").catch(() => {});
-  }
+        // 2) re-enter fullscreen & landscape if they back out of fullscreen
+        document.addEventListener("fullscreenchange", () => {
+            if (!document.fullscreenElement && history.state && history.state.quizOpen) {
+                document.documentElement
+                    .requestFullscreen()
+                    .then(() => {
+                        if (screen.orientation && screen.orientation.lock) {
+                            return screen.orientation.lock("landscape");
+                        }
+                    })
+                    .catch(() => { });
+            }
+        });
+        $("#startQuizBtn").onclick = () => {
+            // Fullscreen first (works on all)
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => { });
+            }
+            // Try to lock orientation (works only on some Android)
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => { });
+            }
+            hideStartPanel();
+            setTimeout(() => launchConfetti($("#confettiBox")), 130);
+            startQuiz(true);
+        };
 
-  hideStartPanel();
-  setTimeout(() => launchConfetti($("#confettiBox")), 130);
-  startQuiz(true);
-
-  // push our dummy state so the first back-press doesn’t leave the quiz
-  history.pushState({ quizOpen: true }, "");
-  window.addEventListener("popstate", onQuizBack);
-};
-
+        function checkOrientation() {
+            if (window.innerWidth < window.innerHeight) {
+                // Show a custom overlay or message
+                alert("For the best experience, please rotate your device to landscape.");
+            }
+        }
         $("#startQuizBtn").onclick = () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(() => { });
@@ -3211,4 +3211,4 @@ $("#startQuizBtn").onclick = () => {
     </script>
 </body>
 
-</html>
+</html==>
