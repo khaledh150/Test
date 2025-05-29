@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,19 +19,21 @@
       flex-direction: column;
       transition: background .35s;
     }
-    .container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 410px;
-      background: rgba(255,255,255,0.97);
-      border-radius: 2.5rem;
-      box-shadow: 0 8px 40px #b993d644, 0 1.5px 0 #fff6;
-      padding: 3.2rem 2.3rem 2.7rem 2.3rem;
-      margin: 2rem 0 0 0;
-      z-index: 2;
-      animation: popin .7s cubic-bezier(.47,1.71,.55,.91);
-    }
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 360px;        /* ↓ shrink width from 410px to 360px */
+  background: rgba(255,255,255,0.97);
+  border-radius: 2.5rem;
+  box-shadow: 0 8px 40px #b993d644, 0 1.5px 0 #fff6;
+  padding: 2.4rem 1.8rem;  /* ↓ reduce padding (optional) */
+  margin: 0;               /* remove extra top margin */
+  transform: translateY(-30px);  /* ↑ move box up by 30px */
+  z-index: 2;
+  animation: popin .7s cubic-bezier(.47,1.71,.55,.91);
+}
+
     @keyframes popin {
       0% { transform: scale(.85) translateY(40px); opacity:0;}
       80% { transform: scale(1.04) translateY(-5px); opacity:1;}
@@ -190,17 +193,22 @@
     .toggle a:hover { text-decoration: underline; }
     /* Mascot BELOW card (quiz style) */
     .mascot-holder {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      width: 100%;
-      margin: 0 auto;
-      margin-top: 18px;
-      pointer-events: none;
-      height: 150px;
-      z-index: 2;
-      animation: mascotBounce 2.2s infinite alternate cubic-bezier(.71,1.54,.55,.97);
-    }
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0 auto;          /* remove old margin-top */
+  margin-top: 0;           /* zero out spacing */
+  pointer-events: none;
+  height: 150px;
+  z-index: 2;
+  transform: translateY(-30px);  /* lift up by 30px */
+  animation: mascotBounce 2.2s infinite alternate cubic-bezier(.71,1.54,.55,.97);
+   margin-top: 0;          /* kill the old 18px */
+  position: relative;
+  top: -30px; 
+}
+
     @keyframes mascotBounce {
       from { transform: translateY(-5px);}
       to   { transform: translateY(15px);}
@@ -221,12 +229,31 @@
     .abacus-bead:nth-child(3) { animation-delay: .31s;}
     .abacus-bead:nth-child(4) { animation-delay: .46s;}
     @keyframes beadbounce { from { transform: translateY(0);} to { transform: translateY(-10px);} }
-    @media (max-width: 600px) {
-      .container { max-width: 98vw; padding: 2rem 1rem 2rem 1rem; }
-      h2 { font-size: 1.15em;}
-      .abacus-mascot { width: 85px; height: 85px;}
-      .mascot-holder { height: 80px;}
-    }
+ @media (max-width: 600px) {
+  .container {
+    max-width: 90vw;
+    padding: 2rem 1rem;
+    /* lift the box up a bit on small screens */
+    transform: translateY(-20px);
+  }
+
+  h2 {
+    font-size: 1.15em;
+  }
+
+  .abacus-mascot {
+    width: 85px;
+    height: 85px;
+  }
+
+  .mascot-holder {
+    height: 80px;
+    margin-top: 0;           /* kill the old positive margin */
+    position: relative;
+    top: -20px;              /* nudge the mascot up */
+  }
+}
+
   </style>
 </head>
 <body>
