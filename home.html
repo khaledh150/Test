@@ -1176,19 +1176,33 @@
       }
     };
     // --- Chapter select ---
-    window.selectChapter = function (e, li, ci) {
-      showingChapter = true;
-      selected = { level: li, chapter: ci };
-      // Save current open state of all levels
-      const openLevels = levelData.map(lvl => lvl.open);
-      renderTop();
-      renderLevels();
-      // Restore open state after render (in case renderLevels somehow resets it)
-      levelData.forEach((lvl, i) => lvl.open = openLevels[i]);
-      renderLevels(); // call again to apply correct open state
-      haptic();
-      e.stopPropagation();
-    };
+window.selectChapter = function (e, li, ci) {
+  // 1) update state
+  showingChapter = true;
+  selected       = { level: li, chapter: ci };
+
+  // 2) preserve open/closed state and re-render
+  const openLevels = levelData.map(lvl => lvl.open);
+  renderTop();
+  renderLevels();
+  levelData.forEach((lvl, i) => lvl.open = openLevels[i]);
+  renderLevels();
+
+  // 3) scroll the list so the selected row is centered
+  const list = document.getElementById(`chaptersList${li}`);
+  const rows = list?.querySelectorAll('.chapter-row');
+  const target = rows?.[ci];
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // 4) scroll the page back to the top so the video is visible
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // 5) feedback & stop propagation
+  haptic();
+  e.stopPropagation();
+};
+
+
     // --- Exercise ---
     window.doExercise = function (btn) {
       // 1) mark complete exactly as before…
@@ -1312,9 +1326,32 @@
       }
     })();
 
-    window.onload = () => {
-      renderTop(); renderLevels(); updateLayout(); addRippleToAllBtns();
-    };
+    // prevent browser from remembering scroll
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+window.onload = () => {
+  // 0) always go back to welcome
+  showingChapter  = false;
+  slideIdx        = 0;   // reset to first slide
+
+  // 1) your normal UI render
+  renderTop();
+  renderLevels();
+  updateLayout();
+  addRippleToAllBtns();
+
+  // 2) reset all chapter‐list scrolls to top
+  document.querySelectorAll('.chapters-list').forEach(list => {
+    list.scrollTop = 0;
+  });
+
+  // 3) scroll the page up so welcome slides are visible
+  window.scrollTo({ top: 0, behavior: 'auto' });
+};
+
+    
   </script>
 </body>
 
