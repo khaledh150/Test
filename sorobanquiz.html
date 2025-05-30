@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Soroban Quiz</title>
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap" rel="stylesheet">
+    <meta name="mobile-web-app-capable" content="yes">
     <style>
         html,
         body {
@@ -13,6 +13,9 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
+            overscroll-behavior: none;
+            /* prevent bounce on mobile */
+
         }
 
         #abacusRoot {
@@ -710,7 +713,7 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow-y: auto;
-                        
+
         }
 
         /* make sure each “box” stays whole in a column */
@@ -781,7 +784,24 @@
             /* scroll its own contents when it overflows */
             /* you can tweak the 90vh up or down to taste — the point is “<100vh” */
         }
+@media (orientation: portrait) {
+  /* hide the soroban behind the quiz in portrait */
+  #abacusRoot {
+    display: none !important;
+  }
 
+  /* force the quiz panel full-screen in portrait */
+  #quizPanel {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    border-radius: 0 !important;
+    flex: none !important;
+  }
+}
 
         /* if you want a bit more breathing room on very small phones: */
         @media (max-width: 500px) {
@@ -1251,6 +1271,7 @@
                 padding: 1rem 0;
             }
         }
+         
     </style>
 </head>
 
@@ -2857,6 +2878,12 @@
             setTimeout(() => launchConfetti($("#confettiBox")), 130);
             startQuiz(true);
         };
+        // 2) if the user rotates, re-lock back to landscape
+        window.addEventListener('orientationchange', () => {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => { });
+            }
+        });
 
         function checkOrientation() {
             if (window.innerWidth < window.innerHeight) {
@@ -3032,7 +3059,8 @@
         }
         function startQuiz(showReadySetGoFlag) {
             console.log('Generating for chapter:', currentChapter);
-
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
             if (flashTokenTimer) clearTimeout(flashTokenTimer);
             currentIndex = 0;
             answers = [];
@@ -3207,7 +3235,29 @@
                 };
             }
         };
+        // — Prevent browser from remembering scroll (optional) —
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
 
+        // — Push an extra history entry so “Back” won’t leave the page —
+        history.pushState(null, "");
+
+        // — On back (popstate), immediately re-fullscreen + re-lock landscape + re-push —
+        window.addEventListener("popstate", function (e) {
+            // 1) re-enter fullscreen
+            document.documentElement
+                .requestFullscreen()
+                .catch(() => { /* ignore if already fullscreen or blocked */ });
+
+            // 2) re-lock orientation
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock("landscape").catch(() => { });
+            }
+
+            // 3) push state again so multiple back-presses stay here
+            history.pushState(null, "");
+        });
     </script>
 </body>
 </html>
